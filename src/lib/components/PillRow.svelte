@@ -12,7 +12,7 @@
     {/each}
 </div>
 
-<style>
+<style lang="scss">
     .pill-row {
         display: flex;
         flex-wrap: wrap;

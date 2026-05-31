@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
 
   const tabData = [
+    { label: "Search", slug: "/search" },
     { label: "Fridge", slug: "/fridge" },
     { label: "Mix", slug: "/mix" },
     { label: "Saved", slug: "/saved" },
@@ -17,10 +18,11 @@
   }
 </script>
 
-<nav class="tab-nav">
+<nav class="tab-nav" aria-label="Main navigation">
   {#each tabData as tab}
     <button
-      class:active={isActive(tab.slug)}
+      class="tab-btn {isActive(tab.slug) ? 'active' : ''}"
+      aria-current={isActive(tab.slug) ? "page" : undefined}
       onclick={() => selectTab(tab.slug)}
       type="button"
     >
@@ -29,27 +31,38 @@
   {/each}
 </nav>
 
-<style>
+<style lang="scss">
+  @use "../../styles/variables" as *;
   .tab-nav {
     display: flex;
-    gap: 1rem;
-    border-bottom: 2px solid #eee;
-    margin-bottom: 1rem;
-  }
-  .tab-nav button {
-    background: none;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition:
-      border-color 0.2s,
-      color 0.2s;
-  }
-  .tab-nav button.active {
-    border-bottom: 2px solid #0070f3;
-    color: #0070f3;
-    font-weight: bold;
+    gap: $app-gap-sm;
+    background: $app-bg;
+    border-radius: 999px;
+    padding: 0.3em 0.4em;
+    margin-bottom: $app-gap-lg;
+    justify-content: center;
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: $app-primary;
+      font-size: 1.08em;
+      font-weight: 500;
+      padding: 0.5em 1.3em;
+      border-radius: 999px;
+      cursor: pointer;
+      transition:
+        background 0.13s,
+        color 0.13s;
+
+      &.active {
+        background: $app-primary;
+        color: $app-btn-text;
+      }
+
+      &:focus {
+        outline: 2px solid $app-primary;
+      }
+    }
   }
 </style>

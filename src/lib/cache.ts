@@ -58,7 +58,6 @@ export function cacheDelete(key: string): void {
 }
 
 export function cacheClearAll(): void {
-	if (!isAvailable()) return;
 	try {
 		const keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
 		keys.forEach((k) => localStorage.removeItem(k));

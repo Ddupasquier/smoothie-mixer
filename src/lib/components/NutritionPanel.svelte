@@ -1,7 +1,13 @@
 <script lang="ts">
+	import MoveItemPrompt from "$lib/components/MoveItemPrompt.svelte";
 	import type { FdcFood, NutritionTotals } from "$lib/utils/types";
-	import { NUTRIENT_IDS } from "$lib/utils/types";
+	import {
+		addFoodToSmoothieList,
+		readSmoothieList,
+		removeFoodFromSmoothieList,
+	} from "$lib/utils/smoothieLists";
 	import { onMount } from "svelte";
+	import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 
 	interface Props {
 		food?: FdcFood;
@@ -10,19 +16,7 @@
 
 	let { totals, food }: Props = $props();
 
-	const vitalNutrients = [
-		{
-			id: NUTRIENT_IDS.CALORIES,
-			label: "Calories",
-			unit: "kcal",
-			highlight: true,
-		},
-		{ id: NUTRIENT_IDS.FAT, label: "Total Fat", unit: "g" },
-		{ id: NUTRIENT_IDS.CARBS, label: "Total Carb.", unit: "g" },
-		{ id: NUTRIENT_IDS.FIBER, label: "Dietary Fiber", unit: "g" },
-		{ id: NUTRIENT_IDS.SUGAR, label: "Total Sugars", unit: "g" },
-		{ id: NUTRIENT_IDS.PROTEIN, label: "Protein", unit: "g" },
-	];
+	import { vitalNutrients } from "../../variables/vitalNutrients";
 
 	const vitalRows = $derived(
 		food
@@ -79,6 +73,58 @@
 		window.addEventListener("resize", syncHeight);
 		return () => window.removeEventListener("resize", syncHeight);
 	});
+
+	// Move prompt state
+	let movePrompt = $state<null | {
+		message: string;
+		onConfirm: () => void;
+		onCancel: () => void;
+	}>(null);
+
+	function handleAddToFridge() {
+		if (!food) return;
+		const shoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
+		if (shoppingList.some((item) => item.fdcId === food.fdcId)) {
+			movePrompt = {
+				message:
+					"This item is already in your shopping list. Move it to your fridge?",
+				onConfirm: () => {
+					removeFoodFromSmoothieList(
+						MIX_STORAGE_KEYS.shoppingList,
+						food.fdcId,
+					);
+					addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
+					movePrompt = null;
+				},
+				onCancel: () => {
+					movePrompt = null;
+				},
+			};
+			return;
+		}
+		addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
+	}
+
+	function handleAddToShopping() {
+		if (!food) return;
+		const fridgeList = readSmoothieList(MIX_STORAGE_KEYS.fridge);
+		if (fridgeList.some((item) => item.fdcId === food.fdcId)) {
+			movePrompt = {
+				message:
+					"This item is already in your fridge. Move it to your shopping list?",
+				onConfirm: () => {
+					removeFoodFromSmoothieList(MIX_STORAGE_KEYS.fridge, food.fdcId);
+					addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
+					movePrompt = null;
+				},
+				onCancel: () => {
+					movePrompt = null;
+				},
+			};
+			return;
+		}
+		addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
+	}
 </script>
 
 <section class="nf-label">
@@ -123,13 +169,29 @@
 			</ul>
 		</div>
 	</div>
+
+	<div class="nf-actions">
+		<button class="nf-btn" onclick={handleAddToFridge} disabled={!food}
+			>Add to Fridge</button
+		>
+		<button class="nf-btn" onclick={handleAddToShopping} disabled={!food}
+			>Add to Shopping List</button
+		>
+	</div>
+	{#if movePrompt}
+		<MoveItemPrompt
+			message={movePrompt.message}
+			onConfirm={movePrompt.onConfirm}
+			onCancel={movePrompt.onCancel}
+		/>
+	{/if}
 	<div class="nf-note">
 		Values are based on the serving sizes you entered (per 100 g raw food
 		data).
 	</div>
 </section>
 
-<style>
+<style lang="scss">
 	.nf-label {
 		background: #fff;
 		border: 3.5px solid #111;
@@ -246,5 +308,30 @@
 		letter-spacing: 0.01em;
 		border-top: 2px solid #111;
 		padding-top: 0.3rem;
+	}
+	.nf-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.7rem;
+		margin: 0.7rem 0 0.2rem 0;
+	}
+	.nf-btn {
+		background: #222;
+		color: #fff;
+		border: none;
+		border-radius: 3px;
+		font-size: 1rem;
+		font-weight: 700;
+		padding: 0.45em 1.1em;
+		cursor: pointer;
+		transition: background 0.15s;
+
+		&:disabled {
+			background: #aaa;
+			cursor: not-allowed;
+		}
+		&:not(:disabled):hover {
+			background: #444;
+		}
 	}
 </style>
