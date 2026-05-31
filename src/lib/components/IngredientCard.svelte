@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Ingredient } from '$lib/types';
-	import { getNutrientValue } from '$lib/stores/smoothie.svelte';
-	import { NUTRIENT_IDS } from '$lib/types';
+	import { getNutrientValue } from "$lib/stores/smoothie.svelte";
+	import type { Ingredient } from "$lib/utils/types";
+	import { NUTRIENT_IDS } from "$lib/utils/types";
 
 	interface Props {
 		ingredient: Ingredient;
@@ -11,28 +11,31 @@
 
 	let { ingredient, onRemove, onUpdateGrams }: Props = $props();
 
-	let localGrams = $state(ingredient.servingGrams);
-
-	$effect(() => {
-		localGrams = ingredient.servingGrams;
-	});
+	const localGrams = $derived(() => ingredient.servingGrams);
 
 	function handleGramsChange(e: Event) {
 		const val = parseInt((e.target as HTMLInputElement).value, 10);
 		if (!isNaN(val) && val > 0) {
-			localGrams = val;
 			onUpdateGrams(ingredient.fdcId, val);
 		}
 	}
 
-	const calories = $derived(getNutrientValue(ingredient, NUTRIENT_IDS.CALORIES));
-	const protein = $derived(getNutrientValue(ingredient, NUTRIENT_IDS.PROTEIN));
+	const calories = $derived(
+		getNutrientValue(ingredient, NUTRIENT_IDS.CALORIES),
+	);
+	const protein = $derived(
+		getNutrientValue(ingredient, NUTRIENT_IDS.PROTEIN),
+	);
 </script>
 
 <li class="ingredient-card">
 	<div class="ing-header">
 		<span class="ing-name">{ingredient.name}</span>
-		<button class="remove-btn" aria-label="Remove {ingredient.name}" onclick={() => onRemove(ingredient.fdcId)}>
+		<button
+			class="remove-btn"
+			aria-label="Remove {ingredient.name}"
+			onclick={() => onRemove(ingredient.fdcId)}
+		>
 			✕
 		</button>
 	</div>

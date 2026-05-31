@@ -9,8 +9,8 @@ import {
 	getNutrientValue,
 	calcNutritionTotals
 } from '$lib/stores/smoothie.svelte';
-import { NUTRIENT_IDS } from '$lib/types';
-import type { FdcFood } from '$lib/types';
+import { NUTRIENT_IDS } from '$lib/utils/types';
+import type { FdcFood } from '$lib/utils/types';
 
 const mockFood: FdcFood = {
 	fdcId: 173944,

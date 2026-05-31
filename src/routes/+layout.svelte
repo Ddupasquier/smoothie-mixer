@@ -1,6 +1,7 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
-	import '../app.css';
+	import favicon from "$lib/assets/favicon.svg";
+	import "../app.css";
+	import TabNavigation from "$lib/components/TabNavigation.svelte";
 
 	let { children } = $props();
 </script>
@@ -13,6 +14,8 @@
 <header class="app-header">
 	<span class="logo">🥤 Smoothie Mixer</span>
 </header>
+
+<TabNavigation />
 
 <main class="app-main">
 	{@render children()}

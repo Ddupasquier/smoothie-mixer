@@ -4,8 +4,8 @@
  */
 
 import { cacheGet, cacheSet } from '$lib/cache';
-import type { FdcFood, Ingredient, NutritionTotals, Smoothie } from '$lib/types';
-import { NUTRIENT_IDS } from '$lib/types';
+import type { FdcFood, Ingredient, NutritionTotals, Smoothie } from '$lib/utils/types';
+import { NUTRIENT_IDS } from '$lib/utils/types';
 
 const SAVED_SMOOTHIES_KEY = 'saved_smoothies';
 const DEFAULT_SERVING_GRAMS = 100;

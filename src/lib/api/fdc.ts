@@ -17,7 +17,7 @@ function getApiKey(): string {
 	if (!key || key === 'your_api_key_here') {
 		console.warn(
 			'[FDC] No API key found. Set VITE_FDC_API_KEY in your .env file. ' +
-				'Get a free key at https://fdc.nal.usda.gov/api-guide.html'
+			'Get a free key at https://fdc.nal.usda.gov/api-guide.html'
 		);
 	}
 	return key;
@@ -40,18 +40,18 @@ function buildUrl(path: string, params: Record<string, string> = {}): string {
  * @param query  - The ingredient search term
  * @param pageSize - Number of results (default 25, max 200)
  */
-export async function searchFoods(query: string, pageSize = 25): Promise<FdcFood[]> {
+export async function searchFoods(query: string): Promise<FdcFood[]> {
 	const trimmed = query.trim();
 	if (!trimmed) return [];
 
-	const cacheKey = `search_${trimmed.toLowerCase()}_${pageSize}`;
+	const cacheKey = `search_${trimmed.toLowerCase()}_all`;
 	const cached = cacheGet<FdcFood[]>(cacheKey);
 	if (cached) return cached;
 
 	const url = buildUrl('/foods/search', {
 		query: trimmed,
-		pageSize: String(pageSize),
 		dataType: 'Foundation,SR Legacy'
+		// No pageSize param: let API return default/max
 	});
 
 	const res = await fetch(url);
