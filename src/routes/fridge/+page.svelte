@@ -115,7 +115,7 @@
         }
 
         .placeholder {
-            color: #b3b3b3;
+            color: $app-muted;
             font-size: 0.98em;
             margin: 0.2em 0;
         }

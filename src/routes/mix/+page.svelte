@@ -40,6 +40,7 @@
     } from "../../defaults/servingMeasureDefaults";
     import { vitalNutrients } from "../../variables/vitalNutrients";
     import { ALL_NUTRIENTS } from "../../variables/allNutrients";
+    import PillRow from "$lib/components/PillRow.svelte";
 
     type NutrientOption = { id: string | number; label: string };
     type SavedMixState = {
@@ -443,7 +444,7 @@
     <header class="mix-header">
         <h2>Mix</h2>
         <p>Build your smoothie here.</p>
-        <button type="button" onclick={resetMix} style="margin-bottom:1rem;"
+    <button type="button" class="reset-btn" onclick={resetMix}
             >Reset All</button
         >
     </header>
@@ -505,19 +506,10 @@
                 <section class="ingredient-list">
                     <h4>Fridge</h4>
                     {#if fridgeItems.length > 0}
-                        <div class="ingredient-buttons">
-                            {#each fridgeItems as food}
-                                <button
-                                    type="button"
-                                    class:selected={selectedFoodIds.includes(
-                                        food.fdcId,
-                                    )}
-                                    onclick={() => toggleFood(food.fdcId)}
-                                >
-                                    {food.description}
-                                </button>
-                            {/each}
-                        </div>
+                        <PillRow
+                            pills={fridgeItems.map((food) => food.description)}
+                            onRemove={(idx) => toggleFood(fridgeItems[idx].fdcId)}
+                        />
                     {:else}
                         <p>No fridge items yet.</p>
                     {/if}
@@ -526,19 +518,10 @@
                 <section class="ingredient-list">
                     <h4>Shopping List</h4>
                     {#if shoppingItems.length > 0}
-                        <div class="ingredient-buttons">
-                            {#each shoppingItems as food}
-                                <button
-                                    type="button"
-                                    class:selected={selectedFoodIds.includes(
-                                        food.fdcId,
-                                    )}
-                                    onclick={() => toggleFood(food.fdcId)}
-                                >
-                                    {food.description}
-                                </button>
-                            {/each}
-                        </div>
+                        <PillRow
+                            pills={shoppingItems.map((food) => food.description)}
+                            onRemove={(idx) => toggleFood(shoppingItems[idx].fdcId)}
+                        />
                     {:else}
                         <p>No shopping list items yet.</p>
                     {/if}
@@ -611,8 +594,25 @@
     </section>
 </div>
 
+
 <style lang="scss">
-    @use "../../styles/variables" as *;
+@use "../../styles/variables" as *;
+
+.reset-btn {
+    margin-bottom: $app-gap-md;
+    background: $app-btn-bg;
+    color: #fff;
+    border: none;
+    border-radius: $app-radius;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.45em 1.1em;
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover {
+        background: $app-btn-bg-hover;
+    }
+}
 
     .mix-page {
         max-width: $app-max-width;

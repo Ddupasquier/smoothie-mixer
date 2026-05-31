@@ -67,21 +67,21 @@
 
 	.overage-summary {
 		padding: $app-gap-sm;
-		background: #fff7ed;
-		border: 1.5px solid #fed7aa;
+			background: $app-warning-bg;
+			border: $app-warning-border;
 		border-radius: $app-card-radius;
 		box-shadow: $app-card-shadow;
 
 		h4 {
 			margin-bottom: 0.2rem;
-			color: #9a3412;
+			color: $app-warning-text;
 			font-size: 0.95rem;
 			font-weight: 800;
 		}
 
 		p {
 			margin-bottom: $app-gap-sm;
-			color: #9a3412;
+			color: $app-warning-text;
 			font-size: 0.86rem;
 			font-weight: 600;
 		}
@@ -117,7 +117,7 @@
 		}
 
 		em {
-			color: #c2410c;
+			color: $app-warning-strong;
 			font-style: normal;
 			font-weight: 800;
 		}
