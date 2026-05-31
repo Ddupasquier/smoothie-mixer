@@ -74,17 +74,22 @@
     );
     const allIngredientItems = $derived([...fridgeItems, ...shoppingItems]);
     const selectedFoods = $derived(
-        allIngredientItems.filter((item) => selectedFoodIds.includes(item.fdcId)),
+        allIngredientItems.filter((item) =>
+            selectedFoodIds.includes(item.fdcId),
+        ),
     );
     const nutrientProgress = $derived(
         selectedNutrients.map((nutrient) => {
-            const goal = nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
+            const goal =
+                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
             if (goal <= 0) return 0;
             return getNutrientTotal(Number(nutrient.id)) / goal;
         }),
     );
     const nutrientLabels = $derived(
-        selectedNutrients.map((nutrient) => nutrient.label.replace("Total ", "")),
+        selectedNutrients.map((nutrient) =>
+            nutrient.label.replace("Total ", ""),
+        ),
     );
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
@@ -92,7 +97,8 @@
     const chartColors = $derived(getChartColors(maxNutrientProgress));
     const nutrientOverages = $derived<NutrientOverage[]>(
         selectedNutrients.flatMap((nutrient) => {
-            const goal = nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
+            const goal =
+                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
             const nutrientId = Number(nutrient.id);
             const total = getNutrientTotal(nutrientId);
             if (goal <= 0 || total <= goal) return [];
@@ -142,7 +148,8 @@
                 typeof option === "object" &&
                 "id" in option &&
                 "label" in option &&
-                (typeof option.id === "string" || typeof option.id === "number") &&
+                (typeof option.id === "string" ||
+                    typeof option.id === "number") &&
                 typeof option.label === "string"
             ) {
                 return [{ id: option.id, label: option.label }];
@@ -215,7 +222,9 @@
 
     function loadNutrientGoals() {
         try {
-            const rawGoals = localStorage.getItem(MIX_STORAGE_KEYS.nutrientGoals);
+            const rawGoals = localStorage.getItem(
+                MIX_STORAGE_KEYS.nutrientGoals,
+            );
             const savedGoals = rawGoals ? JSON.parse(rawGoals) : {};
             nutrientGoals = {
                 ...DEFAULT_NUTRIENT_GOALS,
@@ -256,21 +265,26 @@
             servingGrams = Object.fromEntries(
                 Object.entries(savedState.servingGrams ?? {})
                     .map(([id, grams]) => [Number(id), Number(grams)])
-                    .filter(([id, grams]) => Number.isFinite(id) && Number.isFinite(grams)),
+                    .filter(
+                        ([id, grams]) =>
+                            Number.isFinite(id) && Number.isFinite(grams),
+                    ),
             );
             servingQuantities = Object.fromEntries(
                 selectedFoodIds.map((foodId) => {
                     const parsedInput = savedState.servingInputs?.[foodId]
                         ? parseServingAmount(savedState.servingInputs[foodId])
                         : null;
-                    const savedQuantity = Number(savedState.servingQuantities?.[foodId]);
+                    const savedQuantity = Number(
+                        savedState.servingQuantities?.[foodId],
+                    );
                     return [
                         foodId,
                         Number.isFinite(savedQuantity)
                             ? savedQuantity
-                            : parsedInput?.quantity ??
-                                servingGrams[foodId] ??
-                                DEFAULT_SERVING_GRAMS,
+                            : (parsedInput?.quantity ??
+                              servingGrams[foodId] ??
+                              DEFAULT_SERVING_GRAMS),
                     ];
                 }),
             );
@@ -281,22 +295,23 @@
                         : null;
                     return [
                         foodId,
-                        savedState.servingUnits?.[foodId] ?? parsedInput?.unit ?? "g",
+                        savedState.servingUnits?.[foodId] ??
+                            parsedInput?.unit ??
+                            "g",
                     ];
                 }),
             );
             servingGrams = Object.fromEntries(
                 selectedFoodIds.map((foodId) => {
-                    const food = allIngredientItems.find((item) => item.fdcId === foodId);
+                    const food = allIngredientItems.find(
+                        (item) => item.fdcId === foodId,
+                    );
                     const quantity =
                         servingQuantities[foodId] ??
                         servingGrams[foodId] ??
                         DEFAULT_SERVING_GRAMS;
                     const unit = servingUnits[foodId] ?? "g";
-                    return [
-                        foodId,
-                        convertServingToGrams(quantity, unit),
-                    ];
+                    return [foodId, convertServingToGrams(quantity, unit)];
                 }),
             );
         } catch {
@@ -408,7 +423,10 @@
         loadMixState();
         loadNutrientGoals();
         window.addEventListener("storage", loadIngredientLists);
-        window.addEventListener(SMOOTHIE_LISTS_CHANGED_EVENT, loadIngredientLists);
+        window.addEventListener(
+            SMOOTHIE_LISTS_CHANGED_EVENT,
+            loadIngredientLists,
+        );
         window.addEventListener("focus", loadIngredientLists);
         return () => {
             window.removeEventListener("storage", loadIngredientLists);
@@ -425,7 +443,9 @@
     <header class="mix-header">
         <h2>Mix</h2>
         <p>Build your smoothie here.</p>
-        <button type="button" onclick={resetMix} style="margin-bottom:1rem;">Reset All</button>
+        <button type="button" onclick={resetMix} style="margin-bottom:1rem;"
+            >Reset All</button
+        >
     </header>
 
     <section class="mix-panel" aria-labelledby="nutrient-controls-title">
@@ -473,9 +493,9 @@
                         />
                         <span class="goal-unit">{nutrient.unit}</span>
                         <small>
-                            {getNutrientTotal(Number(nutrient.id)).toFixed(1)} / {nutrientGoals[
-                                Number(nutrient.id)
-                            ] ?? getDefaultGoal(nutrient)}
+                            {getNutrientTotal(Number(nutrient.id)).toFixed(1)} /
+                            {nutrientGoals[Number(nutrient.id)] ??
+                                getDefaultGoal(nutrient)}
                         </small>
                     </label>
                 {/each}
@@ -489,7 +509,9 @@
                             {#each fridgeItems as food}
                                 <button
                                     type="button"
-                                    class:selected={selectedFoodIds.includes(food.fdcId)}
+                                    class:selected={selectedFoodIds.includes(
+                                        food.fdcId,
+                                    )}
                                     onclick={() => toggleFood(food.fdcId)}
                                 >
                                     {food.description}
@@ -508,7 +530,9 @@
                             {#each shoppingItems as food}
                                 <button
                                     type="button"
-                                    class:selected={selectedFoodIds.includes(food.fdcId)}
+                                    class:selected={selectedFoodIds.includes(
+                                        food.fdcId,
+                                    )}
                                     onclick={() => toggleFood(food.fdcId)}
                                 >
                                     {food.description}
@@ -538,7 +562,10 @@
             <NutrientOverageSummary overages={nutrientOverages} />
 
             {#if selectedFoods.length > 0}
-                <section class="serving-panel" aria-label="Selected ingredient amounts">
+                <section
+                    class="serving-panel"
+                    aria-label="Selected ingredient amounts"
+                >
                     <h4>Ingredient Amounts</h4>
                     <div class="serving-list">
                         {#each selectedFoods as food}
@@ -564,11 +591,14 @@
                                         updateServingAmount(
                                             food,
                                             String(getServingQuantity(food)),
-                                            event.currentTarget.value as ServingMeasureUnit,
+                                            event.currentTarget
+                                                .value as ServingMeasureUnit,
                                         )}
                                 >
                                     {#each SERVING_MEASURE_OPTIONS as option}
-                                        <option value={option.value}>{option.label}</option>
+                                        <option value={option.value}
+                                            >{option.label}</option
+                                        >
                                     {/each}
                                 </select>
                                 <span>{getServingGrams(food).toFixed(1)}g</span>
@@ -831,7 +861,10 @@
 
     .serving-input {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(4.5rem, 6rem) minmax(7rem, 9rem) auto;
+        grid-template-columns: minmax(0, 1fr) minmax(4.5rem, 6rem) minmax(
+                7rem,
+                9rem
+            ) auto;
         align-items: center;
         gap: 0.45rem;
         padding: 0.45rem 0.6rem;
