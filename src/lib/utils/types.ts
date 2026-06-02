@@ -14,6 +14,10 @@ export interface FdcFood {
     brandOwner?: string;
     foodCategory?: string;
     foodNutrients: FdcNutrient[];
+    // Branded food fields (optional)
+    dataType?: string;
+    servingSize?: number;
+    servingSizeUnit?: string;
 }
 
 /** The FDC foods/search response envelope */

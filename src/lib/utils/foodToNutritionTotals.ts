@@ -1,13 +1,17 @@
 import type { FdcFood } from "$lib/utils/types";
 import type { NutritionTotals } from "$lib/utils/types";
+import { getFdcNutrientValue } from "$lib/utils/fdcNutrients";
 
-export function foodToNutritionTotals(food: FdcFood): NutritionTotals {
-    // Map FdcFood.foodNutrients to NutritionTotals shape
+/**
+ * Convert an FdcFood into NutritionTotals, scaling nutrients by the given servingGrams.
+ * FDC values are per 100g, so scale accordingly.
+ */
+export function foodToNutritionTotals(food: FdcFood, servingGrams: number = 100): NutritionTotals {
     function get(nutrientId: number): number {
-        const n = food.foodNutrients.find((n) => n.nutrientId === nutrientId);
-        return n ? n.value : 0;
+        const value = getFdcNutrientValue(food, nutrientId);
+        return (value * servingGrams) / 100;
     }
-    return {
+    const result = {
         calories: get(1008),
         protein: get(1003),
         carbs: get(1005),
@@ -15,4 +19,5 @@ export function foodToNutritionTotals(food: FdcFood): NutritionTotals {
         fiber: get(1079),
         sugar: get(2000),
     };
+    return result;
 }

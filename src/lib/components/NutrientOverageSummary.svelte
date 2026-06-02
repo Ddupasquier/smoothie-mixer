@@ -24,7 +24,11 @@
 </script>
 
 {#if overages.length > 0}
-	<section class="overage-summary" aria-live="polite" aria-label="Nutrient goal overages">
+	<section
+		class="overage-summary"
+		aria-live="polite"
+		aria-label="Nutrient goal overages"
+	>
 		<h4>Over Goal</h4>
 		<p>These nutrients exceed your goal for this smoothie.</p>
 		<ul>
@@ -32,14 +36,19 @@
 				<li>
 					<strong>{overage.label}</strong>
 					<span>
-						{formatValue(overage.total)} / {formatValue(overage.goal)}
+						{formatValue(overage.total)} / {formatValue(
+							overage.goal,
+						)}
 						{overage.unit}
 					</span>
 					<em>
 						+{formatValue(overage.overage)}
 						{overage.unit}
 					</em>
-					<Popover buttonLabel="Why?" title={`${overage.label} contributors`}>
+					<Popover
+						buttonLabel="Why?"
+						title={`${overage.label} contributors`}
+					>
 						<p class="popover-note">
 							These selected items contribute to the overage.
 						</p>
@@ -67,8 +76,8 @@
 
 	.overage-summary {
 		padding: $app-gap-sm;
-			background: $app-warning-bg;
-			border: $app-warning-border;
+		background: $app-warning-bg;
+		border: $app-warning-border;
 		border-radius: $app-card-radius;
 		box-shadow: $app-card-shadow;
 

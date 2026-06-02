@@ -6,6 +6,10 @@
 		readSmoothieList,
 		removeFoodFromSmoothieList,
 	} from "$lib/utils/smoothieLists";
+	import {
+		getFdcNutrientValue,
+		isFdcNutrientMatch,
+	} from "$lib/utils/fdcNutrients";
 	import { onMount } from "svelte";
 	import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 
@@ -21,12 +25,10 @@
 	const vitalRows = $derived(
 		food
 			? vitalNutrients.map((vn) => {
-					const n = food.foodNutrients.find(
-						(f) => f.nutrientId === vn.id,
-					);
+					const value = getFdcNutrientValue(food, Number(vn.id));
 					return {
 						label: vn.label,
-						value: n ? n.value.toFixed(1) : "0",
+						value: value ? value.toFixed(1) : "0",
 						unit: vn.unit,
 						highlight: vn.highlight || false,
 					};
@@ -40,7 +42,7 @@
 			? food.foodNutrients
 					.filter(
 						(n) =>
-							!vitalIds.includes(Number(n.nutrientId)) &&
+							!vitalIds.some((id) => isFdcNutrientMatch(n, id)) &&
 							n.value !== 0,
 					)
 					.map((n) => ({

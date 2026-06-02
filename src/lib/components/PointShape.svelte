@@ -4,12 +4,15 @@
 	interface Props {
 		points?: number;
 		values?: number[];
+		goalValues?: number[];
 		labels?: string[];
 		size?: number;
 		fillColor?: string;
 		strokeColor?: string;
 		gridColor?: string;
 		goalColor?: string;
+		goalFillColor?: string;
+		goalStrokeColor?: string;
 		fullWidth?: boolean;
 		class?: string;
 	}
@@ -17,12 +20,15 @@
 	let {
 		points = 0,
 		values = [],
+		goalValues = [],
 		labels = [],
 		size = POINT_SHAPE_DEFAULTS.size,
 		fillColor = POINT_SHAPE_DEFAULTS.fillColor,
 		strokeColor = POINT_SHAPE_DEFAULTS.strokeColor,
 		gridColor = POINT_SHAPE_DEFAULTS.gridColor,
 		goalColor = POINT_SHAPE_DEFAULTS.goalColor,
+		goalFillColor = POINT_SHAPE_DEFAULTS.goalFillColor,
+		goalStrokeColor = POINT_SHAPE_DEFAULTS.goalStrokeColor,
 		fullWidth = false,
 		class: className = "",
 	}: Props = $props();
@@ -40,7 +46,11 @@
 	);
 	const hasData = $derived(normalizedPoints > 0);
 
-	function pointAt(index: number, scale = 1, radius = chartRadius): [number, number] {
+	function pointAt(
+		index: number,
+		scale = 1,
+		radius = chartRadius,
+	): [number, number] {
 		if (axisCount === 1) {
 			return [center, center - radius * scale];
 		}
@@ -58,7 +68,9 @@
 	}
 
 	function pointsToString(pointsList: [number, number][]) {
-		return pointsList.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+		return pointsList
+			.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
+			.join(" ");
 	}
 
 	const rings = $derived(
@@ -80,6 +92,16 @@
 	const valuePoints = $derived(
 		Array.from({ length: axisCount }, (_value, index) =>
 			pointAt(index, normalizedValues[index]),
+		),
+	);
+	const normalizedGoalValues = $derived(
+		Array.from({ length: axisCount }, (_, index) =>
+			Math.max(0, Math.min(goalValues[index] ?? 1, 1)),
+		),
+	);
+	const goalValuePoints = $derived(
+		Array.from({ length: axisCount }, (_v, index) =>
+			pointAt(index, normalizedGoalValues[index]),
 		),
 	);
 </script>
@@ -121,6 +143,15 @@
 				stroke-width={size * 0.006}
 			/>
 			<circle
+				class="point-shape__goal-shape"
+				cx={center}
+				cy={center}
+				r={chartRadius * normalizedGoalValues[0]}
+				fill={goalFillColor}
+				stroke={goalStrokeColor}
+				stroke-width={size * 0.005}
+			/>
+			<circle
 				class="point-shape__value-circle"
 				cx={center}
 				cy={center}
@@ -148,6 +179,17 @@
 				stroke={goalColor}
 				stroke-width={size * 0.006}
 				stroke-linecap="round"
+			/>
+			<line
+				class="point-shape__goal-shape"
+				x1={center - chartRadius * normalizedGoalValues[0]}
+				y1={center}
+				x2={center + chartRadius * normalizedGoalValues[1]}
+				y2={center}
+				stroke={goalStrokeColor}
+				stroke-width={size * 0.024}
+				stroke-linecap="round"
+				opacity="0.85"
 			/>
 			<line
 				x1={center - chartRadius * normalizedValues[0]}
@@ -180,6 +222,14 @@
 					stroke-width={size * 0.003}
 				/>
 			{/each}
+
+			<polygon
+				class="point-shape__goal-shape"
+				points={pointsToString(goalValuePoints)}
+				fill={goalFillColor}
+				stroke={goalStrokeColor}
+				stroke-width={size * 0.005}
+			/>
 
 			<polygon
 				class="point-shape__goal"
@@ -234,6 +284,13 @@
 	}
 
 	.point-shape__value-circle {
+		transition:
+			r 0.32s ease-out,
+			fill 0.18s ease,
+			stroke 0.18s ease;
+	}
+
+	.point-shape__goal-shape {
 		transition:
 			r 0.32s ease-out,
 			fill 0.18s ease,

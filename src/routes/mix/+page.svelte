@@ -3,6 +3,7 @@
         selected = vitalNutrients.map((n) => n.id);
         options = getDefaultOptions();
         addNutrientId = "";
+        // Deselect all fridge and shopping items
         selectedFoodIds = [];
         servingGrams = {};
         servingQuantities = {};
@@ -20,9 +21,11 @@
         SMOOTHIE_LISTS_CHANGED_EVENT,
     } from "$lib/utils/smoothieLists";
     import {
+        convertServingAmount,
         convertServingToGrams,
         parseServingAmount,
     } from "$lib/utils/servingAmount";
+    import { getFdcNutrientValue } from "$lib/utils/fdcNutrients";
     import type { FdcFood } from "$lib/utils/types";
     import { onMount } from "svelte";
     import {
@@ -35,6 +38,7 @@
     } from "../../defaults/mixDefaults";
     import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
     import {
+        SERVING_MEASURE_ALIASES,
         SERVING_MEASURE_OPTIONS,
         type ServingMeasureUnit,
     } from "../../defaults/servingMeasureDefaults";
@@ -87,9 +91,39 @@
             return getNutrientTotal(Number(nutrient.id)) / goal;
         }),
     );
+    const nutrientChartMetrics = $derived(
+        selectedNutrients.map((nutrient) => {
+            const nutrientId = Number(nutrient.id);
+            const baselineGoal = getDefaultGoal(nutrient);
+            const safeBaselineGoal = baselineGoal > 0 ? baselineGoal : 1;
+            const goal = nutrientGoals[nutrientId] || baselineGoal;
+            const total = getNutrientTotal(nutrientId);
+
+            return {
+                goalRatio: goal / safeBaselineGoal,
+                totalRatio: total / safeBaselineGoal,
+            };
+        }),
+    );
+    const chartReferenceRatio = $derived(
+        Math.max(
+            1,
+            ...nutrientChartMetrics.map((metric) => metric.goalRatio),
+        ),
+    );
+    const chartValues = $derived(
+        nutrientChartMetrics.map((metric) =>
+            clampChartValue(metric.totalRatio / chartReferenceRatio),
+        ),
+    );
     const nutrientLabels = $derived(
         selectedNutrients.map((nutrient) =>
             nutrient.label.replace("Total ", ""),
+        ),
+    );
+    const goalValues = $derived(
+        nutrientChartMetrics.map((metric) =>
+            clampChartValue(metric.goalRatio / chartReferenceRatio),
         ),
     );
     const maxNutrientProgress = $derived(
@@ -191,18 +225,24 @@
         return NUTRIENT_PROGRESS_COLORS.wayOver;
     }
 
+    function clampChartValue(value: number) {
+        if (!Number.isFinite(value)) return 0;
+        return Math.max(0, Math.min(value, 1));
+    }
+
     function getNutrientTotal(nutrientId: number) {
-        return selectedFoods.reduce((total, food) => {
-            return total + getFoodNutrientAmount(food, nutrientId);
-        }, 0);
+        return selectedFoods.reduce(
+            (total, food) => total + getFoodNutrientAmount(food, nutrientId),
+            0,
+        );
     }
 
     function getFoodNutrientAmount(food: FdcFood, nutrientId: number) {
-        const nutrient = food.foodNutrients.find(
-            (item) => Number(item.nutrientId) === nutrientId,
-        );
+        const nutrientValue = getFdcNutrientValue(food, nutrientId);
+        if (!nutrientValue) return 0;
         const grams = servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
-        return (nutrient?.value ?? 0) * (grams / DEFAULT_SERVING_GRAMS);
+
+        return (nutrientValue * grams) / 100;
     }
 
     function getNutrientContributors(nutrientId: number) {
@@ -296,7 +336,9 @@
                         : null;
                     return [
                         foodId,
-                        savedState.servingUnits?.[foodId] ??
+                        normalizeServingUnit(
+                            savedState.servingUnits?.[foodId],
+                        ) ??
                             parsedInput?.unit ??
                             "g",
                     ];
@@ -312,7 +354,10 @@
                         servingGrams[foodId] ??
                         DEFAULT_SERVING_GRAMS;
                     const unit = servingUnits[foodId] ?? "g";
-                    return [foodId, convertServingToGrams(quantity, unit)];
+                    return [
+                        foodId,
+                        convertServingToGrams(quantity, unit, food),
+                    ];
                 }),
             );
         } catch {
@@ -371,23 +416,51 @@
         }
 
         selectedFoodIds = [...selectedFoodIds, foodId];
+        const food = allIngredientItems.find((item) => item.fdcId === foodId);
+        const defaultServing = getDefaultServingAmount(food);
         servingGrams = {
             ...servingGrams,
-            [foodId]: servingGrams[foodId] ?? DEFAULT_SERVING_GRAMS,
+            [foodId]:
+                servingGrams[foodId] ??
+                convertServingToGrams(
+                    defaultServing.quantity,
+                    defaultServing.unit,
+                    food,
+                ),
         };
         servingQuantities = {
             ...servingQuantities,
-            [foodId]: servingQuantities[foodId] ?? DEFAULT_SERVING_GRAMS,
+            [foodId]: servingQuantities[foodId] ?? defaultServing.quantity,
         };
         servingUnits = {
             ...servingUnits,
-            [foodId]: servingUnits[foodId] ?? "g",
+            [foodId]: servingUnits[foodId] ?? defaultServing.unit,
         };
         saveMixState();
     }
 
+    function getDefaultServingAmount(food?: FdcFood) {
+        const servingUnit = normalizeServingUnit(food?.servingSizeUnit);
+        if (food?.servingSize && servingUnit) {
+            return {
+                quantity: food.servingSize,
+                unit: servingUnit,
+            };
+        }
+
+        return {
+            quantity: DEFAULT_SERVING_GRAMS,
+            unit: "g" as ServingMeasureUnit,
+        };
+    }
+
     function getServingGrams(food: FdcFood) {
         return servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
+    }
+
+    function getServingGramsLabel(food: FdcFood) {
+        const conversion = getServingConversion(food);
+        return `${conversion.isEstimate ? "≈ " : ""}${conversion.grams.toFixed(1)}g`;
     }
 
     function getServingQuantity(food: FdcFood) {
@@ -395,7 +468,28 @@
     }
 
     function getServingUnit(food: FdcFood) {
-        return servingUnits[food.fdcId] ?? "g";
+        return normalizeServingUnit(servingUnits[food.fdcId]) ?? "g";
+    }
+
+    function normalizeServingUnit(value: unknown) {
+        if (typeof value !== "string") return null;
+        return (
+            SERVING_MEASURE_ALIASES[
+                value.trim().toLowerCase().replace(/\s+/g, "")
+            ] ?? null
+        );
+    }
+
+    function getServingConversion(food: FdcFood) {
+        return convertServingAmount(
+            getServingQuantity(food),
+            getServingUnit(food),
+            food,
+        );
+    }
+
+    function getServingConversionWarning(food: FdcFood) {
+        return getServingConversion(food).warning;
     }
 
     function updateServingAmount(
@@ -414,7 +508,7 @@
         };
         servingGrams = {
             ...servingGrams,
-            [food.fdcId]: convertServingToGrams(quantity, unit),
+            [food.fdcId]: convertServingToGrams(quantity, unit, food),
         };
         saveMixState();
     }
@@ -444,7 +538,7 @@
     <header class="mix-header">
         <h2>Mix</h2>
         <p>Build your smoothie here.</p>
-    <button type="button" class="reset-btn" onclick={resetMix}
+        <button type="button" class="reset-btn" onclick={resetMix}
             >Reset All</button
         >
     </header>
@@ -508,7 +602,17 @@
                     {#if fridgeItems.length > 0}
                         <PillRow
                             pills={fridgeItems.map((food) => food.description)}
-                            onRemove={(idx) => toggleFood(fridgeItems[idx].fdcId)}
+                            onRemove={(idx) =>
+                                toggleFood(fridgeItems[idx].fdcId)}
+                            onSelect={(idx) =>
+                                toggleFood(fridgeItems[idx].fdcId)}
+                            activeIndices={fridgeItems
+                                .map((food, i) =>
+                                    selectedFoodIds.includes(food.fdcId)
+                                        ? i
+                                        : -1,
+                                )
+                                .filter((i) => i !== -1)}
                         />
                     {:else}
                         <p>No fridge items yet.</p>
@@ -519,8 +623,20 @@
                     <h4>Shopping List</h4>
                     {#if shoppingItems.length > 0}
                         <PillRow
-                            pills={shoppingItems.map((food) => food.description)}
-                            onRemove={(idx) => toggleFood(shoppingItems[idx].fdcId)}
+                            pills={shoppingItems.map(
+                                (food) => food.description,
+                            )}
+                            onRemove={(idx) =>
+                                toggleFood(shoppingItems[idx].fdcId)}
+                            onSelect={(idx) =>
+                                toggleFood(shoppingItems[idx].fdcId)}
+                            activeIndices={shoppingItems
+                                .map((food, i) =>
+                                    selectedFoodIds.includes(food.fdcId)
+                                        ? i
+                                        : -1,
+                                )
+                                .filter((i) => i !== -1)}
                         />
                     {:else}
                         <p>No shopping list items yet.</p>
@@ -532,7 +648,8 @@
                 <div class="shape-preview">
                     <PointShape
                         points={selectedCount}
-                        values={nutrientProgress}
+                        values={chartValues}
+                        {goalValues}
                         labels={nutrientLabels}
                         fillColor={chartColors.fill}
                         strokeColor={chartColors.stroke}
@@ -552,7 +669,9 @@
                     <h4>Ingredient Amounts</h4>
                     <div class="serving-list">
                         {#each selectedFoods as food}
-                            <label class="serving-input">
+                            {@const volumeWarning =
+                                getServingConversionWarning(food)}
+                            <div class="serving-input">
                                 <span>{food.description}</span>
                                 <input
                                     type="number"
@@ -584,8 +703,15 @@
                                         >
                                     {/each}
                                 </select>
-                                <span>{getServingGrams(food).toFixed(1)}g</span>
-                            </label>
+                                <span class="serving-grams"
+                                    >{getServingGramsLabel(food)}</span
+                                >
+                                {#if volumeWarning}
+                                    <p class="serving-warning">
+                                        {volumeWarning}
+                                    </p>
+                                {/if}
+                            </div>
                         {/each}
                     </div>
                 </section>
@@ -594,25 +720,24 @@
     </section>
 </div>
 
-
 <style lang="scss">
-@use "../../styles/variables" as *;
+    @use "../../styles/variables" as *;
 
-.reset-btn {
-    margin-bottom: $app-gap-md;
-    background: $app-btn-bg;
-    color: #fff;
-    border: none;
-    border-radius: $app-radius;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 0.45em 1.1em;
-    cursor: pointer;
-    transition: background 0.15s;
-    &:hover {
-        background: $app-btn-bg-hover;
+    .reset-btn {
+        margin-bottom: $app-gap-md;
+        background: $app-btn-bg;
+        color: #fff;
+        border: none;
+        border-radius: $app-radius;
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 0.45em 1.1em;
+        cursor: pointer;
+        transition: background 0.15s;
+        &:hover {
+            background: $app-btn-bg-hover;
+        }
     }
-}
 
     .mix-page {
         max-width: $app-max-width;
@@ -861,10 +986,9 @@
 
     .serving-input {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(4.5rem, 6rem) minmax(
-                7rem,
-                9rem
-            ) auto;
+        grid-template-columns:
+            minmax(0, 1fr) minmax(4.5rem, 6rem) minmax(7rem, 9rem)
+            auto;
         align-items: center;
         gap: 0.45rem;
         padding: 0.45rem 0.6rem;
@@ -892,10 +1016,23 @@
             border-radius: 7px;
         }
 
-        span:last-child {
+        .serving-grams {
             color: $app-muted;
             font-size: 0.82rem;
             font-weight: 700;
+        }
+
+        .serving-warning {
+            grid-column: 1 / -1;
+            margin: 0.1rem 0 0;
+            color: #8a5a00;
+            background: rgba(250, 204, 21, 0.16);
+            border: 1px solid rgba(202, 138, 4, 0.28);
+            border-radius: 7px;
+            padding: 0.45rem 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.35;
         }
     }
 

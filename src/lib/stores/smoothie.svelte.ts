@@ -77,7 +77,22 @@ export function removeIngredient(fdcId: number): void {
 
 export function updateServingGrams(fdcId: number, grams: number): void {
 	const ing = activeIngredients.find((i) => i.fdcId === fdcId);
-	if (ing) ing.servingGrams = Math.max(1, grams);
+	if (ing) {
+		ing.servingGrams = Math.max(1, grams);
+		// Log for olive oil or any ingredient update
+		if (
+			ing.name && ing.name.toLowerCase().includes("olive oil")
+		) {
+			const calories = getNutrientValue(ing, NUTRIENT_IDS.CALORIES);
+			const fat = getNutrientValue(ing, NUTRIENT_IDS.FAT);
+			const carbs = getNutrientValue(ing, NUTRIENT_IDS.CARBS);
+			const protein = getNutrientValue(ing, NUTRIENT_IDS.PROTEIN);
+			console.log(`[updateServingGrams] Olive oil updated: grams=${ing.servingGrams}, calories=${calories}, fat=${fat}, carbs=${carbs}, protein=${protein}`);
+		} else {
+			// Log for any ingredient update
+			console.log(`[updateServingGrams] Updated: name=${ing.name}, grams=${ing.servingGrams}`);
+		}
+	}
 }
 
 export function clearSmoothie(): void {

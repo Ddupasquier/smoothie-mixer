@@ -82,7 +82,10 @@
             <PillRow
                 pills={shoppingList.map((item) => item.description)}
                 onRemove={(idx) =>
-                    removeFromLocalStorageByIndex(MIX_STORAGE_KEYS.shoppingList, idx)}
+                    removeFromLocalStorageByIndex(
+                        MIX_STORAGE_KEYS.shoppingList,
+                        idx,
+                    )}
             />
         {:else}
             <p class="placeholder">No items in shopping list yet.</p>

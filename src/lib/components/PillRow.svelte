@@ -1,14 +1,26 @@
 <script lang="ts">
     import Pill from "./Pill.svelte";
-    let { pills, onRemove } = $props<{
+    let {
+        pills,
+        onRemove,
+        onSelect,
+        activeIndices = [],
+    } = $props<{
         pills: string[];
         onRemove: (idx: number) => void;
+        onSelect?: (idx: number) => void;
+        activeIndices?: number[];
     }>();
 </script>
 
 <div class="pill-row">
     {#each pills as pill, i}
-        <Pill label={pill} onRemove={() => onRemove(i)} />
+        <Pill
+            label={pill}
+            onRemove={() => onRemove(i)}
+            onSelect={() => onSelect && onSelect(i)}
+            active={activeIndices.includes(i)}
+        />
     {/each}
 </div>
 

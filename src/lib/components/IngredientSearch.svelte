@@ -78,7 +78,7 @@
 			loading = true;
 			try {
 				results = await searchFoods(searchString);
-				console.log("IngredientSearch results:", results);
+				// console.log("IngredientSearch results:", results);
 				dispatch("results", { results, query: searchString });
 			} catch (e) {
 				error =

@@ -25,10 +25,9 @@
         <IngredientSearch onSelect={handleSelect} on:results={handleResults} />
     </div>
     {#if selectedFood}
-        <div class="nutrition-facts-label">
-        </div>
+        <div class="nutrition-facts-label"></div>
         <NutritionPanel
-            totals={foodToNutritionTotals(selectedFood)}
+            totals={foodToNutritionTotals(selectedFood, 100)}
             food={selectedFood}
         />
     {/if}

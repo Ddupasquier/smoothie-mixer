@@ -10,6 +10,8 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"audit:fdc-vitals": "node scripts/audit_fdc_vitals.mjs",
+		"compare:fdc": "node scripts/compare_fdc_products.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
