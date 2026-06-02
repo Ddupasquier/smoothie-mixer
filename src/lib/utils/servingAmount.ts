@@ -30,6 +30,16 @@ export type ServingConversion = {
 	warning: string | null;
 };
 
+type WeightServingMeasureUnit = keyof typeof DEFAULT_GRAMS_PER_WEIGHT_MEASURE;
+type VolumeServingMeasureUnit =
+	keyof typeof DEFAULT_MILLILITERS_PER_VOLUME_MEASURE;
+
+function isWeightServingMeasureUnit(
+	unit: ServingMeasureUnit,
+): unit is WeightServingMeasureUnit {
+	return unit in DEFAULT_GRAMS_PER_WEIGHT_MEASURE;
+}
+
 function parseQuantity(value: string) {
 	const normalized = value.trim();
 	const mixedNumberMatch = normalized.match(/^(\d+)\s+(\d+)\/(\d+)$/);
@@ -65,15 +75,13 @@ export function convertServingAmount(
 	food?: FdcFood,
 ): ServingConversion {
 	const safeQuantity = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
-	const dimension = getServingMeasureDimension(unit);
-
-	if (dimension === "weight") {
+	if (isWeightServingMeasureUnit(unit)) {
 		return {
 			grams:
 				safeQuantity *
-				(DEFAULT_GRAMS_PER_WEIGHT_MEASURE[unit] ?? 1),
+				DEFAULT_GRAMS_PER_WEIGHT_MEASURE[unit],
 			milliliters: null,
-			dimension,
+			dimension: "weight",
 			density: null,
 			isEstimate: false,
 			range: null,
@@ -81,8 +89,9 @@ export function convertServingAmount(
 		};
 	}
 
+	const volumeUnit = unit as VolumeServingMeasureUnit;
 	const milliliters =
-		safeQuantity * (DEFAULT_MILLILITERS_PER_VOLUME_MEASURE[unit] ?? 0);
+		safeQuantity * DEFAULT_MILLILITERS_PER_VOLUME_MEASURE[volumeUnit];
 	const density = getDensityEstimate(food);
 	const grams = milliliters * density.gramsPerMilliliter;
 	const variance = density.variancePercent / 100;
@@ -94,7 +103,7 @@ export function convertServingAmount(
 	return {
 		grams,
 		milliliters,
-		dimension,
+		dimension: "volume",
 		density,
 		isEstimate: true,
 		range,
@@ -105,7 +114,7 @@ export function convertServingAmount(
 export function getServingMeasureDimension(
 	unit: ServingMeasureUnit,
 ): ServingMeasureDimension {
-	return unit in DEFAULT_GRAMS_PER_WEIGHT_MEASURE ? "weight" : "volume";
+	return isWeightServingMeasureUnit(unit) ? "weight" : "volume";
 }
 
 export function getDensityEstimate(food?: FdcFood): DensityEstimate {

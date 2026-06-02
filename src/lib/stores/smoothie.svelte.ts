@@ -4,6 +4,7 @@
  */
 
 import { cacheGet, cacheSet } from '$lib/cache';
+import { getFdcNutrientValue } from '$lib/utils/fdcNutrients';
 import type { FdcFood, Ingredient, NutritionTotals, Smoothie } from '$lib/utils/types';
 import { NUTRIENT_IDS } from '$lib/utils/types';
 
@@ -36,10 +37,17 @@ export function foodToIngredient(food: FdcFood, servingGrams = DEFAULT_SERVING_G
  * scaled to the ingredient's serving size.
  */
 export function getNutrientValue(ingredient: Ingredient, nutrientId: number): number {
-	const nutrient = ingredient.nutrients.find((n) => n.nutrientId === nutrientId);
-	if (!nutrient) return 0;
+	const value = getFdcNutrientValue(
+		{
+			fdcId: ingredient.fdcId,
+			description: ingredient.name,
+			foodCategory: ingredient.category,
+			foodNutrients: ingredient.nutrients
+		},
+		nutrientId
+	);
 	// FDC values are per 100 g — scale to the actual serving
-	return (nutrient.value * ingredient.servingGrams) / 100;
+	return (value * ingredient.servingGrams) / 100;
 }
 
 /** Sum up key nutrients across all ingredients in the active smoothie */
@@ -79,19 +87,6 @@ export function updateServingGrams(fdcId: number, grams: number): void {
 	const ing = activeIngredients.find((i) => i.fdcId === fdcId);
 	if (ing) {
 		ing.servingGrams = Math.max(1, grams);
-		// Log for olive oil or any ingredient update
-		if (
-			ing.name && ing.name.toLowerCase().includes("olive oil")
-		) {
-			const calories = getNutrientValue(ing, NUTRIENT_IDS.CALORIES);
-			const fat = getNutrientValue(ing, NUTRIENT_IDS.FAT);
-			const carbs = getNutrientValue(ing, NUTRIENT_IDS.CARBS);
-			const protein = getNutrientValue(ing, NUTRIENT_IDS.PROTEIN);
-			console.log(`[updateServingGrams] Olive oil updated: grams=${ing.servingGrams}, calories=${calories}, fat=${fat}, carbs=${carbs}, protein=${protein}`);
-		} else {
-			// Log for any ingredient update
-			console.log(`[updateServingGrams] Updated: name=${ing.name}, grams=${ing.servingGrams}`);
-		}
 	}
 }
 

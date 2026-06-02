@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { FdcFood } from "$lib/utils/types";
 	import { searchFoods } from "$lib/utils/fdc";
+	import { compareFoodQuality } from "$lib/utils/foodQuality";
 	import { createEventDispatcher } from "svelte";
 	import PillRow from "./PillRow.svelte";
 	import SearchDropdown from "./SearchDropdown.svelte";
@@ -14,14 +15,20 @@
 	let debounceTimer: ReturnType<typeof setTimeout>;
 	const dispatch = createEventDispatcher();
 
+	function sortByQualityThenName(items: FdcFood[]) {
+		return items.sort((a, b) => {
+			const qualitySort = compareFoodQuality(a, b);
+			if (qualitySort !== 0) return qualitySort;
+			return a.description.localeCompare(b.description);
+		});
+	}
+
 	const sortedResults = $derived(() => {
 		const allTerms = [...pills, query.trim()]
 			.map((s) => s.toLowerCase())
 			.filter(Boolean);
 		if (allTerms.length === 0)
-			return [...results].sort((a, b) =>
-				a.description.localeCompare(b.description),
-			);
+			return sortByQualityThenName([...results]);
 		if (allTerms.length === 1) {
 			const startsWith: FdcFood[] = [];
 			const contains: FdcFood[] = [];
@@ -36,11 +43,9 @@
 					rest.push(food);
 				}
 			}
-			startsWith.sort((a, b) =>
-				a.description.localeCompare(b.description),
-			);
-			contains.sort((a, b) => a.description.localeCompare(b.description));
-			rest.sort((a, b) => a.description.localeCompare(b.description));
+			sortByQualityThenName(startsWith);
+			sortByQualityThenName(contains);
+			sortByQualityThenName(rest);
 			return [...startsWith, ...contains, ...rest];
 		}
 		const allParts: FdcFood[] = [];
@@ -59,9 +64,9 @@
 				rest.push(food);
 			}
 		}
-		firstPart.sort((a, b) => a.description.localeCompare(b.description));
-		allParts.sort((a, b) => a.description.localeCompare(b.description));
-		rest.sort((a, b) => a.description.localeCompare(b.description));
+		sortByQualityThenName(firstPart);
+		sortByQualityThenName(allParts);
+		sortByQualityThenName(rest);
 		return [...firstPart, ...allParts, ...rest];
 	});
 
@@ -78,7 +83,6 @@
 			loading = true;
 			try {
 				results = await searchFoods(searchString);
-				// console.log("IngredientSearch results:", results);
 				dispatch("results", { results, query: searchString });
 			} catch (e) {
 				error =

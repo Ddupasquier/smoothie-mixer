@@ -1,5 +1,13 @@
 import { NUTRIENT_IDS, type FdcFood, type FdcNutrient } from "$lib/utils/types";
 
+export type FdcNutrientSource = "exact" | "fallback" | "derived" | "missing";
+
+export type ResolvedFdcNutrient = {
+	nutrient: FdcNutrient | null;
+	value: number;
+	source: FdcNutrientSource;
+};
+
 const FALLBACK_NUTRIENT_IDS: Record<number, number[]> = {
 	[NUTRIENT_IDS.FAT]: [1085],
 };
@@ -20,20 +28,55 @@ export function findFdcNutrient(food: FdcFood, nutrientId: number) {
 }
 
 export function getFdcNutrientValue(food: FdcFood, nutrientId: number) {
-	const nutrient = findFdcNutrient(food, nutrientId);
+	return resolveFdcNutrient(food, nutrientId).value;
+}
 
-	if (nutrient) return nutrient.value;
+export function resolveFdcNutrient(
+	food: FdcFood,
+	nutrientId: number,
+): ResolvedFdcNutrient {
+	const exact = food.foodNutrients.find(
+		(nutrient) => Number(nutrient.nutrientId) === nutrientId,
+	);
 
-	if (nutrientId === NUTRIENT_IDS.CALORIES) {
-		return deriveCalories(food);
+	if (exact) {
+		return { nutrient: exact, value: exact.value, source: "exact" };
 	}
 
-	return 0;
+	const fallback = food.foodNutrients.find((nutrient) =>
+		matchesFallbackNutrient(nutrient, nutrientId),
+	);
+
+	if (fallback) {
+		return {
+			nutrient: fallback,
+			value: fallback.value,
+			source: "fallback",
+		};
+	}
+
+	if (nutrientId === NUTRIENT_IDS.CALORIES) {
+		const calories = deriveCalories(food);
+
+		if (calories > 0) {
+			return {
+				nutrient: null,
+				value: calories,
+				source: "derived",
+			};
+		}
+	}
+
+	return { nutrient: null, value: 0, source: "missing" };
 }
 
 export function isFdcNutrientMatch(nutrient: FdcNutrient, nutrientId: number) {
 	if (Number(nutrient.nutrientId) === nutrientId) return true;
 
+	return matchesFallbackNutrient(nutrient, nutrientId);
+}
+
+function matchesFallbackNutrient(nutrient: FdcNutrient, nutrientId: number) {
 	const fallbackIds = FALLBACK_NUTRIENT_IDS[nutrientId] ?? [];
 	if (fallbackIds.includes(Number(nutrient.nutrientId))) return true;
 

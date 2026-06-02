@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { getFoodQuality } from "$lib/utils/foodQuality";
     import type { FdcFood } from "$lib/utils/types";
     let { results, onSelect } = $props<{
         results: FdcFood[];
@@ -12,6 +13,7 @@
 {#if results.length > 0}
     <ul class="results-list" role="listbox" aria-label="Search results">
         {#each results as food (food.fdcId)}
+            {@const quality = getFoodQuality(food)}
             <li class="result-item">
                 <button
                     class="result-btn"
@@ -25,6 +27,21 @@
                     {#if food.foodCategory}
                         <span class="result-category">{food.foodCategory}</span>
                     {/if}
+                    <span class="result-badges" aria-label={quality.title}>
+                        <span class="result-badge" title={quality.title}>
+                            {quality.symbol} {quality.label}
+                        </span>
+                        {#if food.dataType}
+                            <span class="result-badge result-badge--muted">
+                                {food.dataType}
+                            </span>
+                        {/if}
+                        {#if food.servingSize && food.servingSizeUnit}
+                            <span class="result-badge result-badge--muted">
+                                ↔ {food.servingSize} {food.servingSizeUnit}
+                            </span>
+                        {/if}
+                    </span>
                 </button>
             </li>
         {/each}
@@ -70,5 +87,26 @@
     .result-category {
         font-size: 0.75rem;
         color: var(--color-text-muted);
+    }
+    .result-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.18rem;
+    }
+    .result-badge {
+        width: fit-content;
+        padding: 0.12rem 0.38rem;
+        color: var(--color-text);
+        background: var(--color-primary-light);
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .result-badge--muted {
+        color: var(--color-text-muted);
+        background: var(--color-surface);
     }
 </style>

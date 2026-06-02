@@ -1,6 +1,6 @@
 <script lang="ts">
 	import MoveItemPrompt from "$lib/components/MoveItemPrompt.svelte";
-	import type { FdcFood, NutritionTotals } from "$lib/utils/types";
+	import type { FdcFood } from "$lib/utils/types";
 	import {
 		addFoodToSmoothieList,
 		readSmoothieList,
@@ -15,10 +15,9 @@
 
 	interface Props {
 		food?: FdcFood;
-		totals: NutritionTotals;
 	}
 
-	let { totals, food }: Props = $props();
+	let { food }: Props = $props();
 
 	import { vitalNutrients } from "../../variables/vitalNutrients";
 

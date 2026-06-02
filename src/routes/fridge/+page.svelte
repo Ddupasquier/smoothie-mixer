@@ -1,9 +1,6 @@
 <script lang="ts">
-    import IngredientSearch from "$lib/components/IngredientSearch.svelte";
-    import NutritionPanel from "$lib/components/NutritionPanel.svelte";
     import PillRow from "$lib/components/PillRow.svelte";
     import type { FdcFood } from "$lib/utils/types";
-    import { foodToNutritionTotals } from "$lib/utils/foodToNutritionTotals";
     import {
         readSmoothieList,
         removeFoodFromSmoothieList,
@@ -12,16 +9,7 @@
     } from "$lib/utils/smoothieLists";
     import { onMount } from "svelte";
     import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
-    // Restore handleSelect for IngredientSearch
-    function handleSelect(food: FdcFood) {
-        selectedFood = food;
-    }
 
-    let lastResults = $state<FdcFood[]>([]);
-    let lastQuery = $state("");
-    let selectedFood = $state<FdcFood | null>(null);
-
-    // Pills state
     let onHand = $state<FdcFood[]>([]);
     let shoppingList = $state<FdcFood[]>([]);
 
@@ -38,8 +26,6 @@
         loadLists();
     }
 
-    // Load on mount and whenever the NutritionPanel adds
-
     onMount(() => {
         loadLists();
         window.addEventListener("storage", loadLists);
@@ -52,12 +38,6 @@
         };
     });
 
-    // Patch IngredientSearch to capture results for debugging
-    type ResultsEvent = CustomEvent<{ results: FdcFood[]; query: string }>;
-    function handleResults(event: ResultsEvent) {
-        lastResults = event.detail.results;
-        lastQuery = event.detail.query;
-    }
 </script>
 
 <section class="fridge-section">

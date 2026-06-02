@@ -1,20 +1,9 @@
 <script lang="ts">
-    function resetMix() {
-        selected = vitalNutrients.map((n) => n.id);
-        options = getDefaultOptions();
-        addNutrientId = "";
-        // Deselect all fridge and shopping items
-        selectedFoodIds = [];
-        servingGrams = {};
-        servingQuantities = {};
-        servingUnits = {};
-        nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
-        // Add any other fields to reset as needed
-    }
     import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
     import NutrientOverageSummary, {
         type NutrientOverage,
     } from "$lib/components/NutrientOverageSummary.svelte";
+    import Popover from "$lib/components/Popover.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import {
         readSmoothieList,
@@ -25,16 +14,22 @@
         convertServingToGrams,
         parseServingAmount,
     } from "$lib/utils/servingAmount";
-    import { getFdcNutrientValue } from "$lib/utils/fdcNutrients";
+    import {
+        getChartColors,
+        getChartValues,
+        getDefaultNutrientGoal,
+        getGoalValues,
+        getNutrientChartMetrics,
+        getNutrientContributors as calculateNutrientContributors,
+        getNutrientProgress,
+        getNutrientTotal as calculateNutrientTotal,
+    } from "$lib/utils/mixCalculations";
     import type { FdcFood } from "$lib/utils/types";
     import { onMount } from "svelte";
     import {
-        DEFAULT_GOAL_BY_UNIT,
         DEFAULT_NUTRIENT_GOALS,
         DEFAULT_SERVING_GRAMS,
         MIX_STORAGE_KEYS,
-        NUTRIENT_PROGRESS_COLORS,
-        NUTRIENT_PROGRESS_THRESHOLDS,
     } from "../../defaults/mixDefaults";
     import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
     import {
@@ -84,48 +79,28 @@
         ),
     );
     const nutrientProgress = $derived(
-        selectedNutrients.map((nutrient) => {
-            const goal =
-                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
-            if (goal <= 0) return 0;
-            return getNutrientTotal(Number(nutrient.id)) / goal;
-        }),
+        getNutrientProgress(
+            selectedNutrients,
+            selectedFoods,
+            nutrientGoals,
+            servingGrams,
+        ),
     );
     const nutrientChartMetrics = $derived(
-        selectedNutrients.map((nutrient) => {
-            const nutrientId = Number(nutrient.id);
-            const baselineGoal = getDefaultGoal(nutrient);
-            const safeBaselineGoal = baselineGoal > 0 ? baselineGoal : 1;
-            const goal = nutrientGoals[nutrientId] || baselineGoal;
-            const total = getNutrientTotal(nutrientId);
-
-            return {
-                goalRatio: goal / safeBaselineGoal,
-                totalRatio: total / safeBaselineGoal,
-            };
-        }),
-    );
-    const chartReferenceRatio = $derived(
-        Math.max(
-            1,
-            ...nutrientChartMetrics.map((metric) => metric.goalRatio),
+        getNutrientChartMetrics(
+            selectedNutrients,
+            selectedFoods,
+            nutrientGoals,
+            servingGrams,
         ),
     );
-    const chartValues = $derived(
-        nutrientChartMetrics.map((metric) =>
-            clampChartValue(metric.totalRatio / chartReferenceRatio),
-        ),
-    );
+    const chartValues = $derived(getChartValues(nutrientChartMetrics));
     const nutrientLabels = $derived(
         selectedNutrients.map((nutrient) =>
             nutrient.label.replace("Total ", ""),
         ),
     );
-    const goalValues = $derived(
-        nutrientChartMetrics.map((metric) =>
-            clampChartValue(metric.goalRatio / chartReferenceRatio),
-        ),
-    );
+    const goalValues = $derived(getGoalValues(nutrientChartMetrics));
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
@@ -202,58 +177,19 @@
     }
 
     function getDefaultGoal(nutrient: { id: string | number; unit?: string }) {
-        const id = Number(nutrient.id);
-        if (DEFAULT_NUTRIENT_GOALS[id]) return DEFAULT_NUTRIENT_GOALS[id];
-        if (nutrient.unit === "g") return DEFAULT_GOAL_BY_UNIT.grams;
-        if (nutrient.unit === "kcal") return DEFAULT_GOAL_BY_UNIT.calories;
-        return DEFAULT_GOAL_BY_UNIT.fallback;
-    }
-
-    function getChartColors(progress: number) {
-        if (progress <= NUTRIENT_PROGRESS_THRESHOLDS.atGoal) {
-            return NUTRIENT_PROGRESS_COLORS.atGoal;
-        }
-
-        if (progress <= NUTRIENT_PROGRESS_THRESHOLDS.barelyOver) {
-            return NUTRIENT_PROGRESS_COLORS.barelyOver;
-        }
-
-        if (progress <= NUTRIENT_PROGRESS_THRESHOLDS.midwayOver) {
-            return NUTRIENT_PROGRESS_COLORS.midwayOver;
-        }
-
-        return NUTRIENT_PROGRESS_COLORS.wayOver;
-    }
-
-    function clampChartValue(value: number) {
-        if (!Number.isFinite(value)) return 0;
-        return Math.max(0, Math.min(value, 1));
+        return getDefaultNutrientGoal(nutrient);
     }
 
     function getNutrientTotal(nutrientId: number) {
-        return selectedFoods.reduce(
-            (total, food) => total + getFoodNutrientAmount(food, nutrientId),
-            0,
-        );
-    }
-
-    function getFoodNutrientAmount(food: FdcFood, nutrientId: number) {
-        const nutrientValue = getFdcNutrientValue(food, nutrientId);
-        if (!nutrientValue) return 0;
-        const grams = servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
-
-        return (nutrientValue * grams) / 100;
+        return calculateNutrientTotal(selectedFoods, nutrientId, servingGrams);
     }
 
     function getNutrientContributors(nutrientId: number) {
-        return selectedFoods
-            .map((food) => ({
-                label: food.description,
-                amount: getFoodNutrientAmount(food, nutrientId),
-                grams: servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS,
-            }))
-            .filter((contributor) => contributor.amount > 0)
-            .sort((a, b) => b.amount - a.amount);
+        return calculateNutrientContributors(
+            selectedFoods,
+            nutrientId,
+            servingGrams,
+        );
     }
 
     function loadIngredientLists() {
@@ -384,6 +320,29 @@
         );
     }
 
+    function resetGoals() {
+        nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
+        saveNutrientGoals(nutrientGoals);
+    }
+
+    function clearIngredients() {
+        selectedFoodIds = [];
+        servingGrams = {};
+        servingQuantities = {};
+        servingUnits = {};
+        saveMixState();
+    }
+
+    function resetMix() {
+        selected = vitalNutrients.map((n) => n.id);
+        options = getDefaultOptions();
+        addNutrientId = "";
+        clearIngredients();
+        nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
+        saveNutrientGoals(nutrientGoals);
+        saveMixState();
+    }
+
     function handleChange(next: (string | number)[]) {
         selected = next;
         saveMixState();
@@ -452,10 +411,6 @@
             quantity: DEFAULT_SERVING_GRAMS,
             unit: "g" as ServingMeasureUnit,
         };
-    }
-
-    function getServingGrams(food: FdcFood) {
-        return servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
     }
 
     function getServingGramsLabel(food: FdcFood) {
@@ -536,11 +491,17 @@
 
 <div class="mix-page">
     <header class="mix-header">
-        <h2>Mix</h2>
-        <p>Build your smoothie here.</p>
-        <button type="button" class="reset-btn" onclick={resetMix}
-            >Reset All</button
-        >
+        <div>
+            <h2>Mix</h2>
+            <p>Build your smoothie here.</p>
+        </div>
+        <div class="reset-actions" aria-label="Mix reset actions">
+            <button type="button" onclick={resetGoals}>Reset Goals</button>
+            <button type="button" onclick={clearIngredients}
+                >Clear Ingredients</button
+            >
+            <button type="button" onclick={resetMix}>Reset All</button>
+        </div>
     </header>
 
     <section class="mix-panel" aria-labelledby="nutrient-controls-title">
@@ -707,9 +668,14 @@
                                     >{getServingGramsLabel(food)}</span
                                 >
                                 {#if volumeWarning}
-                                    <p class="serving-warning">
-                                        {volumeWarning}
-                                    </p>
+                                    <div class="serving-warning">
+                                        <Popover
+                                            buttonLabel="⚠️ Estimate"
+                                            title="Volume conversion estimate"
+                                        >
+                                            <p>{volumeWarning}</p>
+                                        </Popover>
+                                    </div>
                                 {/if}
                             </div>
                         {/each}
@@ -723,22 +689,6 @@
 <style lang="scss">
     @use "../../styles/variables" as *;
 
-    .reset-btn {
-        margin-bottom: $app-gap-md;
-        background: $app-btn-bg;
-        color: #fff;
-        border: none;
-        border-radius: $app-radius;
-        font-size: 1rem;
-        font-weight: 700;
-        padding: 0.45em 1.1em;
-        cursor: pointer;
-        transition: background 0.15s;
-        &:hover {
-            background: $app-btn-bg-hover;
-        }
-    }
-
     .mix-page {
         max-width: $app-max-width;
         margin: 0 auto;
@@ -747,6 +697,10 @@
     }
 
     .mix-header {
+        display: flex;
+        justify-content: space-between;
+        gap: $app-gap-md;
+        align-items: start;
         margin-bottom: $app-gap-sm;
 
         h2 {
@@ -756,6 +710,26 @@
 
         p {
             color: $app-muted;
+        }
+    }
+
+    .reset-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.4rem;
+
+        button {
+            background: $app-btn-bg;
+            color: $app-btn-text;
+            border-radius: $app-radius;
+            font-size: 0.86rem;
+            font-weight: 700;
+            padding: 0.42rem 0.75rem;
+
+            &:hover {
+                background: $app-btn-bg-hover;
+            }
         }
     }
 
@@ -915,38 +889,6 @@
         }
     }
 
-    .ingredient-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: $app-gap-sm;
-
-        button {
-            max-width: 100%;
-            padding: 0.42rem 0.65rem;
-            overflow: hidden;
-            color: $app-primary;
-            background: $app-section-bg;
-            border: $app-border;
-            border-radius: 999px;
-            box-shadow: $app-card-shadow;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-
-            &:hover {
-                background: $app-accent;
-                border-color: #b3d3f6;
-            }
-
-            &.selected {
-                color: $app-btn-text;
-                background: $app-primary;
-                border-color: $app-primary;
-            }
-        }
-    }
-
     .shape-panel {
         display: grid;
         place-items: center;
@@ -1024,15 +966,9 @@
 
         .serving-warning {
             grid-column: 1 / -1;
-            margin: 0.1rem 0 0;
-            color: #8a5a00;
-            background: rgba(250, 204, 21, 0.16);
-            border: 1px solid rgba(202, 138, 4, 0.28);
-            border-radius: 7px;
-            padding: 0.45rem 0.55rem;
-            font-size: 0.78rem;
-            font-weight: 600;
-            line-height: 1.35;
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 0.1rem;
         }
     }
 
@@ -1043,6 +979,14 @@
 
         .panel-header {
             grid-template-columns: 1fr;
+        }
+
+        .mix-header {
+            display: grid;
+        }
+
+        .reset-actions {
+            justify-content: flex-start;
         }
 
         .ingredient-lists {

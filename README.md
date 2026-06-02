@@ -6,7 +6,7 @@ Mix and match ingredients for making well-balanced smoothies.
 
 - 🔍 Search ingredients via the [FoodData Central API](https://fdc.nal.usda.gov/)
 - 🧪 Live nutrition totals (calories, protein, carbs, fat, fiber, sugar)
-- 💾 Save & load smoothies (stored in `localStorage` — no database needed)
+- 🧊 Keep fridge, shopping list, mix progress, and goal settings in `localStorage`
 - 📱 Mobile-first responsive UI
 - 🚦 Rate-limit friendly: search results cached for 24 hours in `localStorage`
 
@@ -62,11 +62,11 @@ npm test
 
 Tests run entirely offline using mocked fetch — no API key required.
 
-To run the **live integration test** against the real FDC API (verifies your key works):
+To compare live FDC product data while debugging nutrient mappings:
 
 ```bash
-# Ensure VITE_FDC_API_KEY is set in your .env, then:
-npx vitest run src/lib/api/fdc.test.ts --reporter=verbose
+npm run compare:fdc -- "sunflower oil" "2% milk"
+npm run audit:fdc-vitals
 ```
 
 ---
@@ -78,16 +78,19 @@ src/
 ├── app.css                    # Global mobile-first styles
 ├── app.html                   # HTML shell
 ├── lib/
-│   ├── api/
-│   │   └── fdc.ts             # FoodData Central API client (cached)
 │   ├── components/
 │   │   ├── IngredientCard.svelte
 │   │   ├── IngredientSearch.svelte
+│   │   ├── PointShape.svelte
 │   │   └── NutritionPanel.svelte
 │   ├── stores/
 │   │   └── smoothie.svelte.ts # Active smoothie state + saved smoothies
 │   ├── cache.ts               # localStorage TTL cache
-│   └── types.ts               # Shared TypeScript types
+│   └── utils/
+│       ├── fdc.ts             # FoodData Central API client (cached)
+│       ├── fdcNutrients.ts    # FDC nutrient ID/name fallbacks
+│       ├── servingAmount.ts   # Weight/volume to grams conversion
+│       └── types.ts           # Shared TypeScript types
 └── routes/
     ├── +layout.svelte
     └── +page.svelte           # Main smoothie builder UI
