@@ -3,6 +3,7 @@ import {
 	getChartValues,
 	getGoalValues,
 	getNutrientChartMetrics,
+	getNutrientContributionBreakdowns,
 	getNutrientContributors,
 	getNutrientProgress,
 	getNutrientTotal,
@@ -58,6 +59,56 @@ describe("mix calculations", () => {
 			amount: 46.6,
 			grams: 50,
 		});
+	});
+
+	it("calculates top nutrient contribution percentages", () => {
+		const banana = {
+			fdcId: 3,
+			description: "Banana",
+			foodNutrients: [
+				{
+					nutrientId: NUTRIENT_IDS.CARBS,
+					nutrientName: "Carbohydrate",
+					nutrientNumber: "205",
+					unitName: "G",
+					value: 22.8,
+				},
+			],
+		} satisfies FdcFood;
+		const honey = {
+			fdcId: 4,
+			description: "Honey",
+			foodNutrients: [
+				{
+					nutrientId: NUTRIENT_IDS.CARBS,
+					nutrientName: "Carbohydrate",
+					nutrientNumber: "205",
+					unitName: "G",
+					value: 82.4,
+				},
+			],
+		} satisfies FdcFood;
+
+		const breakdowns = getNutrientContributionBreakdowns(
+			[
+				{
+					id: NUTRIENT_IDS.CARBS,
+					label: "Total Carb.",
+					unit: "g",
+				},
+			],
+			[banana, honey],
+			{ 3: 100, 4: 25 },
+			1,
+		);
+
+		expect(breakdowns).toHaveLength(1);
+		expect(breakdowns[0].contributors).toHaveLength(1);
+		expect(breakdowns[0].contributors[0]).toMatchObject({
+			label: "Banana",
+			amount: 22.8,
+		});
+		expect(breakdowns[0].contributors[0].percentOfTotal).toBeCloseTo(52.53);
 	});
 
 	it("calculates progress and chart values from goals", () => {

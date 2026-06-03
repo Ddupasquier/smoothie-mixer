@@ -10,6 +10,7 @@
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
     } from "$lib/utils/smoothieLists";
+    import IngredientContributionBreakdown from "$lib/components/IngredientContributionBreakdown.svelte";
     import { addSavedDrink } from "$lib/utils/savedDrinks";
     import {
         convertServingAmount,
@@ -22,6 +23,7 @@
         getDefaultNutrientGoal,
         getFoodNutrientAmount,
         getGoalValues,
+        getNutrientContributionBreakdowns,
         getNutrientChartMetrics,
         getNutrientContributors as calculateNutrientContributors,
         getNutrientProgress,
@@ -139,6 +141,13 @@
         }),
     );
     const goalValues = $derived(getGoalValues(nutrientChartMetrics));
+    const contributionBreakdowns = $derived(
+        getNutrientContributionBreakdowns(
+            selectedNutrients,
+            selectedFoods,
+            servingGrams,
+        ),
+    );
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
@@ -837,6 +846,9 @@
                         fullWidth
                     />
                 </div>
+                <IngredientContributionBreakdown
+                    breakdowns={contributionBreakdowns}
+                />
             </div>
 
             <NutrientOverageSummary overages={nutrientOverages} />

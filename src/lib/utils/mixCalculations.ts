@@ -20,6 +20,18 @@ export type NutrientContributor = {
 	grams: number;
 };
 
+export type NutrientContribution = NutrientContributor & {
+	percentOfTotal: number;
+};
+
+export type NutrientContributionBreakdown = {
+	nutrientId: number;
+	label: string;
+	unit: string;
+	total: number;
+	contributors: NutrientContribution[];
+};
+
 export type NutrientChartMetric = {
 	goalRatio: number;
 	totalRatio: number;
@@ -70,6 +82,43 @@ export function getNutrientContributors(
 		}))
 		.filter((contributor) => contributor.amount > 0)
 		.sort((a, b) => b.amount - a.amount);
+}
+
+export function getNutrientContributionBreakdowns(
+	nutrients: NutrientMeta[],
+	foods: FdcFood[],
+	servingGrams: Record<number, number>,
+	maxContributors = 2,
+): NutrientContributionBreakdown[] {
+	return nutrients.flatMap((nutrient) => {
+		const nutrientId = Number(nutrient.id);
+		const contributors = getNutrientContributors(
+			foods,
+			nutrientId,
+			servingGrams,
+		);
+		const total = contributors.reduce(
+			(sum, contributor) => sum + contributor.amount,
+			0,
+		);
+
+		if (total <= 0) return [];
+
+		return [
+			{
+				nutrientId,
+				label: nutrient.label ?? String(nutrient.id),
+				unit: nutrient.unit ?? "",
+				total,
+				contributors: contributors
+					.slice(0, maxContributors)
+					.map((contributor) => ({
+						...contributor,
+						percentOfTotal: (contributor.amount / total) * 100,
+					})),
+			},
+		];
+	});
 }
 
 export function getNutrientProgress(
