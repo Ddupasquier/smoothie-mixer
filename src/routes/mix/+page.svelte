@@ -1,9 +1,9 @@
 <script lang="ts">
     import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
+    import IngredientCard from "$lib/components/IngredientCard.svelte";
     import NutrientOverageSummary, {
         type NutrientOverage,
     } from "$lib/components/NutrientOverageSummary.svelte";
-    import Popover from "$lib/components/Popover.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import {
         readSmoothieList,
@@ -18,6 +18,7 @@
         getChartColors,
         getChartValues,
         getDefaultNutrientGoal,
+        getFoodNutrientAmount,
         getGoalValues,
         getNutrientChartMetrics,
         getNutrientContributors as calculateNutrientContributors,
@@ -34,7 +35,6 @@
     import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
     import {
         SERVING_MEASURE_ALIASES,
-        SERVING_MEASURE_OPTIONS,
         type ServingMeasureUnit,
     } from "../../defaults/servingMeasureDefaults";
     import { vitalNutrients } from "../../variables/vitalNutrients";
@@ -206,6 +206,34 @@
             nutrientId,
             servingGrams,
         );
+    }
+
+    function getFoodSourceLabel(food: FdcFood) {
+        if (fridgeItems.some((item) => item.fdcId === food.fdcId)) {
+            return "Fridge";
+        }
+
+        return "Shopping";
+    }
+
+    function getFoodNutrientChips(food: FdcFood) {
+        return selectedNutrients
+            .map((nutrient) => ({
+                label: nutrient.label.replace("Total ", ""),
+                amount: getFoodNutrientAmount(
+                    food,
+                    Number(nutrient.id),
+                    servingGrams,
+                ),
+                unit: nutrient.unit ?? "",
+            }))
+            .filter((chip) => chip.amount > 0)
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 3)
+            .map((chip) => ({
+                label: chip.label,
+                value: `+${formatChartNumber(chip.amount)}${chip.unit}`,
+            }));
     }
 
     function loadIngredientLists() {
@@ -621,6 +649,35 @@
                 </section>
             </div>
 
+            {#if selectedFoods.length > 0}
+                <section
+                    class="selected-ingredients-panel"
+                    aria-label="Selected ingredients"
+                >
+                    <div class="selected-ingredients-header">
+                        <div>
+                            <h4>Selected Ingredients</h4>
+                            <p>Adjust amounts here. The graph updates from these values.</p>
+                        </div>
+                    </div>
+                    <div class="selected-ingredient-cards">
+                        {#each selectedFoods as food}
+                            <IngredientCard
+                                {food}
+                                sourceLabel={getFoodSourceLabel(food)}
+                                quantity={getServingQuantity(food)}
+                                unit={getServingUnit(food)}
+                                gramsLabel={getServingGramsLabel(food)}
+                                warning={getServingConversionWarning(food)}
+                                nutrientChips={getFoodNutrientChips(food)}
+                                onRemove={toggleFood}
+                                onServingChange={updateServingAmount}
+                            />
+                        {/each}
+                    </div>
+                </section>
+            {/if}
+
             <div class="shape-panel" aria-label="Generated shape">
                 <div class="shape-preview">
                     <PointShape
@@ -638,67 +695,6 @@
             </div>
 
             <NutrientOverageSummary overages={nutrientOverages} />
-
-            {#if selectedFoods.length > 0}
-                <section
-                    class="serving-panel"
-                    aria-label="Selected ingredient amounts"
-                >
-                    <h4>Ingredient Amounts</h4>
-                    <div class="serving-list">
-                        {#each selectedFoods as food}
-                            {@const volumeWarning =
-                                getServingConversionWarning(food)}
-                            <div class="serving-input">
-                                <span>{food.description}</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="any"
-                                    value={getServingQuantity(food)}
-                                    aria-label={`Quantity for ${food.description}`}
-                                    oninput={(event) =>
-                                        updateServingAmount(
-                                            food,
-                                            event.currentTarget.value,
-                                            getServingUnit(food),
-                                        )}
-                                />
-                                <select
-                                    aria-label={`Measure for ${food.description}`}
-                                    value={getServingUnit(food)}
-                                    onchange={(event) =>
-                                        updateServingAmount(
-                                            food,
-                                            String(getServingQuantity(food)),
-                                            event.currentTarget
-                                                .value as ServingMeasureUnit,
-                                        )}
-                                >
-                                    {#each SERVING_MEASURE_OPTIONS as option}
-                                        <option value={option.value}
-                                            >{option.label}</option
-                                        >
-                                    {/each}
-                                </select>
-                                <span class="serving-grams"
-                                    >{getServingGramsLabel(food)}</span
-                                >
-                                {#if volumeWarning}
-                                    <div class="serving-warning">
-                                        <Popover
-                                            buttonLabel="⚠️ Estimate"
-                                            title="Volume conversion estimate"
-                                        >
-                                            <p>{volumeWarning}</p>
-                                        </Popover>
-                                    </div>
-                                {/if}
-                            </div>
-                        {/each}
-                    </div>
-                </section>
-            {/if}
         </div>
     </section>
 </div>
@@ -924,69 +920,35 @@
         box-shadow: $app-card-shadow;
     }
 
-    .serving-panel {
+    .selected-ingredients-panel {
         padding: $app-gap-sm;
         background: $app-bg;
         border: $app-border;
         border-radius: $app-card-radius;
 
         h4 {
-            margin-bottom: $app-gap-sm;
             color: $app-primary;
             font-size: 0.95rem;
             font-weight: 700;
         }
-    }
 
-    .serving-list {
-        display: grid;
-        gap: $app-gap-sm;
-    }
-
-    .serving-input {
-        display: grid;
-        grid-template-columns:
-            minmax(0, 1fr) minmax(4.5rem, 6rem) minmax(7rem, 9rem)
-            auto;
-        align-items: center;
-        gap: 0.45rem;
-        padding: 0.45rem 0.6rem;
-        color: $app-primary;
-        background: $app-section-bg;
-        border: $app-border;
-        border-radius: $app-radius;
-        font-size: 0.9rem;
-        font-weight: 600;
-
-        span:first-child {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        input,
-        select {
-            width: 100%;
-            height: 2rem;
-            padding: 0 0.45rem;
-            color: $app-primary;
-            background: $app-bg;
-            border: $app-border;
-            border-radius: 7px;
-        }
-
-        .serving-grams {
+        p {
             color: $app-muted;
-            font-size: 0.82rem;
-            font-weight: 700;
+            font-size: 0.86rem;
         }
+    }
 
-        .serving-warning {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: flex-start;
-            margin-top: 0.1rem;
-        }
+    .selected-ingredients-header {
+        display: flex;
+        justify-content: space-between;
+        gap: $app-gap-sm;
+        margin-bottom: $app-gap-sm;
+    }
+
+    .selected-ingredient-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: $app-gap-sm;
     }
 
     @media (max-width: 680px) {

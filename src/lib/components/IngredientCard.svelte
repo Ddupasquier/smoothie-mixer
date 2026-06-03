@@ -1,131 +1,260 @@
 <script lang="ts">
-	import { getNutrientValue } from "$lib/stores/smoothie.svelte";
-	import type { Ingredient } from "$lib/utils/types";
-	import { NUTRIENT_IDS } from "$lib/utils/types";
+	import Popover from "$lib/components/Popover.svelte";
+	import type { FdcFood } from "$lib/utils/types";
+	import {
+		SERVING_MEASURE_OPTIONS,
+		type ServingMeasureUnit,
+	} from "../../defaults/servingMeasureDefaults";
 
-	interface Props {
-		ingredient: Ingredient;
-		onRemove: (fdcId: number) => void;
-		onUpdateGrams: (fdcId: number, grams: number) => void;
+	type NutrientChip = {
+		label: string;
+		value: string;
+	};
+
+	let {
+		food,
+		sourceLabel,
+		quantity,
+		unit,
+		gramsLabel,
+		warning = null,
+		nutrientChips = [],
+		onRemove,
+		onServingChange,
+	}: {
+		food: FdcFood;
+		sourceLabel: string;
+		quantity: number;
+		unit: ServingMeasureUnit;
+		gramsLabel: string;
+		warning?: string | null;
+		nutrientChips?: NutrientChip[];
+		onRemove: (foodId: number) => void;
+		onServingChange: (
+			food: FdcFood,
+			quantityValue: string,
+			unit: ServingMeasureUnit,
+		) => void;
+	} = $props();
+</script>
+
+<article class="ingredient-card">
+	<header class="ingredient-card__header">
+		<div>
+			<span class="ingredient-card__source">{sourceLabel}</span>
+			<h5>{food.description}</h5>
+		</div>
+		<button
+			class="ingredient-card__remove"
+			type="button"
+			aria-label={`Remove ${food.description}`}
+			onclick={() => onRemove(food.fdcId)}
+		>
+			×
+		</button>
+	</header>
+
+	<div class="ingredient-card__controls">
+		<label>
+			<span>Amount</span>
+			<input
+				type="number"
+				min="0"
+				step="any"
+				value={quantity}
+				aria-label={`Quantity for ${food.description}`}
+				oninput={(event) =>
+					onServingChange(food, event.currentTarget.value, unit)}
+			/>
+		</label>
+		<label>
+			<span>Unit</span>
+			<select
+				value={unit}
+				aria-label={`Measure for ${food.description}`}
+				onchange={(event) =>
+					onServingChange(
+						food,
+						String(quantity),
+						event.currentTarget.value as ServingMeasureUnit,
+					)}
+			>
+				{#each SERVING_MEASURE_OPTIONS as option}
+					<option value={option.value}>{option.label}</option>
+				{/each}
+			</select>
+		</label>
+	</div>
+
+	<div class="ingredient-card__meta">
+		<span class="ingredient-card__grams">Converted <strong>{gramsLabel}</strong></span>
+		{#if warning}
+			<Popover buttonLabel="⚠️ Estimate" title="Volume conversion estimate">
+				<p>{warning}</p>
+			</Popover>
+		{/if}
+	</div>
+
+	{#if nutrientChips.length > 0}
+		<div class="ingredient-card__chips" aria-label="Top nutrient contributions">
+			{#each nutrientChips as chip}
+				<span>{chip.label} {chip.value}</span>
+			{/each}
+		</div>
+	{/if}
+</article>
+
+<style lang="scss">
+	@use "../../styles/variables" as *;
+
+	.ingredient-card {
+		position: relative;
+		display: grid;
+		gap: $app-gap-sm;
+		padding: $app-gap-sm;
+		min-width: 0;
+		background: $app-section-bg;
+		border: $app-border;
+		border-radius: $app-card-radius;
+		box-shadow: $app-card-shadow;
 	}
 
-	let { ingredient, onRemove, onUpdateGrams }: Props = $props();
+	.ingredient-card__header {
+		display: flex;
+		justify-content: space-between;
+		gap: $app-gap-sm;
+		align-items: flex-start;
+		min-width: 0;
+		padding-right: 1.85rem;
 
-	const localGrams = $derived(() => ingredient.servingGrams);
+		div {
+			min-width: 0;
+		}
 
-	function handleGramsChange(e: Event) {
-		const val = parseInt((e.target as HTMLInputElement).value, 10);
-		if (!isNaN(val) && val > 0) {
-			onUpdateGrams(ingredient.fdcId, val);
+		h5 {
+			margin: 0.1rem 0 0;
+			color: $app-primary;
+			font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+			font-weight: 800;
+			line-height: 1.25;
+			overflow-wrap: anywhere;
 		}
 	}
 
-	const calories = $derived(
-		getNutrientValue(ingredient, NUTRIENT_IDS.CALORIES),
-	);
-	const protein = $derived(
-		getNutrientValue(ingredient, NUTRIENT_IDS.PROTEIN),
-	);
-</script>
-
-<li class="ingredient-card">
-	<div class="ing-header">
-		<span class="ing-name">{ingredient.name}</span>
-		<button
-			class="remove-btn"
-			aria-label="Remove {ingredient.name}"
-			onclick={() => onRemove(ingredient.fdcId)}
-		>
-			✕
-		</button>
-	</div>
-	<div class="ing-footer">
-		<label class="grams-label">
-			<span>Grams:</span>
-			<input
-				type="number"
-				class="grams-input"
-				min="1"
-				max="1000"
-				value={localGrams}
-				onchange={handleGramsChange}
-			/>
-		</label>
-		<div class="ing-macros">
-			<span>{Math.round(calories)} kcal</span>
-			<span>{protein.toFixed(1)} g protein</span>
-		</div>
-	</div>
-</li>
-
-<style>
-	.ingredient-card {
-		list-style: none;
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		padding: 0.75rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.ingredient-card__source {
+		display: inline-flex;
+		width: fit-content;
+		padding: 0.1rem 0.45rem;
+		color: $app-muted;
+		background: $app-bg;
+		border: $app-border;
+		border-radius: 999px;
+		font-size: 0.68rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
-	.ing-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
-	.ing-name {
-		font-weight: 600;
-		font-size: 0.9rem;
-		line-height: 1.3;
-		flex: 1;
-	}
-
-	.remove-btn {
-		background: transparent;
-		color: var(--color-danger);
-		font-size: 1rem;
-		padding: 0.15rem 0.4rem;
-		border-radius: var(--radius-sm);
+	.ingredient-card__remove {
+		position: absolute;
+		top: 0.45rem;
+		right: 0.45rem;
+		width: 1.85rem;
+		height: 1.85rem;
+		padding: 0;
+		color: $app-primary;
+		background: $app-accent;
+		border-radius: 999px;
+		font-size: 1.2rem;
+		font-weight: 800;
 		line-height: 1;
-		flex-shrink: 0;
+
+		&:hover {
+			background: $app-warning-bg;
+			color: $app-warning-strong;
+		}
 	}
 
-	.remove-btn:hover {
-		background: #fce4e4;
+	.ingredient-card__controls {
+		display: grid;
+		grid-template-columns: minmax(4.25rem, 0.75fr) minmax(0, 1fr);
+		gap: 0.45rem;
+		align-items: end;
+		min-width: 0;
 	}
 
-	.ing-footer {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		flex-wrap: wrap;
+	label {
+		display: grid;
+		gap: 0.18rem;
+		min-width: 0;
+		color: $app-muted;
+		font-size: 0.68rem;
+		font-weight: 800;
 	}
 
-	.grams-label {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
-	}
-
-	.grams-input {
-		width: 70px;
-		padding: 0.25rem 0.4rem;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		text-align: center;
-	}
-
-	.ing-macros {
-		display: flex;
-		gap: 0.6rem;
+	input,
+	select {
+		width: 100%;
+		height: 2rem;
+		min-width: 0;
+		padding: 0 0.45rem;
+		color: $app-primary;
+		background: $app-bg;
+		border: $app-border;
+		border-radius: 7px;
 		font-size: 0.8rem;
-		color: var(--color-text-muted);
+	}
+
+	.ingredient-card__meta {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		min-width: 0;
+	}
+
+	.ingredient-card__grams {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.25rem;
+		width: fit-content;
+		max-width: 100%;
+		padding: 0.16rem 0.45rem;
+		color: $app-muted;
+		background: $app-bg;
+		border: $app-border;
+		border-radius: 999px;
+		font-size: 0.7rem;
+		font-weight: 800;
+	}
+
+	.ingredient-card__grams strong {
+		color: $app-primary;
+		font-size: 0.78rem;
+		white-space: nowrap;
+	}
+
+	.ingredient-card__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+
+		span {
+			max-width: 100%;
+			padding: 0.16rem 0.45rem;
+			color: $app-primary;
+			background: $app-accent;
+			border: 1px solid #b3d3f6;
+			border-radius: 999px;
+			font-size: 0.68rem;
+			font-weight: 800;
+			overflow-wrap: anywhere;
+		}
+	}
+
+	@media (max-width: 520px) {
+		.ingredient-card__controls {
+			grid-template-columns: 1fr 1fr;
+		}
 	}
 </style>
