@@ -642,105 +642,119 @@
     </TextInputDialog>
 
     <section class="mix-panel" aria-labelledby="nutrient-controls-title">
-        <div class="panel-header">
-            <div>
-                <h3 id="nutrient-controls-title">Nutrients</h3>
-                <p>{selectedCount} selected</p>
-            </div>
-            <div class="add-nutrient-controls">
-                <label for="add-nutrient">Add nutrient</label>
-                <select id="add-nutrient" bind:value={addNutrientId}>
-                    <option value="">Select nutrient</option>
-                    {#each ALL_NUTRIENTS.filter((n) => !options.some((opt) => opt.id == n.id)) as n}
-                        <option value={n.id}>{n.label}</option>
-                    {/each}
-                </select>
-                <button
-                    type="button"
-                    onclick={handleAddNutrient}
-                    disabled={!addNutrientId}>Add</button
-                >
-            </div>
-        </div>
-
         <div class="mix-builder">
-            <div class="mix-nutrients" aria-label="Selected nutrients">
-                <CheckboxGroup {options} {selected} onChange={handleChange} />
-            </div>
+            <section class="setup-card setup-card--nutrients">
+                <div class="panel-header">
+                    <div>
+                        <h3 id="nutrient-controls-title">Nutrients</h3>
+                        <p>{selectedCount} selected for the graph</p>
+                    </div>
+                    <div class="add-nutrient-controls">
+                        <label for="add-nutrient">Add nutrient</label>
+                        <select id="add-nutrient" bind:value={addNutrientId}>
+                            <option value="">Select nutrient</option>
+                            {#each ALL_NUTRIENTS.filter((n) => !options.some((opt) => opt.id == n.id)) as n}
+                                <option value={n.id}>{n.label}</option>
+                            {/each}
+                        </select>
+                        <button
+                            type="button"
+                            onclick={handleAddNutrient}
+                            disabled={!addNutrientId}>Add</button
+                        >
+                    </div>
+                </div>
 
-            <div class="goal-grid" aria-label="Nutrient goals">
-                {#each selectedNutrients as nutrient}
-                    <label class="goal-input">
-                        <span>{nutrient.label}</span>
-                        <input
-                            type="number"
-                            min="0"
-                            step="any"
-                            value={nutrientGoals[Number(nutrient.id)] ??
-                                getDefaultGoal(nutrient)}
-                            oninput={(event) =>
-                                updateGoal(
-                                    nutrient.id,
-                                    event.currentTarget.value,
+                <div class="mix-nutrients" aria-label="Selected nutrients">
+                    <CheckboxGroup {options} {selected} onChange={handleChange} />
+                </div>
+            </section>
+
+            <section class="setup-card setup-card--goals">
+                <div class="section-heading">
+                    <h4>Goal Targets</h4>
+                    <p>Set the target amount for each selected nutrient.</p>
+                </div>
+                <div class="goal-grid" aria-label="Nutrient goals">
+                    {#each selectedNutrients as nutrient}
+                        <label class="goal-input">
+                            <span>{nutrient.label}</span>
+                            <input
+                                type="number"
+                                min="0"
+                                step="any"
+                                value={nutrientGoals[Number(nutrient.id)] ??
+                                    getDefaultGoal(nutrient)}
+                                oninput={(event) =>
+                                    updateGoal(
+                                        nutrient.id,
+                                        event.currentTarget.value,
+                                    )}
+                            />
+                            <span class="goal-unit">{nutrient.unit}</span>
+                            <small>
+                                {getNutrientTotal(Number(nutrient.id)).toFixed(1)} /
+                                {nutrientGoals[Number(nutrient.id)] ??
+                                    getDefaultGoal(nutrient)}
+                            </small>
+                        </label>
+                    {/each}
+                </div>
+            </section>
+
+            <section class="setup-card setup-card--ingredients">
+                <div class="section-heading">
+                    <h4>Choose Ingredients</h4>
+                    <p>Select items from your fridge or shopping list.</p>
+                </div>
+                <div class="ingredient-lists" aria-label="Smoothie ingredients">
+                    <section class="ingredient-list">
+                        <h5>Fridge</h5>
+                        {#if fridgeItems.length > 0}
+                            <PillRow
+                                pills={fridgeItems.map((food) => food.description)}
+                                onRemove={(idx) =>
+                                    toggleFood(fridgeItems[idx].fdcId)}
+                                onSelect={(idx) =>
+                                    toggleFood(fridgeItems[idx].fdcId)}
+                                activeIndices={fridgeItems
+                                    .map((food, i) =>
+                                        selectedFoodIds.includes(food.fdcId)
+                                            ? i
+                                            : -1,
+                                    )
+                                    .filter((i) => i !== -1)}
+                            />
+                        {:else}
+                            <p>No fridge items yet.</p>
+                        {/if}
+                    </section>
+
+                    <section class="ingredient-list">
+                        <h5>Shopping List</h5>
+                        {#if shoppingItems.length > 0}
+                            <PillRow
+                                pills={shoppingItems.map(
+                                    (food) => food.description,
                                 )}
-                        />
-                        <span class="goal-unit">{nutrient.unit}</span>
-                        <small>
-                            {getNutrientTotal(Number(nutrient.id)).toFixed(1)} /
-                            {nutrientGoals[Number(nutrient.id)] ??
-                                getDefaultGoal(nutrient)}
-                        </small>
-                    </label>
-                {/each}
-            </div>
-
-            <div class="ingredient-lists" aria-label="Smoothie ingredients">
-                <section class="ingredient-list">
-                    <h4>Fridge</h4>
-                    {#if fridgeItems.length > 0}
-                        <PillRow
-                            pills={fridgeItems.map((food) => food.description)}
-                            onRemove={(idx) =>
-                                toggleFood(fridgeItems[idx].fdcId)}
-                            onSelect={(idx) =>
-                                toggleFood(fridgeItems[idx].fdcId)}
-                            activeIndices={fridgeItems
-                                .map((food, i) =>
-                                    selectedFoodIds.includes(food.fdcId)
-                                        ? i
-                                        : -1,
-                                )
-                                .filter((i) => i !== -1)}
-                        />
-                    {:else}
-                        <p>No fridge items yet.</p>
-                    {/if}
-                </section>
-
-                <section class="ingredient-list">
-                    <h4>Shopping List</h4>
-                    {#if shoppingItems.length > 0}
-                        <PillRow
-                            pills={shoppingItems.map(
-                                (food) => food.description,
-                            )}
-                            onRemove={(idx) =>
-                                toggleFood(shoppingItems[idx].fdcId)}
-                            onSelect={(idx) =>
-                                toggleFood(shoppingItems[idx].fdcId)}
-                            activeIndices={shoppingItems
-                                .map((food, i) =>
-                                    selectedFoodIds.includes(food.fdcId)
-                                        ? i
-                                        : -1,
-                                )
-                                .filter((i) => i !== -1)}
-                        />
-                    {:else}
-                        <p>No shopping list items yet.</p>
-                    {/if}
-                </section>
-            </div>
+                                onRemove={(idx) =>
+                                    toggleFood(shoppingItems[idx].fdcId)}
+                                onSelect={(idx) =>
+                                    toggleFood(shoppingItems[idx].fdcId)}
+                                activeIndices={shoppingItems
+                                    .map((food, i) =>
+                                        selectedFoodIds.includes(food.fdcId)
+                                            ? i
+                                            : -1,
+                                    )
+                                    .filter((i) => i !== -1)}
+                            />
+                        {:else}
+                            <p>No shopping list items yet.</p>
+                        {/if}
+                    </section>
+                </div>
+            </section>
 
             {#if selectedFoods.length > 0}
                 <section
@@ -806,8 +820,8 @@
         display: flex;
         justify-content: space-between;
         gap: $app-gap-md;
-        align-items: start;
-        margin-bottom: $app-gap-sm;
+        align-items: flex-start;
+        margin-bottom: $app-gap-md;
 
         h2 {
             margin-bottom: 0.25rem;
@@ -823,15 +837,16 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-end;
-        gap: 0.4rem;
+        gap: 0.35rem;
+        max-width: 22rem;
 
         button {
             background: $app-btn-bg;
             color: $app-btn-text;
             border-radius: $app-radius;
-            font-size: 0.86rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            padding: 0.42rem 0.75rem;
+            padding: 0.42rem 0.7rem;
 
             &:hover {
                 background: $app-btn-bg-hover;
@@ -917,30 +932,56 @@
     }
 
     .mix-panel {
-        padding: $app-gap-md;
+        padding: $app-gap-sm;
         background: $app-section-bg;
         border: $app-border;
         border-radius: $app-card-radius;
         box-shadow: $app-box-shadow;
     }
 
-    .panel-header {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
-        gap: $app-gap-md;
-        align-items: end;
-        margin-bottom: $app-gap-md;
+    .setup-card {
+        padding: $app-gap-sm;
+        background: $app-bg;
+        border: $app-border;
+        border-radius: $app-card-radius;
+    }
 
-        h3 {
-            margin-bottom: 0.1rem;
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: $app-gap-sm;
+        margin-bottom: $app-gap-sm;
+
+        h4 {
             color: $app-primary;
-            font-size: 1.05rem;
-            font-weight: 600;
+            font-size: 0.92rem;
+            font-weight: 800;
         }
 
         p {
             color: $app-muted;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            line-height: 1.35;
+        }
+    }
+
+    .panel-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+        gap: $app-gap-sm;
+        align-items: end;
+        margin-bottom: $app-gap-sm;
+
+        h3 {
+            margin-bottom: 0.1rem;
+            color: $app-primary;
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        p {
+            color: $app-muted;
+            font-size: 0.8rem;
             font-weight: 600;
         }
     }
@@ -953,7 +994,7 @@
         label {
             grid-column: 1 / -1;
             color: $app-muted;
-            font-size: 0.84rem;
+            font-size: 0.75rem;
             font-weight: 700;
             line-height: 1;
         }
@@ -961,19 +1002,21 @@
         select {
             width: 100%;
             min-width: 0;
-            height: 2.35rem;
-            padding: 0 0.7rem;
+            height: 2.1rem;
+            padding: 0 0.55rem;
             color: $app-primary;
             background: $app-bg;
             border: $app-border;
             border-radius: 8px;
+            font-size: 0.86rem;
         }
 
         button {
-            height: 2.35rem;
-            padding: 0 0.7rem;
+            height: 2.1rem;
+            padding: 0 0.65rem;
             background: $app-btn-bg;
             color: $app-btn-text;
+            font-size: 0.84rem;
 
             &:hover:not(:disabled) {
                 background: $app-btn-bg-hover;
@@ -990,58 +1033,75 @@
         display: grid;
         grid-template-columns: 1fr;
         align-items: stretch;
-        gap: $app-gap-md;
+        gap: $app-gap-sm;
     }
 
     .mix-nutrients {
         display: flex;
         align-content: flex-start;
+
+        :global(.checkbox-group) {
+            gap: 0.35rem;
+        }
+
+        :global(.checkbox-item) {
+            min-height: 1.85rem;
+            padding: 0.3rem 0.55rem;
+            font-size: 0.84rem;
+        }
+
+        :global(input) {
+            width: 0.8rem;
+            height: 0.8rem;
+        }
     }
 
     .goal-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: $app-gap-sm;
+        grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+        gap: 0.45rem;
     }
 
     .goal-input {
         display: grid;
-        grid-template-columns: 1fr minmax(4rem, 5.5rem) auto;
+        grid-template-columns: minmax(0, 1fr) minmax(3.8rem, 4.8rem) auto;
         align-items: center;
-        gap: 0.4rem;
+        gap: 0.35rem;
         min-width: 0;
-        padding: 0.45rem 0.6rem;
-        background: $app-bg;
+        padding: 0.42rem 0.55rem;
+        background: $app-section-bg;
         border: $app-border;
         border-radius: $app-radius;
         color: $app-primary;
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.82rem;
+        font-weight: 800;
 
         span {
             min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         input {
             width: 100%;
             min-width: 0;
-            height: 2rem;
+            height: 1.85rem;
             padding: 0 0.45rem;
             color: $app-primary;
-            background: $app-section-bg;
+            background: $app-bg;
             border: $app-border;
             border-radius: 7px;
+            font-size: 0.86rem;
         }
 
         .goal-unit {
             color: $app-muted;
-            font-size: 0.82rem;
+            font-size: 0.76rem;
         }
 
         small {
             grid-column: 1 / -1;
             color: $app-muted;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-weight: 600;
         }
     }
@@ -1049,26 +1109,52 @@
     .ingredient-lists {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: $app-gap-md;
+        gap: $app-gap-sm;
     }
 
     .ingredient-list {
         min-width: 0;
-        padding: $app-gap-sm;
-        background: $app-bg;
+        max-height: 13rem;
+        overflow-y: auto;
+        padding: 0.45rem;
+        background: $app-section-bg;
         border: $app-border;
         border-radius: $app-card-radius;
 
-        h4 {
-            margin-bottom: $app-gap-sm;
+        h5 {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            margin: -0.45rem -0.45rem 0.35rem;
+            padding: 0.45rem;
             color: $app-primary;
-            font-size: 0.95rem;
-            font-weight: 700;
+            background: $app-section-bg;
+            border-bottom: $app-border;
+            font-size: 0.84rem;
+            font-weight: 800;
         }
 
         p {
             color: $app-muted;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+        }
+
+        :global(.pill-row) {
+            gap: 0.3rem;
+            margin: 0;
+        }
+
+        :global(.pill) {
+            max-width: 100%;
+            padding: 0.16rem 0.55rem;
+            font-size: 0.82rem;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        :global(.pill-remove) {
+            flex-shrink: 0;
+            font-size: 1rem;
         }
     }
 

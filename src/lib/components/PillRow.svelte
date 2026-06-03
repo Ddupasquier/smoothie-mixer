@@ -11,15 +11,42 @@
         onSelect?: (idx: number) => void;
         activeIndices?: number[];
     }>();
+
+    type ArrangedPill = {
+        label: string;
+        index: number;
+        active: boolean;
+    };
+
+    function arrangePills(
+        pillLabels: string[],
+        selectedIndices: number[],
+    ): ArrangedPill[] {
+        return pillLabels
+            .map((label, index) => ({
+                label,
+                index,
+                active: selectedIndices.includes(index),
+            }))
+            .sort((a, b) => {
+                if (a.active !== b.active) return a.active ? -1 : 1;
+                if (a.label.length !== b.label.length) {
+                    return a.label.length - b.label.length;
+                }
+                return a.label.localeCompare(b.label);
+            });
+    }
+
+    const arrangedPills = $derived(arrangePills(pills, activeIndices));
 </script>
 
 <div class="pill-row">
-    {#each pills as pill, i}
+    {#each arrangedPills as pill (`${pill.index}-${pill.label}`)}
         <Pill
-            label={pill}
-            onRemove={() => onRemove(i)}
-            onSelect={() => onSelect && onSelect(i)}
-            active={activeIndices.includes(i)}
+            label={pill.label}
+            onRemove={() => onRemove(pill.index)}
+            onSelect={() => onSelect && onSelect(pill.index)}
+            active={pill.active}
         />
     {/each}
 </div>
