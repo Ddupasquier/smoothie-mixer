@@ -10,7 +10,7 @@
 		getFdcNutrientValue,
 		isFdcNutrientMatch,
 	} from "$lib/utils/fdcNutrients";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 	import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 
 	interface Props {
@@ -81,6 +81,21 @@
 		onConfirm: () => void;
 		onCancel: () => void;
 	}>(null);
+	let feedbackMessage = $state("");
+	let feedbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function showFeedback(message: string) {
+		feedbackMessage = message;
+		if (feedbackTimer) clearTimeout(feedbackTimer);
+		feedbackTimer = setTimeout(() => {
+			feedbackMessage = "";
+			feedbackTimer = null;
+		}, 1800);
+	}
+
+	onDestroy(() => {
+		if (feedbackTimer) clearTimeout(feedbackTimer);
+	});
 
 	function handleAddToFridge() {
 		if (!food) return;
@@ -95,6 +110,7 @@
 						food.fdcId,
 					);
 					addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
+					showFeedback("Moved to fridge.");
 					movePrompt = null;
 				},
 				onCancel: () => {
@@ -103,7 +119,8 @@
 			};
 			return;
 		}
-		addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
+		const added = addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
+		showFeedback(added ? "Added to fridge." : "Already in fridge.");
 	}
 
 	function handleAddToShopping() {
@@ -116,6 +133,7 @@
 				onConfirm: () => {
 					removeFoodFromSmoothieList(MIX_STORAGE_KEYS.fridge, food.fdcId);
 					addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
+					showFeedback("Moved to shopping list.");
 					movePrompt = null;
 				},
 				onCancel: () => {
@@ -124,7 +142,8 @@
 			};
 			return;
 		}
-		addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
+		const added = addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
+		showFeedback(added ? "Added to shopping list." : "Already in shopping list.");
 	}
 </script>
 
@@ -179,6 +198,12 @@
 			>Add to Shopping List</button
 		>
 	</div>
+	{#if feedbackMessage}
+		<div class="nf-feedback" role="status" aria-live="polite">
+			<span>✓</span>
+			{feedbackMessage}
+		</div>
+	{/if}
 	{#if movePrompt}
 		<MoveItemPrompt
 			message={movePrompt.message}
@@ -316,6 +341,31 @@
 		gap: 0.7rem;
 		margin: 0.7rem 0 0.2rem 0;
 	}
+	.nf-feedback {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.35rem;
+		min-height: 1.3rem;
+		margin: 0.2rem 0;
+		color: #166534;
+		font-family: Arial, sans-serif;
+		font-size: 0.86rem;
+		font-weight: 800;
+		animation: nf-feedback-pop 0.18s ease-out;
+
+		span {
+			display: inline-grid;
+			place-items: center;
+			width: 1.05rem;
+			height: 1.05rem;
+			color: #fff;
+			background: #16a34a;
+			border-radius: 999px;
+			font-size: 0.72rem;
+			line-height: 1;
+		}
+	}
 	.nf-btn {
 		background: #222;
 		color: #fff;
@@ -333,6 +383,17 @@
 		}
 		&:not(:disabled):hover {
 			background: #444;
+		}
+	}
+
+	@keyframes nf-feedback-pop {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 </style>
