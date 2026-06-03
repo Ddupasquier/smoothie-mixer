@@ -3,8 +3,7 @@
   import { goto } from "$app/navigation";
 
   const tabData = [
-    { label: "Search", slug: "/search" },
-    { label: "Fridge", slug: "/fridge" },
+    { label: "Ingredients", slug: "/fridge" },
     { label: "Mix", slug: "/mix" },
     { label: "Saved", slug: "/saved" },
   ];

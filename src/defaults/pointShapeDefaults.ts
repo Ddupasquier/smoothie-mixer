@@ -1,5 +1,5 @@
 export const POINT_SHAPE_DEFAULTS = {
-	size: 550,
+	size: 450,
 	fillColor: "rgba(0, 255, 8, 1)",
 	strokeColor: "rgba(0, 255, 8, 0.37)",
 	gridColor: "rgba(26, 58, 90, 0.22)",

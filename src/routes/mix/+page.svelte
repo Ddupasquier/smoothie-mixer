@@ -100,6 +100,14 @@
             nutrient.label.replace("Total ", ""),
         ),
     );
+    const nutrientValueLabels = $derived(
+        selectedNutrients.map((nutrient) => {
+            const nutrientId = Number(nutrient.id);
+            const total = getNutrientTotal(nutrientId);
+            const goal = nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient);
+            return `${formatChartNumber(total)}/${formatChartNumber(goal)}${nutrient.unit ?? ""}`;
+        }),
+    );
     const goalValues = $derived(getGoalValues(nutrientChartMetrics));
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
@@ -178,6 +186,14 @@
 
     function getDefaultGoal(nutrient: { id: string | number; unit?: string }) {
         return getDefaultNutrientGoal(nutrient);
+    }
+
+    function formatChartNumber(value: number) {
+        const absoluteValue = Math.abs(value);
+        if (absoluteValue >= 10000) return `${Math.round(value / 1000)}k`;
+        if (absoluteValue >= 1000) return `${(value / 1000).toFixed(1)}k`;
+        if (absoluteValue >= 10) return String(Math.round(value));
+        return value.toFixed(1).replace(/\.0$/, "");
     }
 
     function getNutrientTotal(nutrientId: number) {
@@ -612,6 +628,7 @@
                         values={chartValues}
                         {goalValues}
                         labels={nutrientLabels}
+                        valueLabels={nutrientValueLabels}
                         fillColor={chartColors.fill}
                         strokeColor={chartColors.stroke}
                         size={POINT_SHAPE_DEFAULTS.size}

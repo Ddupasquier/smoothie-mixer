@@ -6,6 +6,7 @@
 		values?: number[];
 		goalValues?: number[];
 		labels?: string[];
+		valueLabels?: string[];
 		size?: number;
 		fillColor?: string;
 		strokeColor?: string;
@@ -22,6 +23,7 @@
 		values = [],
 		goalValues = [],
 		labels = [],
+		valueLabels = [],
 		size = POINT_SHAPE_DEFAULTS.size,
 		fillColor = POINT_SHAPE_DEFAULTS.fillColor,
 		strokeColor = POINT_SHAPE_DEFAULTS.strokeColor,
@@ -86,6 +88,12 @@
 			label: pointAt(index, 1, labelRadius),
 		})),
 	);
+
+	function getTextAnchor(x: number) {
+		if (x < center - 4) return "end";
+		if (x > center + 4) return "start";
+		return "middle";
+	}
 	const goalPoints = $derived(
 		Array.from({ length: axisCount }, (_value, index) => pointAt(index)),
 	);
@@ -253,14 +261,19 @@
 				class="point-shape__label"
 				x={axis.label[0]}
 				y={axis.label[1]}
-				text-anchor={axis.label[0] < center - 4
-					? "end"
-					: axis.label[0] > center + 4
-						? "start"
-						: "middle"}
+				text-anchor={getTextAnchor(axis.label[0])}
 				dominant-baseline="middle"
 			>
-				{labels[index] ?? ""}
+				<tspan x={axis.label[0]}>{labels[index] ?? ""}</tspan>
+				{#if valueLabels[index]}
+					<tspan
+						class="point-shape__value-label"
+						x={axis.label[0]}
+						dy="1.35em"
+					>
+						{valueLabels[index]}
+					</tspan>
+				{/if}
 			</text>
 		{/each}
 	{/if}
@@ -281,6 +294,13 @@
 		fill: #1a3a5a;
 		font-size: 0.72rem;
 		font-weight: 700;
+	}
+
+	.point-shape__value-label {
+		fill: rgba(26, 58, 90, 0.72);
+		font-size: 0.54rem;
+		font-weight: 800;
+		letter-spacing: 0.01em;
 	}
 
 	.point-shape__value-circle {

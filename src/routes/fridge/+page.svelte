@@ -1,4 +1,6 @@
 <script lang="ts">
+    import IngredientSearch from "$lib/components/IngredientSearch.svelte";
+    import NutritionPanel from "$lib/components/NutritionPanel.svelte";
     import PillRow from "$lib/components/PillRow.svelte";
     import type { FdcFood } from "$lib/utils/types";
     import {
@@ -12,10 +14,15 @@
 
     let onHand = $state<FdcFood[]>([]);
     let shoppingList = $state<FdcFood[]>([]);
+    let selectedFood = $state<FdcFood | null>(null);
 
     function loadLists() {
         onHand = readSmoothieList(MIX_STORAGE_KEYS.fridge);
         shoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
+    }
+
+    function handleSelect(food: FdcFood) {
+        selectedFood = food;
     }
 
     function removeFromLocalStorageByIndex(key: SmoothieListKey, idx: number) {
@@ -40,41 +47,124 @@
 
 </script>
 
-<section class="fridge-section">
-    <h3>On Hand</h3>
-    <div class="fridge-container" aria-label="On Hand ingredients">
-        {#if onHand.length > 0}
-            <PillRow
-                pills={onHand.map((item) => item.description)}
-                onRemove={(idx) =>
-                    removeFromLocalStorageByIndex(MIX_STORAGE_KEYS.fridge, idx)}
-            />
-        {:else}
-            <p class="placeholder">No ingredients on hand yet.</p>
-        {/if}
-    </div>
-</section>
+<div class="ingredients-page">
+    <header class="ingredients-header">
+        <div>
+            <h2>Ingredients</h2>
+            <p>Search foods, add them to your fridge, and track shopping needs.</p>
+        </div>
+    </header>
 
-<section class="fridge-section">
-    <h3>Shopping List</h3>
-    <div class="fridge-container" aria-label="Shopping List ingredients">
-        {#if shoppingList.length > 0}
-            <PillRow
-                pills={shoppingList.map((item) => item.description)}
-                onRemove={(idx) =>
-                    removeFromLocalStorageByIndex(
-                        MIX_STORAGE_KEYS.shoppingList,
-                        idx,
-                    )}
-            />
-        {:else}
-            <p class="placeholder">No items in shopping list yet.</p>
+    <section class="ingredient-search-panel" aria-labelledby="ingredient-search-title">
+        <div class="section-heading">
+            <h3 id="ingredient-search-title">Find Ingredients</h3>
+            <p>Pick a result to preview nutrition and add it to a list.</p>
+        </div>
+        <IngredientSearch onSelect={handleSelect} />
+        {#if selectedFood}
+            <div class="nutrition-preview">
+                <NutritionPanel food={selectedFood} />
+            </div>
         {/if}
+    </section>
+
+    <div class="ingredient-lists-grid">
+        <section class="fridge-section">
+            <h3>On Hand</h3>
+            <div class="fridge-container" aria-label="On Hand ingredients">
+                {#if onHand.length > 0}
+                    <PillRow
+                        pills={onHand.map((item) => item.description)}
+                        onRemove={(idx) =>
+                            removeFromLocalStorageByIndex(
+                                MIX_STORAGE_KEYS.fridge,
+                                idx,
+                            )}
+                    />
+                {:else}
+                    <p class="placeholder">No ingredients on hand yet.</p>
+                {/if}
+            </div>
+        </section>
+
+        <section class="fridge-section">
+            <h3>Shopping List</h3>
+            <div class="fridge-container" aria-label="Shopping List ingredients">
+                {#if shoppingList.length > 0}
+                    <PillRow
+                        pills={shoppingList.map((item) => item.description)}
+                        onRemove={(idx) =>
+                            removeFromLocalStorageByIndex(
+                                MIX_STORAGE_KEYS.shoppingList,
+                                idx,
+                            )}
+                    />
+                {:else}
+                    <p class="placeholder">No items in shopping list yet.</p>
+                {/if}
+            </div>
+        </section>
     </div>
-</section>
+</div>
 
 <style lang="scss">
     @use "../../styles/variables" as *;
+
+    .ingredients-page {
+        max-width: $app-max-width;
+        margin: 0 auto;
+        padding: $app-padding 0;
+        box-sizing: border-box;
+    }
+
+    .ingredients-header {
+        margin-bottom: $app-gap-md;
+
+        h2 {
+            margin-bottom: 0.25rem;
+            color: $app-primary;
+        }
+
+        p {
+            color: $app-muted;
+        }
+    }
+
+    .ingredient-search-panel {
+        padding: $app-gap-md;
+        margin-bottom: $app-gap-lg;
+        background: $app-section-bg;
+        border: $app-border;
+        border-radius: $app-card-radius;
+        box-shadow: $app-box-shadow;
+    }
+
+    .section-heading {
+        margin-bottom: $app-gap-sm;
+
+        h3 {
+            margin-bottom: 0.1rem;
+            color: $app-primary;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        p {
+            color: $app-muted;
+            font-size: 0.9rem;
+        }
+    }
+
+    .nutrition-preview {
+        margin-top: $app-gap-md;
+    }
+
+    .ingredient-lists-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: $app-gap-md;
+    }
+
     .fridge-section {
         margin-bottom: $app-gap-lg;
 
@@ -101,6 +191,16 @@
             color: $app-muted;
             font-size: 0.98em;
             margin: 0.2em 0;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .ingredients-page {
+            padding-top: $app-gap-sm;
+        }
+
+        .ingredient-lists-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
