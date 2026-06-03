@@ -5,10 +5,12 @@
         type NutrientOverage,
     } from "$lib/components/NutrientOverageSummary.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
+    import TextInputDialog from "$lib/components/TextInputDialog.svelte";
     import {
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
     } from "$lib/utils/smoothieLists";
+    import { addSavedDrink } from "$lib/utils/savedDrinks";
     import {
         convertServingAmount,
         convertServingToGrams,
@@ -64,6 +66,7 @@
     let nutrientGoals = $state<Record<number, number>>({
         ...DEFAULT_NUTRIENT_GOALS,
     });
+    let saveDialogOpen = $state(false);
 
     const selectedCount = $derived(selected.length);
     const selectedNutrients = $derived(
@@ -106,6 +109,31 @@
             const total = getNutrientTotal(nutrientId);
             const goal = nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient);
             return `${formatChartNumber(total)}/${formatChartNumber(goal)}${nutrient.unit ?? ""}`;
+        }),
+    );
+    const saveGoalDiffs = $derived(
+        selectedNutrients.map((nutrient) => {
+            const nutrientId = Number(nutrient.id);
+            const total = getNutrientTotal(nutrientId);
+            const goal = nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient);
+            const difference = total - goal;
+            const tolerance = Math.max(goal * 0.05, 0.05);
+            const status =
+                Math.abs(difference) <= tolerance
+                    ? "near"
+                    : difference > 0
+                      ? "over"
+                      : "under";
+
+            return {
+                label: nutrient.label,
+                unit: nutrient.unit ?? "",
+                total,
+                goal,
+                difference,
+                percentOfGoal: goal > 0 ? (total / goal) * 100 : 0,
+                status,
+            };
         }),
     );
     const goalValues = $derived(getGoalValues(nutrientChartMetrics));
@@ -194,6 +222,12 @@
         if (absoluteValue >= 1000) return `${(value / 1000).toFixed(1)}k`;
         if (absoluteValue >= 10) return String(Math.round(value));
         return value.toFixed(1).replace(/\.0$/, "");
+    }
+
+    function formatSignedChartNumber(value: number) {
+        if (Math.abs(value) < 0.05) return "0";
+        const sign = value > 0 ? "+" : "-";
+        return `${sign}${formatChartNumber(Math.abs(value))}`;
     }
 
     function getNutrientTotal(nutrientId: number) {
@@ -387,6 +421,20 @@
         saveMixState();
     }
 
+    function saveCurrentDrink(name: string) {
+        addSavedDrink({
+            name,
+            foods: selectedFoods,
+            selected,
+            options,
+            nutrientGoals,
+            servingGrams,
+            servingQuantities,
+            servingUnits,
+        });
+        saveDialogOpen = false;
+    }
+
     function handleChange(next: (string | number)[]) {
         selected = next;
         saveMixState();
@@ -540,6 +588,11 @@
             <p>Build your smoothie here.</p>
         </div>
         <div class="reset-actions" aria-label="Mix reset actions">
+            <button
+                type="button"
+                onclick={() => (saveDialogOpen = true)}
+                disabled={selectedFoods.length === 0}>Save</button
+            >
             <button type="button" onclick={resetGoals}>Reset Goals</button>
             <button type="button" onclick={clearIngredients}
                 >Clear Ingredients</button
@@ -547,6 +600,46 @@
             <button type="button" onclick={resetMix}>Reset All</button>
         </div>
     </header>
+
+    <TextInputDialog
+        open={saveDialogOpen}
+        title="Review & Save Drink"
+        description="Before saving, confirm these totals are close enough to your goals."
+        label="Drink name"
+        placeholder="Post-workout, Low sugar, High fiber…"
+        confirmLabel="Save Anyway"
+        cancelLabel="Cancel"
+        onConfirm={saveCurrentDrink}
+        onCancel={() => (saveDialogOpen = false)}
+    >
+        <div class="save-goal-review">
+            <p>
+                Current ingredients compared with your selected nutrient goals:
+            </p>
+            <div class="save-goal-review__list">
+                {#each saveGoalDiffs as diff}
+                    <div class="save-goal-review__row">
+                        <div>
+                            <strong>{diff.label}</strong>
+                            <span
+                                >Actual {formatChartNumber(diff.total)}{diff.unit}
+                                · Goal {formatChartNumber(diff.goal)}{diff.unit}
+                                · {Math.round(diff.percentOfGoal)}%</span
+                            >
+                        </div>
+                        <span class={`save-goal-review__badge ${diff.status}`}>
+                            {diff.status === "near"
+                                ? "Near goal"
+                                : diff.status === "over"
+                                  ? "Over"
+                                  : "Under"}
+                            {formatSignedChartNumber(diff.difference)}{diff.unit}
+                        </span>
+                    </div>
+                {/each}
+            </div>
+        </div>
+    </TextInputDialog>
 
     <section class="mix-panel" aria-labelledby="nutrient-controls-title">
         <div class="panel-header">
@@ -743,6 +836,83 @@
             &:hover {
                 background: $app-btn-bg-hover;
             }
+
+            &:disabled {
+                cursor: not-allowed;
+                background: $app-btn-disabled;
+            }
+        }
+    }
+
+    .save-goal-review {
+        display: grid;
+        gap: $app-gap-sm;
+
+        > p {
+            color: $app-muted;
+            font-size: 0.86rem;
+            line-height: 1.4;
+        }
+    }
+
+    .save-goal-review__list {
+        display: grid;
+        gap: 0.4rem;
+        max-height: 16rem;
+        overflow-y: auto;
+        padding-right: 0.15rem;
+    }
+
+    .save-goal-review__row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0.6rem;
+        background: $app-bg;
+        border: $app-border;
+        border-radius: $app-radius;
+
+        div {
+            display: grid;
+            gap: 0.1rem;
+            min-width: 0;
+        }
+
+        strong {
+            color: $app-primary;
+            font-size: 0.86rem;
+        }
+
+        span {
+            color: $app-muted;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+    }
+
+    .save-goal-review__badge {
+        justify-self: end;
+        width: fit-content;
+        max-width: 8rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        text-align: right;
+        white-space: nowrap;
+
+        &.near {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        &.under {
+            color: $app-primary;
+            background: $app-accent;
+        }
+
+        &.over {
+            color: $app-warning-text;
+            background: $app-warning-bg;
         }
     }
 
