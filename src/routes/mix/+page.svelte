@@ -32,6 +32,7 @@
     import {
         DEFAULT_NUTRIENT_GOALS,
         DEFAULT_SERVING_GRAMS,
+        GOAL_TEMPLATES,
         MIX_STORAGE_KEYS,
     } from "../../defaults/mixDefaults";
     import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
@@ -67,6 +68,7 @@
         ...DEFAULT_NUTRIENT_GOALS,
     });
     let saveDialogOpen = $state(false);
+    let selectedGoalTemplateId = $state("");
 
     const selectedCount = $derived(selected.length);
     const selectedNutrients = $derived(
@@ -400,6 +402,7 @@
 
     function resetGoals() {
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
+        selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
     }
 
@@ -417,6 +420,7 @@
         addNutrientId = "";
         clearIngredients();
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
+        selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
         saveMixState();
     }
@@ -454,6 +458,21 @@
         const nextGoals = {
             ...nutrientGoals,
             [Number(id)]: Math.max(0, Number(value) || 0),
+        };
+        nutrientGoals = nextGoals;
+        saveNutrientGoals(nextGoals);
+        selectedGoalTemplateId = "";
+    }
+
+    function applyGoalTemplate() {
+        const template = GOAL_TEMPLATES.find(
+            (item) => item.id === selectedGoalTemplateId,
+        );
+        if (!template) return;
+
+        const nextGoals = {
+            ...nutrientGoals,
+            ...template.goals,
         };
         nutrientGoals = nextGoals;
         saveNutrientGoals(nextGoals);
@@ -672,8 +691,27 @@
 
             <section class="setup-card setup-card--goals">
                 <div class="section-heading">
-                    <h4>Goal Targets</h4>
-                    <p>Set the target amount for each selected nutrient.</p>
+                    <div>
+                        <h4>Goal Targets</h4>
+                        <p>Set the target amount for each selected nutrient.</p>
+                    </div>
+                    <div class="goal-template-controls">
+                        <label for="goal-template">Template</label>
+                        <select
+                            id="goal-template"
+                            bind:value={selectedGoalTemplateId}
+                        >
+                            <option value="">Choose preset</option>
+                            {#each GOAL_TEMPLATES as template}
+                                <option value={template.id}>{template.label}</option>
+                            {/each}
+                        </select>
+                        <button
+                            type="button"
+                            onclick={applyGoalTemplate}
+                            disabled={!selectedGoalTemplateId}>Apply</button
+                        >
+                    </div>
                 </div>
                 <div class="goal-grid" aria-label="Nutrient goals">
                     {#each selectedNutrients as nutrient}
@@ -949,8 +987,13 @@
     .section-heading {
         display: flex;
         justify-content: space-between;
+        align-items: flex-end;
         gap: $app-gap-sm;
         margin-bottom: $app-gap-sm;
+
+        > div:first-child {
+            min-width: 0;
+        }
 
         h4 {
             color: $app-primary;
@@ -962,6 +1005,51 @@
             color: $app-muted;
             font-size: 0.8rem;
             line-height: 1.35;
+        }
+    }
+
+    .goal-template-controls {
+        display: grid;
+        grid-template-columns: minmax(8.5rem, 1fr) auto;
+        gap: 0.35rem;
+        min-width: min(100%, 15rem);
+
+        label {
+            grid-column: 1 / -1;
+            color: $app-muted;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        select {
+            width: 100%;
+            min-width: 0;
+            height: 2rem;
+            padding: 0 0.5rem;
+            color: $app-primary;
+            background: $app-section-bg;
+            border: $app-border;
+            border-radius: 8px;
+            font-size: 0.82rem;
+        }
+
+        button {
+            height: 2rem;
+            padding: 0 0.6rem;
+            color: $app-btn-text;
+            background: $app-btn-bg;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 800;
+
+            &:hover:not(:disabled) {
+                background: $app-btn-bg-hover;
+            }
+
+            &:disabled {
+                cursor: not-allowed;
+                background: $app-btn-disabled;
+            }
         }
     }
 
@@ -1226,6 +1314,14 @@
 
         .ingredient-lists {
             grid-template-columns: 1fr;
+        }
+
+        .section-heading {
+            display: grid;
+        }
+
+        .goal-template-controls {
+            min-width: 0;
         }
 
         .add-nutrient-controls {

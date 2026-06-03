@@ -23,6 +23,74 @@ export const DEFAULT_NUTRIENT_GOALS: Record<number, number> = {
 	1258: 500,
 };
 
+export const GOAL_TEMPLATES = [
+	{
+		id: "balanced",
+		label: "Balanced",
+		description: "Moderate calories, protein, carbs, fiber, and sugar.",
+		goals: {
+			1008: 350,
+			1004: 15,
+			1005: 60,
+			1079: 10,
+			2000: 25,
+			1003: 25,
+		},
+	},
+	{
+		id: "high-protein",
+		label: "High Protein",
+		description: "Prioritizes protein while keeping sugar moderate.",
+		goals: {
+			1008: 450,
+			1004: 18,
+			1005: 50,
+			1079: 8,
+			2000: 20,
+			1003: 45,
+		},
+	},
+	{
+		id: "low-sugar",
+		label: "Low Sugar",
+		description: "Keeps sugar low while preserving fiber and protein.",
+		goals: {
+			1008: 300,
+			1004: 12,
+			1005: 35,
+			1079: 12,
+			2000: 10,
+			1003: 25,
+		},
+	},
+	{
+		id: "calorie-dense",
+		label: "Calorie Dense",
+		description: "Higher energy target for a more filling drink.",
+		goals: {
+			1008: 650,
+			1004: 30,
+			1005: 85,
+			1079: 10,
+			2000: 35,
+			1003: 35,
+		},
+	},
+	{
+		id: "fiber-focused",
+		label: "Fiber Focused",
+		description: "Raises fiber and keeps sugar controlled.",
+		goals: {
+			1008: 375,
+			1004: 12,
+			1005: 60,
+			1079: 18,
+			2000: 18,
+			1003: 25,
+		},
+	},
+] as const;
+
 export const DEFAULT_GOAL_BY_UNIT = {
 	grams: 20,
 	calories: 350,
