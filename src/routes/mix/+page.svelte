@@ -5,7 +5,12 @@
         type NutrientOverage,
     } from "$lib/components/NutrientOverageSummary.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
+    import SmartWarnings from "$lib/components/SmartWarnings.svelte";
     import TextInputDialog from "$lib/components/TextInputDialog.svelte";
+    import {
+        getNutrientGoalWarnings,
+        type SmartWarning,
+    } from "$lib/utils/smartWarnings";
     import {
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
@@ -148,6 +153,23 @@
             servingGrams,
         ),
     );
+    const smartWarnings = $derived<SmartWarning[]>([
+        ...getNutrientGoalWarnings(
+            selectedNutrients.map((nutrient) => {
+                const nutrientId = Number(nutrient.id);
+                return {
+                    id: nutrient.id,
+                    label: nutrient.label,
+                    unit: nutrient.unit ?? "",
+                    total: getNutrientTotal(nutrientId),
+                    goal:
+                        nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient),
+                };
+            }),
+            { includeUnderTargets: selectedFoods.length > 0 },
+        ),
+        ...getEstimatedVolumeWarnings(),
+    ]);
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
@@ -567,6 +589,43 @@
         return getServingConversion(food).warning;
     }
 
+    function getEstimatedVolumeWarnings(): SmartWarning[] {
+        const estimatedConversions = selectedFoods
+            .map((food) => ({
+                food,
+                conversion: getServingConversion(food),
+            }))
+            .filter(
+                ({ conversion }) =>
+                    conversion.isEstimate && Boolean(conversion.density),
+            );
+
+        if (estimatedConversions.length === 0) return [];
+
+        const maxVariance = Math.max(
+            ...estimatedConversions.map(
+                ({ conversion }) => conversion.density?.variancePercent ?? 0,
+            ),
+        );
+        const labels = estimatedConversions
+            .slice(0, 3)
+            .map(({ food }) => food.description);
+        const extraCount = estimatedConversions.length - labels.length;
+        const labelText = `${labels.join(", ")}${
+            extraCount > 0 ? `, and ${extraCount} more` : ""
+        }`;
+
+        return [
+            {
+                id: "estimated-volume-conversions",
+                tone: maxVariance >= 40 ? "warning" : "info",
+                symbol: "~",
+                title: "Estimated volume conversions",
+                message: `This graph uses estimated volume conversions for ${labelText}. Actual weights may vary up to ±${maxVariance}%. Use grams for the most accurate graph.`,
+            },
+        ];
+    }
+
     function updateServingAmount(
         food: FdcFood,
         quantityValue: string,
@@ -846,6 +905,7 @@
                         fullWidth
                     />
                 </div>
+                <SmartWarnings warnings={smartWarnings} />
                 <IngredientContributionBreakdown
                     breakdowns={contributionBreakdowns}
                 />
@@ -1215,8 +1275,8 @@
     .ingredient-list {
         min-width: 0;
         max-height: 13rem;
-        overflow-y: auto;
-        padding: 0.45rem;
+        overflow: auto;
+        padding: 0;
         background: $app-section-bg;
         border: $app-border;
         border-radius: $app-card-radius;
@@ -1224,8 +1284,8 @@
         h5 {
             position: sticky;
             top: 0;
-            z-index: 1;
-            margin: -0.45rem -0.45rem 0.35rem;
+            z-index: 2;
+            margin: 0 0 0.35rem;
             padding: 0.45rem;
             color: $app-primary;
             background: $app-section-bg;
@@ -1235,6 +1295,7 @@
         }
 
         p {
+            padding: 0 0.45rem 0.45rem;
             color: $app-muted;
             font-size: 0.82rem;
         }
@@ -1242,6 +1303,7 @@
         :global(.pill-row) {
             gap: 0.3rem;
             margin: 0;
+            padding: 0 0.45rem 0.45rem;
         }
 
         :global(.pill) {
