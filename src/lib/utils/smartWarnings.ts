@@ -23,17 +23,17 @@ export type NutrientGoalWarningInput = {
 	goal: number;
 };
 
-function formatAmount(value: number) {
+const formatAmount = (value: number) => {
 	const absoluteValue = Math.abs(value);
 	if (absoluteValue >= 100) return String(Math.round(value));
 	if (absoluteValue >= 10) return value.toFixed(1).replace(/\.0$/, "");
 	return value.toFixed(1).replace(/\.0$/, "");
-}
+};
 
-export function getNutrientGoalWarnings(
+export const getNutrientGoalWarnings = (
 	nutrients: NutrientGoalWarningInput[],
 	{ includeUnderTargets = true } = {},
-): SmartWarning[] {
+): SmartWarning[] => {
 	return nutrients.flatMap((nutrient): SmartWarning[] => {
 		const unit = nutrient.unit ?? "";
 		const goal = Math.max(0, nutrient.goal);
@@ -71,4 +71,4 @@ export function getNutrientGoalWarnings(
 
 		return [];
 	});
-}
+};

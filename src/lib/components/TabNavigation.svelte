@@ -8,13 +8,13 @@
     { label: "Saved", slug: "/saved" },
   ];
 
-  function isActive(slug: string) {
+  const isActive = (slug: string) => {
     return $page.url.pathname === slug;
-  }
+  };
 
-  function selectTab(slug: string) {
+  const selectTab = (slug: string) => {
     goto(slug);
-  }
+  };
 </script>
 
 <nav class="tab-nav" aria-label="Main navigation">

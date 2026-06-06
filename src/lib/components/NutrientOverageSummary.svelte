@@ -18,9 +18,9 @@
 
 	let { overages = [] }: { overages?: NutrientOverage[] } = $props();
 
-	function formatValue(value: number) {
+	const formatValue = (value: number) => {
 		return value >= 10 ? value.toFixed(0) : value.toFixed(1);
-	}
+	};
 </script>
 
 {#if overages.length > 0}

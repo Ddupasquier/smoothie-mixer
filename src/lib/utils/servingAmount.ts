@@ -34,13 +34,13 @@ type WeightServingMeasureUnit = keyof typeof DEFAULT_GRAMS_PER_WEIGHT_MEASURE;
 type VolumeServingMeasureUnit =
 	keyof typeof DEFAULT_MILLILITERS_PER_VOLUME_MEASURE;
 
-function isWeightServingMeasureUnit(
+const isWeightServingMeasureUnit = (
 	unit: ServingMeasureUnit,
-): unit is WeightServingMeasureUnit {
+): unit is WeightServingMeasureUnit => {
 	return unit in DEFAULT_GRAMS_PER_WEIGHT_MEASURE;
-}
+};
 
-function parseQuantity(value: string) {
+const parseQuantity = (value: string) => {
 	const normalized = value.trim();
 	const mixedNumberMatch = normalized.match(/^(\d+)\s+(\d+)\/(\d+)$/);
 	if (mixedNumberMatch) {
@@ -59,21 +59,21 @@ function parseQuantity(value: string) {
 
 	const numericValue = Number(normalized);
 	return Number.isFinite(numericValue) ? numericValue : null;
-}
+};
 
-export function convertServingToGrams(
+export const convertServingToGrams = (
 	quantity: number,
 	unit: ServingMeasureUnit,
 	food?: FdcFood,
-) {
+) => {
 	return convertServingAmount(quantity, unit, food).grams;
-}
+};
 
-export function convertServingAmount(
+export const convertServingAmount = (
 	quantity: number,
 	unit: ServingMeasureUnit,
 	food?: FdcFood,
-): ServingConversion {
+): ServingConversion => {
 	const safeQuantity = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
 	if (isWeightServingMeasureUnit(unit)) {
 		return {
@@ -109,15 +109,15 @@ export function convertServingAmount(
 		range,
 		warning: getVolumeWarning(density, range),
 	};
-}
+};
 
-export function getServingMeasureDimension(
+export const getServingMeasureDimension = (
 	unit: ServingMeasureUnit,
-): ServingMeasureDimension {
+): ServingMeasureDimension => {
 	return isWeightServingMeasureUnit(unit) ? "weight" : "volume";
-}
+};
 
-export function getDensityEstimate(food?: FdcFood): DensityEstimate {
+export const getDensityEstimate = (food?: FdcFood): DensityEstimate => {
 	const text = `${food?.description ?? ""} ${food?.foodCategory ?? ""}`.toLowerCase();
 
 	if (/\boil\b|olive oil|sunflower oil|canola oil|avocado oil/.test(text)) {
@@ -216,12 +216,12 @@ export function getDensityEstimate(food?: FdcFood): DensityEstimate {
 		variancePercent: 50,
 		confidence: "rough",
 	};
-}
+};
 
-function getVolumeWarning(
+const getVolumeWarning = (
 	density: DensityEstimate,
 	range: { minGrams: number; maxGrams: number },
-) {
+) => {
 	const rangeText = `${range.minGrams.toFixed(1)}–${range.maxGrams.toFixed(1)}g`;
 	const prefix =
 		density.confidence === "known"
@@ -231,9 +231,9 @@ function getVolumeWarning(
 				: "Volume conversion is a rough estimate using a";
 
 	return `${prefix} ${density.label} density. Actual weight may vary about ±${density.variancePercent}% (${rangeText}). Use grams for the most accurate result.`;
-}
+};
 
-export function parseServingAmount(input: string): ParsedServingAmount | null {
+export const parseServingAmount = (input: string): ParsedServingAmount | null => {
 	const normalized = input.trim().toLowerCase();
 	if (!normalized) return null;
 
@@ -253,4 +253,4 @@ export function parseServingAmount(input: string): ParsedServingAmount | null {
 		quantity,
 		unit,
 	};
-}
+};

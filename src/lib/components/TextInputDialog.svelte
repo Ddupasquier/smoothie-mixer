@@ -37,9 +37,9 @@
 		wasOpen = open;
 	});
 
-	function confirm() {
+	const confirm = () => {
 		onConfirm(value);
-	}
+	};
 </script>
 
 {#if open}

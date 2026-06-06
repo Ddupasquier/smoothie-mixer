@@ -48,11 +48,11 @@
 	);
 	const hasData = $derived(normalizedPoints > 0);
 
-	function pointAt(
+	const pointAt = (
 		index: number,
 		scale = 1,
 		radius = chartRadius,
-	): [number, number] {
+	): [number, number] => {
 		if (axisCount === 1) {
 			return [center, center - radius * scale];
 		}
@@ -67,13 +67,13 @@
 			center + radius * scale * Math.cos(angle),
 			center + radius * scale * Math.sin(angle),
 		];
-	}
+	};
 
-	function pointsToString(pointsList: [number, number][]) {
+	const pointsToString = (pointsList: [number, number][]) => {
 		return pointsList
 			.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
 			.join(" ");
-	}
+	};
 
 	const rings = $derived(
 		Array.from({ length: ringCount }, (_, index) =>
@@ -89,11 +89,11 @@
 		})),
 	);
 
-	function getTextAnchor(x: number) {
+	const getTextAnchor = (x: number) => {
 		if (x < center - 4) return "end";
 		if (x > center + 4) return "start";
 		return "middle";
-	}
+	};
 	const goalPoints = $derived(
 		Array.from({ length: axisCount }, (_value, index) => pointAt(index)),
 	);

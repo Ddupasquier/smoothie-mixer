@@ -65,16 +65,16 @@ if (!API_KEY || API_KEY === "your_api_key_here") {
 const queries = process.argv.slice(2);
 const auditQueries = queries.length > 0 ? queries : DEFAULT_QUERIES;
 
-function buildSearchUrl(query) {
+const buildSearchUrl = (query) => {
 	const url = new URL(`${BASE_URL}/foods/search`);
 	url.searchParams.set("api_key", API_KEY);
 	url.searchParams.set("query", query);
 	url.searchParams.set("pageSize", "1");
 	url.searchParams.set("dataType", "Foundation,SR Legacy,Branded");
 	return url;
-}
+};
 
-async function searchTopFood(query) {
+const searchTopFood = async (query) => {
 	const response = await fetch(buildSearchUrl(query));
 
 	if (!response.ok) {
@@ -89,15 +89,15 @@ async function searchTopFood(query) {
 		totalHits: data.totalHits ?? 0,
 		food: data.foods?.[0] ?? null,
 	};
-}
+};
 
-function findExact(food, nutrientId) {
+const findExact = (food, nutrientId) => {
 	return food.foodNutrients?.find(
 		(nutrient) => Number(nutrient.nutrientId) === nutrientId,
 	);
-}
+};
 
-function findFallback(food, nutrientId) {
+const findFallback = (food, nutrientId) => {
 	const fallbackIds = FALLBACK_NUTRIENT_IDS[nutrientId] ?? [];
 	const fallbackNumbers = FALLBACK_NUTRIENT_NUMBERS[nutrientId] ?? [];
 
@@ -105,9 +105,9 @@ function findFallback(food, nutrientId) {
 		if (fallbackIds.includes(Number(nutrient.nutrientId))) return true;
 		return fallbackNumbers.includes(String(nutrient.nutrientNumber));
 	});
-}
+};
 
-function findResolved(food, nutrientId) {
+const findResolved = (food, nutrientId) => {
 	const exact = findExact(food, nutrientId);
 	if (exact) return { nutrient: exact, source: "exact" };
 
@@ -130,35 +130,35 @@ function findResolved(food, nutrientId) {
 	}
 
 	return { nutrient: null, source: "missing" };
-}
+};
 
-function deriveCalories(food) {
+const deriveCalories = (food) => {
 	const fat = findResolvedWithoutDerivation(food, 1004)?.value ?? 0;
 	const carbs = findResolvedWithoutDerivation(food, 1005)?.value ?? 0;
 	const protein = findResolvedWithoutDerivation(food, 1003)?.value ?? 0;
 	return fat * 9 + carbs * 4 + protein * 4;
-}
+};
 
-function findResolvedWithoutDerivation(food, nutrientId) {
+const findResolvedWithoutDerivation = (food, nutrientId) => {
 	return findExact(food, nutrientId) ?? findFallback(food, nutrientId) ?? null;
-}
+};
 
-function formatValue(nutrient, fallbackUnit) {
+const formatValue = (nutrient, fallbackUnit) => {
 	if (!nutrient) return "—";
 
 	const value = Number(nutrient.value);
 	const formattedValue = Number.isFinite(value) ? value.toFixed(2) : "—";
 	return `${formattedValue} ${nutrient.unitName ?? fallbackUnit}`.trim();
-}
+};
 
-function sourceMarker(source) {
+const sourceMarker = (source) => {
 	if (source === "exact") return "exact";
 	if (source === "fallback") return "fallback";
 	if (source === "derived") return "derived";
 	return "MISSING";
-}
+};
 
-function auditFood(result) {
+const auditFood = (result) => {
 	if (!result.food) {
 		return {
 			query: result.query,
@@ -192,9 +192,9 @@ function auditFood(result) {
 		missingCount,
 		vitals,
 	};
-}
+};
 
-function printAudit(audits) {
+const printAudit = (audits) => {
 	console.table(
 		audits.map((audit) => ({
 			query: audit.query,
@@ -221,7 +221,7 @@ function printAudit(audits) {
 			})),
 		);
 	}
-}
+};
 
 try {
 	const results = await Promise.all(auditQueries.map(searchTopFood));

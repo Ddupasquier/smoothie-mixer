@@ -21,10 +21,28 @@
         parseServingAmount,
     } from "$lib/utils/servingAmount";
     import {
+        formatChartNumber,
+        formatSignedChartNumber,
+        getDefaultNutrientOptions,
+        getDefaultServingAmount,
+        getEstimatedVolumeWarnings,
+        getFoodNutrientChips,
+        getFoodSourceLabel,
+        getNutrientMeta,
+        getServingGramsLabel,
+        mergeNutrientOptions,
+        normalizeNutrientOptions,
+        normalizeServingUnit,
+        optionsFromSelectedNutrientIds,
+        readNutrientGoalsFromStorage,
+        type NutrientOption,
+        type SavedMixState,
+        withOverageDetails,
+    } from "$lib/utils/mixUi";
+    import {
         getChartColors,
         getChartValues,
         getDefaultNutrientGoal,
-        getFoodNutrientAmount,
         getGoalValues,
         getNutrientContributionBreakdowns,
         getNutrientChartMetrics,
@@ -41,27 +59,13 @@
         MIX_STORAGE_KEYS,
     } from "../../defaults/mixDefaults";
     import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
-    import {
-        SERVING_MEASURE_ALIASES,
-        type ServingMeasureUnit,
-    } from "../../defaults/servingMeasureDefaults";
+    import type { ServingMeasureUnit } from "../../defaults/servingMeasureDefaults";
     import { vitalNutrients } from "../../variables/vitalNutrients";
     import { ALL_NUTRIENTS } from "../../variables/allNutrients";
     import PillRow from "$lib/components/PillRow.svelte";
 
-    type NutrientOption = { id: string | number; label: string };
-    type SavedMixState = {
-        selected?: (string | number)[];
-        options?: NutrientOption[];
-        selectedFoodIds?: number[];
-        servingGrams?: Record<string, number>;
-        servingInputs?: Record<string, string>;
-        servingQuantities?: Record<string, number>;
-        servingUnits?: Record<string, ServingMeasureUnit>;
-    };
-
     let selected = $state<(string | number)[]>(vitalNutrients.map((n) => n.id));
-    let options = $state<NutrientOption[]>(getDefaultOptions());
+    let options = $state<NutrientOption[]>(getDefaultNutrientOptions());
     let addNutrientId = $state<string | number>("");
     let fridgeItems = $state<FdcFood[]>([]);
     let shoppingItems = $state<FdcFood[]>([]);
@@ -75,10 +79,29 @@
     let saveDialogOpen = $state(false);
     let selectedGoalTemplateId = $state("");
 
+    const getServingQuantity = (food: FdcFood) => {
+        return servingQuantities[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
+    };
+
+    const getServingUnit = (food: FdcFood) => {
+        return normalizeServingUnit(servingUnits[food.fdcId]) ?? "g";
+    };
+
+    const getServingConversion = (food: FdcFood) => {
+        return convertServingAmount(
+            getServingQuantity(food),
+            getServingUnit(food),
+            food,
+        );
+    };
+
     const selectedCount = $derived(selected.length);
     const selectedNutrients = $derived(
         selected.flatMap((id) => {
-            const nutrient = getNutrientMeta(id);
+            const nutrient = getNutrientMeta(id, [
+                vitalNutrients,
+                ALL_NUTRIENTS,
+            ]);
             return nutrient ? [nutrient] : [];
         }),
     );
@@ -107,14 +130,15 @@
     const chartValues = $derived(getChartValues(nutrientChartMetrics));
     const nutrientLabels = $derived(
         selectedNutrients.map((nutrient) =>
-            nutrient.label.replace("Total ", ""),
+            (nutrient.label ?? String(nutrient.id)).replace("Total ", ""),
         ),
     );
     const nutrientValueLabels = $derived(
         selectedNutrients.map((nutrient) => {
             const nutrientId = Number(nutrient.id);
             const total = getNutrientTotal(nutrientId);
-            const goal = nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient);
+            const goal =
+                nutrientGoals[nutrientId] ?? getDefaultNutrientGoal(nutrient);
             return `${formatChartNumber(total)}/${formatChartNumber(goal)}${nutrient.unit ?? ""}`;
         }),
     );
@@ -122,7 +146,8 @@
         selectedNutrients.map((nutrient) => {
             const nutrientId = Number(nutrient.id);
             const total = getNutrientTotal(nutrientId);
-            const goal = nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient);
+            const goal =
+                nutrientGoals[nutrientId] ?? getDefaultNutrientGoal(nutrient);
             const difference = total - goal;
             const tolerance = Math.max(goal * 0.05, 0.05);
             const status =
@@ -133,7 +158,7 @@
                       : "under";
 
             return {
-                label: nutrient.label,
+                label: nutrient.label ?? String(nutrient.id),
                 unit: nutrient.unit ?? "",
                 total,
                 goal,
@@ -154,7 +179,8 @@
     const nutrientOverages = $derived(
         selectedNutrients.flatMap((nutrient) => {
             const goal =
-                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
+                nutrientGoals[Number(nutrient.id)] ||
+                getDefaultNutrientGoal(nutrient);
             const nutrientId = Number(nutrient.id);
             const total = getNutrientTotal(nutrientId);
             if (goal <= 0 || total <= goal) return [];
@@ -162,8 +188,8 @@
             return [
                 {
                     nutrientId,
-                    label: nutrient.label,
-                    unit: nutrient.unit,
+                    label: nutrient.label ?? String(nutrient.id),
+                    unit: nutrient.unit ?? "",
                     total,
                     goal,
                     overage: total - goal,
@@ -178,158 +204,55 @@
                 const nutrientId = Number(nutrient.id);
                 return {
                     id: nutrient.id,
-                    label: nutrient.label,
+                    label: nutrient.label ?? String(nutrient.id),
                     unit: nutrient.unit ?? "",
                     total: getNutrientTotal(nutrientId),
                     goal:
-                        nutrientGoals[nutrientId] ?? getDefaultGoal(nutrient),
+                        nutrientGoals[nutrientId] ??
+                        getDefaultNutrientGoal(nutrient),
                 };
             }),
             { includeUnderTargets: selectedFoods.length > 0 },
-        ).map((warning) => withOverageDetails(warning)),
-        ...getEstimatedVolumeWarnings(),
+        ).map((warning) => withOverageDetails(warning, nutrientOverages)),
+        ...getEstimatedVolumeWarnings(selectedFoods, getServingConversion),
     ]);
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
     const chartColors = $derived(getChartColors(maxNutrientProgress));
 
-    function getNutrientMeta(id: string | number) {
-        return [...vitalNutrients, ...ALL_NUTRIENTS].find(
-            (nutrient) => nutrient.id == id,
-        );
-    }
-
-    function getDefaultOptions() {
-        return vitalNutrients.map((nutrient) => ({
-            id: nutrient.id,
-            label: nutrient.label,
-        }));
-    }
-
-    function mergeOptions(...optionLists: NutrientOption[][]) {
-        const seen = new Set<string>();
-        return optionLists.flat().filter((option) => {
-            const key = String(option.id);
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-    }
-
-    function normalizeOptions(value: unknown): NutrientOption[] {
-        if (!Array.isArray(value)) return [];
-
-        return value.flatMap((option) => {
-            if (
-                option &&
-                typeof option === "object" &&
-                "id" in option &&
-                "label" in option &&
-                (typeof option.id === "string" ||
-                    typeof option.id === "number") &&
-                typeof option.label === "string"
-            ) {
-                return [{ id: option.id, label: option.label }];
-            }
-
-            return [];
-        });
-    }
-
-    function optionsFromSelectedIds(selectedIds: (string | number)[]) {
-        return selectedIds.flatMap((id) => {
-            const nutrient = getNutrientMeta(id);
-            return nutrient ? [{ id: nutrient.id, label: nutrient.label }] : [];
-        });
-    }
-
-    function getDefaultGoal(nutrient: { id: string | number; unit?: string }) {
-        return getDefaultNutrientGoal(nutrient);
-    }
-
-    function formatChartNumber(value: number) {
-        const absoluteValue = Math.abs(value);
-        if (absoluteValue >= 10000) return `${Math.round(value / 1000)}k`;
-        if (absoluteValue >= 1000) return `${(value / 1000).toFixed(1)}k`;
-        if (absoluteValue >= 10) return String(Math.round(value));
-        return value.toFixed(1).replace(/\.0$/, "");
-    }
-
-    function formatSignedChartNumber(value: number) {
-        if (Math.abs(value) < 0.05) return "0";
-        const sign = value > 0 ? "+" : "-";
-        return `${sign}${formatChartNumber(Math.abs(value))}`;
-    }
-
-    function getNutrientTotal(nutrientId: number) {
+    const getNutrientTotal = (nutrientId: number) => {
         return calculateNutrientTotal(selectedFoods, nutrientId, servingGrams);
-    }
+    };
 
-    function getNutrientContributors(nutrientId: number) {
+    const getNutrientContributors = (nutrientId: number) => {
         return calculateNutrientContributors(
             selectedFoods,
             nutrientId,
             servingGrams,
         );
-    }
+    };
 
-    function getFoodSourceLabel(food: FdcFood) {
-        if (fridgeItems.some((item) => item.fdcId === food.fdcId)) {
-            return "Fridge";
-        }
-
-        return "Shopping";
-    }
-
-    function getFoodNutrientChips(food: FdcFood) {
-        return selectedNutrients
-            .map((nutrient) => ({
-                label: nutrient.label.replace("Total ", ""),
-                amount: getFoodNutrientAmount(
-                    food,
-                    Number(nutrient.id),
-                    servingGrams,
-                ),
-                unit: nutrient.unit ?? "",
-            }))
-            .filter((chip) => chip.amount > 0)
-            .sort((a, b) => b.amount - a.amount)
-            .slice(0, 3)
-            .map((chip) => ({
-                label: chip.label,
-                value: `+${formatChartNumber(chip.amount)}${chip.unit}`,
-            }));
-    }
-
-    function loadIngredientLists() {
+    const loadIngredientLists = () => {
         fridgeItems = readSmoothieList(MIX_STORAGE_KEYS.fridge);
         shoppingItems = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
-    }
+    };
 
-    function loadNutrientGoals() {
-        try {
-            const rawGoals = localStorage.getItem(
-                MIX_STORAGE_KEYS.nutrientGoals,
-            );
-            const savedGoals = rawGoals ? JSON.parse(rawGoals) : {};
-            nutrientGoals = {
-                ...DEFAULT_NUTRIENT_GOALS,
-                ...savedGoals,
-            };
-        } catch {
-            nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
-        }
-    }
+    const loadNutrientGoals = () => {
+        nutrientGoals = {
+            ...DEFAULT_NUTRIENT_GOALS,
+            ...readNutrientGoalsFromStorage(),
+        };
+    };
 
-    function saveNutrientGoals(nextGoals: Record<number, number>) {
+    const saveNutrientGoals = (nextGoals: Record<number, number>) => {
         localStorage.setItem(
             MIX_STORAGE_KEYS.nutrientGoals,
             JSON.stringify(nextGoals),
         );
-    }
+    };
 
-    function loadMixState() {
+    const loadMixState = () => {
         try {
             const rawState = localStorage.getItem(MIX_STORAGE_KEYS.mixState);
             if (!rawState) return;
@@ -338,13 +261,16 @@
             const savedSelected = Array.isArray(savedState.selected)
                 ? savedState.selected
                 : selected;
-            const savedOptions = normalizeOptions(savedState.options);
+            const savedOptions = normalizeNutrientOptions(savedState.options);
 
             selected = savedSelected;
-            options = mergeOptions(
-                getDefaultOptions(),
+            options = mergeNutrientOptions(
+                getDefaultNutrientOptions(),
                 savedOptions,
-                optionsFromSelectedIds(savedSelected),
+                optionsFromSelectedNutrientIds(savedSelected, [
+                    vitalNutrients,
+                    ALL_NUTRIENTS,
+                ]),
             );
             selectedFoodIds = Array.isArray(savedState.selectedFoodIds)
                 ? savedState.selectedFoodIds.filter((id) => Number.isFinite(id))
@@ -408,15 +334,15 @@
             );
         } catch {
             selected = vitalNutrients.map((nutrient) => nutrient.id);
-            options = getDefaultOptions();
+            options = getDefaultNutrientOptions();
             selectedFoodIds = [];
             servingGrams = {};
             servingQuantities = {};
             servingUnits = {};
         }
-    }
+    };
 
-    function saveMixState() {
+    const saveMixState = () => {
         localStorage.setItem(
             MIX_STORAGE_KEYS.mixState,
             JSON.stringify({
@@ -428,34 +354,34 @@
                 servingUnits,
             }),
         );
-    }
+    };
 
-    function resetGoals() {
+    const resetGoals = () => {
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
         selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
-    }
+    };
 
-    function clearIngredients() {
+    const clearIngredients = () => {
         selectedFoodIds = [];
         servingGrams = {};
         servingQuantities = {};
         servingUnits = {};
         saveMixState();
-    }
+    };
 
-    function resetMix() {
+    const resetMix = () => {
         selected = vitalNutrients.map((n) => n.id);
-        options = getDefaultOptions();
+        options = getDefaultNutrientOptions();
         addNutrientId = "";
         clearIngredients();
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
         selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
         saveMixState();
-    }
+    };
 
-    function saveCurrentDrink(name: string) {
+    const saveCurrentDrink = (name: string) => {
         addSavedDrink({
             name,
             foods: selectedFoods,
@@ -467,14 +393,14 @@
             servingUnits,
         });
         saveDialogOpen = false;
-    }
+    };
 
-    function handleChange(next: (string | number)[]) {
+    const handleChange = (next: (string | number)[]) => {
         selected = next;
         saveMixState();
-    }
+    };
 
-    function handleAddNutrient() {
+    const handleAddNutrient = () => {
         if (!addNutrientId) return;
         const nutrient = ALL_NUTRIENTS.find((n) => n.id == addNutrientId);
         if (nutrient && !options.some((opt) => opt.id == nutrient.id)) {
@@ -482,9 +408,9 @@
             saveMixState();
         }
         addNutrientId = "";
-    }
+    };
 
-    function updateGoal(id: string | number, value: string) {
+    const updateGoal = (id: string | number, value: string) => {
         const nextGoals = {
             ...nutrientGoals,
             [Number(id)]: Math.max(0, Number(value) || 0),
@@ -492,9 +418,9 @@
         nutrientGoals = nextGoals;
         saveNutrientGoals(nextGoals);
         selectedGoalTemplateId = "";
-    }
+    };
 
-    function applyGoalTemplate() {
+    const applyGoalTemplate = () => {
         const template = GOAL_TEMPLATES.find(
             (item) => item.id === selectedGoalTemplateId,
         );
@@ -506,9 +432,9 @@
         };
         nutrientGoals = nextGoals;
         saveNutrientGoals(nextGoals);
-    }
+    };
 
-    function toggleFood(foodId: number) {
+    const toggleFood = (foodId: number) => {
         if (selectedFoodIds.includes(foodId)) {
             selectedFoodIds = selectedFoodIds.filter((id) => id !== foodId);
             saveMixState();
@@ -537,120 +463,17 @@
             [foodId]: servingUnits[foodId] ?? defaultServing.unit,
         };
         saveMixState();
-    }
+    };
 
-    function getDefaultServingAmount(food?: FdcFood) {
-        const servingUnit = normalizeServingUnit(food?.servingSizeUnit);
-        if (food?.servingSize && servingUnit) {
-            return {
-                quantity: food.servingSize,
-                unit: servingUnit,
-            };
-        }
-
-        return {
-            quantity: DEFAULT_SERVING_GRAMS,
-            unit: "g" as ServingMeasureUnit,
-        };
-    }
-
-    function getServingGramsLabel(food: FdcFood) {
-        const conversion = getServingConversion(food);
-        return `${conversion.isEstimate ? "≈ " : ""}${conversion.grams.toFixed(1)}g`;
-    }
-
-    function getServingQuantity(food: FdcFood) {
-        return servingQuantities[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
-    }
-
-    function getServingUnit(food: FdcFood) {
-        return normalizeServingUnit(servingUnits[food.fdcId]) ?? "g";
-    }
-
-    function normalizeServingUnit(value: unknown) {
-        if (typeof value !== "string") return null;
-        return (
-            SERVING_MEASURE_ALIASES[
-                value.trim().toLowerCase().replace(/\s+/g, "")
-            ] ?? null
-        );
-    }
-
-    function getServingConversion(food: FdcFood) {
-        return convertServingAmount(
-            getServingQuantity(food),
-            getServingUnit(food),
-            food,
-        );
-    }
-
-    function getServingConversionWarning(food: FdcFood) {
+    const getServingConversionWarning = (food: FdcFood) => {
         return getServingConversion(food).warning;
-    }
+    };
 
-    function withOverageDetails(warning: SmartWarning): SmartWarning {
-        if (!warning.id.startsWith("over-")) return warning;
-
-        const nutrientId = Number(warning.id.replace("over-", ""));
-        const overage = nutrientOverages.find(
-            (item) => item.nutrientId === nutrientId,
-        );
-        if (!overage) return warning;
-
-        return {
-            ...warning,
-            detailSummary: `${formatChartNumber(overage.total)} / ${formatChartNumber(
-                overage.goal,
-            )}${overage.unit} (${formatSignedChartNumber(overage.overage)}${overage.unit})`,
-            details: overage.contributors.map((contributor) => ({
-                label: contributor.label,
-                value: `${formatChartNumber(contributor.amount)}${overage.unit} from ${formatChartNumber(contributor.grams)}g`,
-            })),
-        };
-    }
-
-    function getEstimatedVolumeWarnings(): SmartWarning[] {
-        const estimatedConversions = selectedFoods
-            .map((food) => ({
-                food,
-                conversion: getServingConversion(food),
-            }))
-            .filter(
-                ({ conversion }) =>
-                    conversion.isEstimate && Boolean(conversion.density),
-            );
-
-        if (estimatedConversions.length === 0) return [];
-
-        const maxVariance = Math.max(
-            ...estimatedConversions.map(
-                ({ conversion }) => conversion.density?.variancePercent ?? 0,
-            ),
-        );
-        const labels = estimatedConversions
-            .slice(0, 3)
-            .map(({ food }) => food.description);
-        const extraCount = estimatedConversions.length - labels.length;
-        const labelText = `${labels.join(", ")}${
-            extraCount > 0 ? `, and ${extraCount} more` : ""
-        }`;
-
-        return [
-            {
-                id: "estimated-volume-conversions",
-                tone: maxVariance >= 40 ? "warning" : "info",
-                symbol: "~",
-                title: "Estimated volume conversions",
-                message: `This graph uses estimated volume conversions for ${labelText}. Actual weights may vary up to ±${maxVariance}%. Use grams for the most accurate graph.`,
-            },
-        ];
-    }
-
-    function updateServingAmount(
+    const updateServingAmount = (
         food: FdcFood,
         quantityValue: string,
         unit: ServingMeasureUnit,
-    ) {
+    ) => {
         const quantity = Math.max(0, Number(quantityValue) || 0);
         servingQuantities = {
             ...servingQuantities,
@@ -665,7 +488,7 @@
             [food.fdcId]: convertServingToGrams(quantity, unit, food),
         };
         saveMixState();
-    }
+    };
 
     onMount(() => {
         loadIngredientLists();
@@ -810,7 +633,7 @@
                                 min="0"
                                 step="any"
                                 value={nutrientGoals[Number(nutrient.id)] ??
-                                    getDefaultGoal(nutrient)}
+                                    getDefaultNutrientGoal(nutrient)}
                                 oninput={(event) =>
                                     updateGoal(
                                         nutrient.id,
@@ -821,7 +644,7 @@
                             <small>
                                 {getNutrientTotal(Number(nutrient.id)).toFixed(1)} /
                                 {nutrientGoals[Number(nutrient.id)] ??
-                                    getDefaultGoal(nutrient)}
+                                    getDefaultNutrientGoal(nutrient)}
                             </small>
                         </label>
                     {/each}
@@ -897,12 +720,21 @@
                         {#each selectedFoods as food}
                             <IngredientCard
                                 {food}
-                                sourceLabel={getFoodSourceLabel(food)}
+                                sourceLabel={getFoodSourceLabel(
+                                    food,
+                                    fridgeItems,
+                                )}
                                 quantity={getServingQuantity(food)}
                                 unit={getServingUnit(food)}
-                                gramsLabel={getServingGramsLabel(food)}
+                                gramsLabel={getServingGramsLabel(
+                                    getServingConversion(food),
+                                )}
                                 warning={getServingConversionWarning(food)}
-                                nutrientChips={getFoodNutrientChips(food)}
+                                nutrientChips={getFoodNutrientChips(
+                                    food,
+                                    selectedNutrients,
+                                    servingGrams,
+                                )}
                                 onRemove={toggleFood}
                                 onServingChange={updateServingAmount}
                             />

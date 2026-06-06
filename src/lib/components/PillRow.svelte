@@ -18,10 +18,10 @@
         active: boolean;
     };
 
-    function arrangePills(
+    const arrangePills = (
         pillLabels: string[],
         selectedIndices: number[],
-    ): ArrangedPill[] {
+    ): ArrangedPill[] => {
         return pillLabels
             .map((label, index) => ({
                 label,
@@ -35,7 +35,7 @@
                 }
                 return a.label.localeCompare(b.label);
             });
-    }
+    };
 
     const arrangedPills = $derived(arrangePills(pills, activeIndices));
 </script>

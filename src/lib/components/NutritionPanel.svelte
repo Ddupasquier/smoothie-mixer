@@ -62,11 +62,11 @@
 	let vitalListRef: HTMLUListElement | null = null;
 	let rightColHeight = $state(0);
 
-	function syncHeight() {
+	const syncHeight = () => {
 		if (vitalListRef) {
 			rightColHeight = vitalListRef.offsetHeight;
 		}
-	}
+	};
 
 	$effect(() => {
 		syncHeight();
@@ -87,20 +87,20 @@
 	let feedbackMessage = $state("");
 	let feedbackTimer: ReturnType<typeof setTimeout> | null = null;
 
-	function showFeedback(message: string) {
+	const showFeedback = (message: string) => {
 		feedbackMessage = message;
 		if (feedbackTimer) clearTimeout(feedbackTimer);
 		feedbackTimer = setTimeout(() => {
 			feedbackMessage = "";
 			feedbackTimer = null;
 		}, 1800);
-	}
+	};
 
 	onDestroy(() => {
 		if (feedbackTimer) clearTimeout(feedbackTimer);
 	});
 
-	function handleAddToFridge() {
+	const handleAddToFridge = () => {
 		if (!food) return;
 		const shoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
 		if (shoppingList.some((item) => item.fdcId === food.fdcId)) {
@@ -124,9 +124,9 @@
 		}
 		const added = addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food);
 		showFeedback(added ? "Added to fridge." : "Already in fridge.");
-	}
+	};
 
-	function handleAddToShopping() {
+	const handleAddToShopping = () => {
 		if (!food) return;
 		const fridgeList = readSmoothieList(MIX_STORAGE_KEYS.fridge);
 		if (fridgeList.some((item) => item.fdcId === food.fdcId)) {
@@ -147,7 +147,7 @@
 		}
 		const added = addFoodToSmoothieList(MIX_STORAGE_KEYS.shoppingList, food);
 		showFeedback(added ? "Added to shopping list." : "Already in shopping list.");
-	}
+	};
 </script>
 
 <section class="nf-label">

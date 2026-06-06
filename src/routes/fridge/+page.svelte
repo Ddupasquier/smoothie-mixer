@@ -16,22 +16,22 @@
     let shoppingList = $state<FdcFood[]>([]);
     let selectedFood = $state<FdcFood | null>(null);
 
-    function loadLists() {
+    const loadLists = () => {
         onHand = readSmoothieList(MIX_STORAGE_KEYS.fridge);
         shoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
-    }
+    };
 
-    function handleSelect(food: FdcFood) {
+    const handleSelect = (food: FdcFood) => {
         selectedFood = food;
-    }
+    };
 
-    function removeFromLocalStorageByIndex(key: SmoothieListKey, idx: number) {
+    const removeFromLocalStorageByIndex = (key: SmoothieListKey, idx: number) => {
         const list = readSmoothieList(key);
         const food = list[idx];
         if (!food) return;
         removeFoodFromSmoothieList(key, food.fdcId);
         loadLists();
-    }
+    };
 
     onMount(() => {
         loadLists();

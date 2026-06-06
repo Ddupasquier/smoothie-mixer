@@ -11,7 +11,7 @@ interface CacheEntry<T> {
 	expiresAt: number;
 }
 
-function isAvailable(): boolean {
+const isAvailable = (): boolean => {
 	try {
 		const key = '__sm_test__';
 		localStorage.setItem(key, '1');
@@ -20,9 +20,9 @@ function isAvailable(): boolean {
 	} catch {
 		return false;
 	}
-}
+};
 
-export function cacheGet<T>(key: string): T | null {
+export const cacheGet = <T>(key: string): T | null => {
 	if (!isAvailable()) return null;
 	try {
 		const raw = localStorage.getItem(PREFIX + key);
@@ -36,9 +36,9 @@ export function cacheGet<T>(key: string): T | null {
 	} catch {
 		return null;
 	}
-}
+};
 
-export function cacheSet<T>(key: string, data: T, ttlMs = DEFAULT_TTL_MS): void {
+export const cacheSet = <T>(key: string, data: T, ttlMs = DEFAULT_TTL_MS): void => {
 	if (!isAvailable()) return;
 	try {
 		const entry: CacheEntry<T> = { data, expiresAt: Date.now() + ttlMs };
@@ -46,22 +46,22 @@ export function cacheSet<T>(key: string, data: T, ttlMs = DEFAULT_TTL_MS): void 
 	} catch {
 		// Storage quota exceeded or unavailable — fail silently
 	}
-}
+};
 
-export function cacheDelete(key: string): void {
+export const cacheDelete = (key: string): void => {
 	if (!isAvailable()) return;
 	try {
 		localStorage.removeItem(PREFIX + key);
 	} catch {
 		// ignore
 	}
-}
+};
 
-export function cacheClearAll(): void {
+export const cacheClearAll = (): void => {
 	try {
 		const keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
 		keys.forEach((k) => localStorage.removeItem(k));
 	} catch {
 		// ignore
 	}
-}
+};

@@ -6,9 +6,9 @@
         results: FdcFood[];
         onSelect: (food: FdcFood) => void;
     }>();
-    function formatName(desc: string): string {
+    const formatName = (desc: string): string => {
         return desc.length > 60 ? desc.slice(0, 57) + "…" : desc;
-    }
+    };
 </script>
 
 {#if results.length > 0}

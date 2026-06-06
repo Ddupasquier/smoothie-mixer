@@ -11,7 +11,7 @@ import type { FdcFood, FdcSearchResponse } from '$lib/utils/types';
 
 const BASE_URL = 'https://api.nal.usda.gov/fdc/v1';
 
-function getApiKey(): string {
+const getApiKey = (): string => {
     const key = import.meta.env.VITE_FDC_API_KEY ?? '';
     if (!key || key === 'your_api_key_here') {
         console.warn(
@@ -20,18 +20,18 @@ function getApiKey(): string {
         );
     }
     return key;
-}
+};
 
-function buildUrl(path: string, params: Record<string, string> = {}): string {
+const buildUrl = (path: string, params: Record<string, string> = {}): string => {
     const url = new URL(`${BASE_URL}${path}`);
     url.searchParams.set('api_key', getApiKey());
     for (const [k, v] of Object.entries(params)) {
         url.searchParams.set(k, v);
     }
     return url.toString();
-}
+};
 
-export async function searchFoods(query: string): Promise<FdcFood[]> {
+export const searchFoods = async (query: string): Promise<FdcFood[]> => {
     const trimmed = query.trim();
     if (!trimmed) return [];
 
@@ -54,9 +54,9 @@ export async function searchFoods(query: string): Promise<FdcFood[]> {
 
     cacheSet(cacheKey, foods);
     return foods;
-}
+};
 
-export async function getFoodById(fdcId: number): Promise<FdcFood> {
+export const getFoodById = async (fdcId: number): Promise<FdcFood> => {
     const cacheKey = `food_${fdcId}`;
     const cached = cacheGet<FdcFood>(cacheKey);
     if (cached) return cached;
@@ -70,4 +70,4 @@ export async function getFoodById(fdcId: number): Promise<FdcFood> {
     const food: FdcFood = await res.json();
     cacheSet(cacheKey, food);
     return food;
-}
+};

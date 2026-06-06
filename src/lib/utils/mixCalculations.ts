@@ -37,43 +37,43 @@ export type NutrientChartMetric = {
 	totalRatio: number;
 };
 
-export function getDefaultNutrientGoal(nutrient: NutrientMeta) {
+export const getDefaultNutrientGoal = (nutrient: NutrientMeta) => {
 	const id = Number(nutrient.id);
 	if (DEFAULT_NUTRIENT_GOALS[id]) return DEFAULT_NUTRIENT_GOALS[id];
 	if (nutrient.unit === "g") return DEFAULT_GOAL_BY_UNIT.grams;
 	if (nutrient.unit === "kcal") return DEFAULT_GOAL_BY_UNIT.calories;
 	return DEFAULT_GOAL_BY_UNIT.fallback;
-}
+};
 
-export function getFoodNutrientAmount(
+export const getFoodNutrientAmount = (
 	food: FdcFood,
 	nutrientId: number,
 	servingGrams: Record<number, number>,
-) {
+) => {
 	const nutrientValue = getFdcNutrientValue(food, nutrientId);
 	if (!nutrientValue) return 0;
 
 	const grams = servingGrams[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
 	return (nutrientValue * grams) / DEFAULT_SERVING_GRAMS;
-}
+};
 
-export function getNutrientTotal(
+export const getNutrientTotal = (
 	foods: FdcFood[],
 	nutrientId: number,
 	servingGrams: Record<number, number>,
-) {
+) => {
 	return foods.reduce(
 		(total, food) =>
 			total + getFoodNutrientAmount(food, nutrientId, servingGrams),
 		0,
 	);
-}
+};
 
-export function getNutrientContributors(
+export const getNutrientContributors = (
 	foods: FdcFood[],
 	nutrientId: number,
 	servingGrams: Record<number, number>,
-) {
+) => {
 	return foods
 		.map((food) => ({
 			label: food.description,
@@ -82,14 +82,14 @@ export function getNutrientContributors(
 		}))
 		.filter((contributor) => contributor.amount > 0)
 		.sort((a, b) => b.amount - a.amount);
-}
+};
 
-export function getNutrientContributionBreakdowns(
+export const getNutrientContributionBreakdowns = (
 	nutrients: NutrientMeta[],
 	foods: FdcFood[],
 	servingGrams: Record<number, number>,
 	maxContributors = 2,
-): NutrientContributionBreakdown[] {
+): NutrientContributionBreakdown[] => {
 	return nutrients.flatMap((nutrient) => {
 		const nutrientId = Number(nutrient.id);
 		const contributors = getNutrientContributors(
@@ -119,28 +119,28 @@ export function getNutrientContributionBreakdowns(
 			},
 		];
 	});
-}
+};
 
-export function getNutrientProgress(
+export const getNutrientProgress = (
 	nutrients: NutrientMeta[],
 	foods: FdcFood[],
 	nutrientGoals: Record<number, number>,
 	servingGrams: Record<number, number>,
-) {
+) => {
 	return nutrients.map((nutrient) => {
 		const goal =
 			nutrientGoals[Number(nutrient.id)] ?? getDefaultNutrientGoal(nutrient);
 		if (goal <= 0) return 0;
 		return getNutrientTotal(foods, Number(nutrient.id), servingGrams) / goal;
 	});
-}
+};
 
-export function getNutrientChartMetrics(
+export const getNutrientChartMetrics = (
 	nutrients: NutrientMeta[],
 	foods: FdcFood[],
 	nutrientGoals: Record<number, number>,
 	servingGrams: Record<number, number>,
-): NutrientChartMetric[] {
+): NutrientChartMetric[] => {
 	return nutrients.map((nutrient) => {
 		const nutrientId = Number(nutrient.id);
 		const baselineGoal = getDefaultNutrientGoal(nutrient);
@@ -153,27 +153,27 @@ export function getNutrientChartMetrics(
 			totalRatio: total / safeBaselineGoal,
 		};
 	});
-}
+};
 
-export function getChartReferenceRatio(metrics: NutrientChartMetric[]) {
+export const getChartReferenceRatio = (metrics: NutrientChartMetric[]) => {
 	return Math.max(1, ...metrics.map((metric) => metric.goalRatio));
-}
+};
 
-export function getChartValues(metrics: NutrientChartMetric[]) {
+export const getChartValues = (metrics: NutrientChartMetric[]) => {
 	const referenceRatio = getChartReferenceRatio(metrics);
 	return metrics.map((metric) =>
 		clampChartValue(metric.totalRatio / referenceRatio),
 	);
-}
+};
 
-export function getGoalValues(metrics: NutrientChartMetric[]) {
+export const getGoalValues = (metrics: NutrientChartMetric[]) => {
 	const referenceRatio = getChartReferenceRatio(metrics);
 	return metrics.map((metric) =>
 		clampChartValue(metric.goalRatio / referenceRatio),
 	);
-}
+};
 
-export function getChartColors(progress: number) {
+export const getChartColors = (progress: number) => {
 	if (progress <= NUTRIENT_PROGRESS_THRESHOLDS.atGoal) {
 		return NUTRIENT_PROGRESS_COLORS.atGoal;
 	}
@@ -187,9 +187,9 @@ export function getChartColors(progress: number) {
 	}
 
 	return NUTRIENT_PROGRESS_COLORS.wayOver;
-}
+};
 
-export function clampChartValue(value: number) {
+export const clampChartValue = (value: number) => {
 	if (!Number.isFinite(value)) return 0;
 	return Math.max(0, Math.min(value, 1));
-}
+};

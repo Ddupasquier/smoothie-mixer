@@ -32,11 +32,11 @@ export type SavedDrink = {
 
 export type SavedDrinkInput = Omit<SavedDrink, "id" | "createdAt">;
 
-function dispatchSavedDrinksChanged() {
+const dispatchSavedDrinksChanged = () => {
 	window.dispatchEvent(new CustomEvent(SAVED_DRINKS_CHANGED_EVENT));
-}
+};
 
-function compactFood(food: FdcFood): FdcFood {
+const compactFood = (food: FdcFood): FdcFood => {
 	return {
 		fdcId: food.fdcId,
 		description: food.description,
@@ -53,9 +53,9 @@ function compactFood(food: FdcFood): FdcFood {
 			value: nutrient.value,
 		})),
 	};
-}
+};
 
-function normalizeDrink(value: SavedDrink): SavedDrink {
+const normalizeDrink = (value: SavedDrink): SavedDrink => {
 	return {
 		...value,
 		foods: (value.foods ?? []).map(compactFood),
@@ -66,9 +66,9 @@ function normalizeDrink(value: SavedDrink): SavedDrink {
 		servingQuantities: value.servingQuantities ?? {},
 		servingUnits: value.servingUnits ?? {},
 	};
-}
+};
 
-export function readSavedDrinks() {
+export const readSavedDrinks = () => {
 	try {
 		const raw = localStorage.getItem(SAVED_DRINKS_STORAGE_KEY);
 		const drinks = raw ? (JSON.parse(raw) as SavedDrink[]) : [];
@@ -76,17 +76,17 @@ export function readSavedDrinks() {
 	} catch {
 		return [];
 	}
-}
+};
 
-export function writeSavedDrinks(drinks: SavedDrink[]) {
+export const writeSavedDrinks = (drinks: SavedDrink[]) => {
 	localStorage.setItem(
 		SAVED_DRINKS_STORAGE_KEY,
 		JSON.stringify(drinks.map(normalizeDrink)),
 	);
 	dispatchSavedDrinksChanged();
-}
+};
 
-export function addSavedDrink(input: SavedDrinkInput) {
+export const addSavedDrink = (input: SavedDrinkInput) => {
 	const drink: SavedDrink = {
 		...input,
 		id: crypto.randomUUID(),
@@ -97,13 +97,13 @@ export function addSavedDrink(input: SavedDrinkInput) {
 	const drinks = readSavedDrinks();
 	writeSavedDrinks([drink, ...drinks]);
 	return drink;
-}
+};
 
-export function deleteSavedDrink(id: string) {
+export const deleteSavedDrink = (id: string) => {
 	writeSavedDrinks(readSavedDrinks().filter((drink) => drink.id !== id));
-}
+};
 
-export function restoreSavedDrinkToMix(drink: SavedDrink) {
+export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
 	const fridge = readSmoothieList(MIX_STORAGE_KEYS.fridge);
 	const knownFoodIds = new Set(fridge.map((food) => food.fdcId));
 	const missingFoods = drink.foods.filter((food) => !knownFoodIds.has(food.fdcId));
@@ -139,4 +139,4 @@ export function restoreSavedDrinkToMix(drink: SavedDrink) {
 			),
 		}),
 	);
-}
+};

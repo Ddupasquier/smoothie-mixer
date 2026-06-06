@@ -11,35 +11,35 @@
 
     let drinks = $state<SavedDrink[]>([]);
 
-    function loadSavedDrinks() {
+    const loadSavedDrinks = () => {
         drinks = readSavedDrinks();
-    }
+    };
 
-    function formatDate(timestamp: number) {
+    const formatDate = (timestamp: number) => {
         return new Intl.DateTimeFormat(undefined, {
             month: "short",
             day: "numeric",
             year: "numeric",
         }).format(new Date(timestamp));
-    }
+    };
 
-    function getIngredientSummary(drink: SavedDrink) {
+    const getIngredientSummary = (drink: SavedDrink) => {
         if (drink.foods.length === 0) return "No ingredients";
         return drink.foods
             .slice(0, 3)
             .map((food) => food.description)
             .join(", ");
-    }
+    };
 
-    function loadDrink(drink: SavedDrink) {
+    const loadDrink = (drink: SavedDrink) => {
         restoreSavedDrinkToMix(drink);
         goto("/mix");
-    }
+    };
 
-    function removeDrink(drinkId: string) {
+    const removeDrink = (drinkId: string) => {
         deleteSavedDrink(drinkId);
         loadSavedDrinks();
-    }
+    };
 
     onMount(() => {
         loadSavedDrinks();

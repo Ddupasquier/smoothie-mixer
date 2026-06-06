@@ -5,13 +5,13 @@
 		breakdowns = [],
 	}: { breakdowns?: NutrientContributionBreakdown[] } = $props();
 
-	function formatAmount(value: number) {
+	const formatAmount = (value: number) => {
 		return value >= 10 ? value.toFixed(0) : value.toFixed(1);
-	}
+	};
 
-	function formatPercent(value: number) {
+	const formatPercent = (value: number) => {
 		return `${Math.round(value)}%`;
-	}
+	};
 </script>
 
 {#if breakdowns.length > 0}

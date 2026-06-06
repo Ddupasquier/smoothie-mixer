@@ -8,11 +8,11 @@ export type SmoothieListKey =
 	| typeof MIX_STORAGE_KEYS.fridge
 	| typeof MIX_STORAGE_KEYS.shoppingList;
 
-function dispatchListsChanged() {
+const dispatchListsChanged = () => {
 	window.dispatchEvent(new CustomEvent(SMOOTHIE_LISTS_CHANGED_EVENT));
-}
+};
 
-function compactFood(food: FdcFood): FdcFood {
+const compactFood = (food: FdcFood): FdcFood => {
 	return {
 		fdcId: food.fdcId,
 		description: food.description,
@@ -29,17 +29,17 @@ function compactFood(food: FdcFood): FdcFood {
 			value: nutrient.value,
 		})),
 	};
-}
+};
 
-function isQuotaExceededError(error: unknown) {
+const isQuotaExceededError = (error: unknown) => {
 	return (
 		error instanceof DOMException &&
 		(error.name === "QuotaExceededError" ||
 			error.name === "NS_ERROR_DOM_QUOTA_REACHED")
 	);
-}
+};
 
-export function readSmoothieList(key: SmoothieListKey) {
+export const readSmoothieList = (key: SmoothieListKey) => {
 	try {
 		const raw = localStorage.getItem(key);
 		const list = raw ? (JSON.parse(raw) as FdcFood[]) : [];
@@ -47,9 +47,9 @@ export function readSmoothieList(key: SmoothieListKey) {
 	} catch {
 		return [];
 	}
-}
+};
 
-export function writeSmoothieList(key: SmoothieListKey, list: FdcFood[]) {
+export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 	const compactList = list.map(compactFood);
 
 	try {
@@ -71,18 +71,18 @@ export function writeSmoothieList(key: SmoothieListKey, list: FdcFood[]) {
 			return false;
 		}
 	}
-}
+};
 
-export function addFoodToSmoothieList(key: SmoothieListKey, food: FdcFood) {
+export const addFoodToSmoothieList = (key: SmoothieListKey, food: FdcFood) => {
 	const list = readSmoothieList(key);
 	if (list.some((item) => item.fdcId === food.fdcId)) {
 		return false;
 	}
 
 	return writeSmoothieList(key, [...list, compactFood(food)]);
-}
+};
 
-export function removeFoodFromSmoothieList(key: SmoothieListKey, foodId: number) {
+export const removeFoodFromSmoothieList = (key: SmoothieListKey, foodId: number) => {
 	const list = readSmoothieList(key).filter((item) => item.fdcId !== foodId);
 	return writeSmoothieList(key, list);
-}
+};

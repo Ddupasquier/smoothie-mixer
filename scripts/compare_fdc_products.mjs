@@ -31,16 +31,16 @@ if (!API_KEY || API_KEY === "your_api_key_here") {
 const queries = process.argv.slice(2);
 const [firstQuery, secondQuery] = queries.length >= 2 ? queries : DEFAULT_QUERIES;
 
-function buildSearchUrl(query, pageSize = 5) {
+const buildSearchUrl = (query, pageSize = 5) => {
 	const url = new URL(`${BASE_URL}/foods/search`);
 	url.searchParams.set("api_key", API_KEY);
 	url.searchParams.set("query", query);
 	url.searchParams.set("pageSize", String(pageSize));
 	url.searchParams.set("dataType", "Foundation,SR Legacy,Branded");
 	return url;
-}
+};
 
-async function searchFoods(query) {
+const searchFoods = async (query) => {
 	const response = await fetch(buildSearchUrl(query));
 
 	if (!response.ok) {
@@ -55,24 +55,24 @@ async function searchFoods(query) {
 		totalHits: data.totalHits ?? 0,
 		foods: data.foods ?? [],
 	};
-}
+};
 
-function getNutrient(food, nutrientId) {
+const getNutrient = (food, nutrientId) => {
 	return food.foodNutrients?.find(
 		(nutrient) => Number(nutrient.nutrientId) === nutrientId,
 	);
-}
+};
 
-function formatNutrient(food, nutrientId) {
+const formatNutrient = (food, nutrientId) => {
 	const nutrient = getNutrient(food, nutrientId);
 	if (!nutrient) return "—";
 
 	const value = Number(nutrient.value);
 	const formattedValue = Number.isFinite(value) ? value.toFixed(2) : nutrient.value;
 	return `${formattedValue} ${nutrient.unitName ?? ""}`.trim();
-}
+};
 
-function summarizeFood(food) {
+const summarizeFood = (food) => {
 	return {
 		fdcId: food.fdcId,
 		description: food.description,
@@ -90,9 +90,9 @@ function summarizeFood(food) {
 			]),
 		),
 	};
-}
+};
 
-function printSummary(result) {
+const printSummary = (result) => {
 	const topFood = result.foods[0];
 
 	console.log(`\n=== ${result.query} ===`);
@@ -118,9 +118,9 @@ function printSummary(result) {
 			})),
 		);
 	}
-}
+};
 
-function printNutrientComparison(firstFood, secondFood) {
+const printNutrientComparison = (firstFood, secondFood) => {
 	if (!firstFood || !secondFood) return;
 
 	console.log("\n=== Nutrient comparison for top results ===");
@@ -131,7 +131,7 @@ function printNutrientComparison(firstFood, secondFood) {
 			[secondFood.description]: formatNutrient(secondFood, nutrient.id),
 		})),
 	);
-}
+};
 
 try {
 	const [firstResult, secondResult] = await Promise.all([

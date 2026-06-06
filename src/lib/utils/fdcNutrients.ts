@@ -21,20 +21,20 @@ const FALLBACK_NUTRIENT_NUMBERS: Record<number, string[]> = {
 	[NUTRIENT_IDS.SUGAR]: ["269"],
 };
 
-export function findFdcNutrient(food: FdcFood, nutrientId: number) {
+export const findFdcNutrient = (food: FdcFood, nutrientId: number) => {
 	return food.foodNutrients.find((nutrient) =>
 		isFdcNutrientMatch(nutrient, nutrientId),
 	);
-}
+};
 
-export function getFdcNutrientValue(food: FdcFood, nutrientId: number) {
+export const getFdcNutrientValue = (food: FdcFood, nutrientId: number) => {
 	return resolveFdcNutrient(food, nutrientId).value;
-}
+};
 
-export function resolveFdcNutrient(
+export const resolveFdcNutrient = (
 	food: FdcFood,
 	nutrientId: number,
-): ResolvedFdcNutrient {
+): ResolvedFdcNutrient => {
 	const exact = food.foodNutrients.find(
 		(nutrient) => Number(nutrient.nutrientId) === nutrientId,
 	);
@@ -68,23 +68,23 @@ export function resolveFdcNutrient(
 	}
 
 	return { nutrient: null, value: 0, source: "missing" };
-}
+};
 
-export function isFdcNutrientMatch(nutrient: FdcNutrient, nutrientId: number) {
+export const isFdcNutrientMatch = (nutrient: FdcNutrient, nutrientId: number) => {
 	if (Number(nutrient.nutrientId) === nutrientId) return true;
 
 	return matchesFallbackNutrient(nutrient, nutrientId);
-}
+};
 
-function matchesFallbackNutrient(nutrient: FdcNutrient, nutrientId: number) {
+const matchesFallbackNutrient = (nutrient: FdcNutrient, nutrientId: number) => {
 	const fallbackIds = FALLBACK_NUTRIENT_IDS[nutrientId] ?? [];
 	if (fallbackIds.includes(Number(nutrient.nutrientId))) return true;
 
 	const fallbackNumbers = FALLBACK_NUTRIENT_NUMBERS[nutrientId] ?? [];
 	return fallbackNumbers.includes(String(nutrient.nutrientNumber));
-}
+};
 
-function deriveCalories(food: FdcFood) {
+const deriveCalories = (food: FdcFood) => {
 	const fat = getMacroValue(food, NUTRIENT_IDS.FAT);
 	const carbs = getMacroValue(food, NUTRIENT_IDS.CARBS);
 	const protein = getMacroValue(food, NUTRIENT_IDS.PROTEIN);
@@ -92,9 +92,9 @@ function deriveCalories(food: FdcFood) {
 	if (fat === 0 && carbs === 0 && protein === 0) return 0;
 
 	return fat * 9 + carbs * 4 + protein * 4;
-}
+};
 
-function getMacroValue(food: FdcFood, nutrientId: number) {
+const getMacroValue = (food: FdcFood, nutrientId: number) => {
 	const nutrient = findFdcNutrient(food, nutrientId);
 	return nutrient?.value ?? 0;
-}
+};

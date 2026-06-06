@@ -1,16 +1,12 @@
 <script lang="ts">
 	import Popover from "$lib/components/Popover.svelte";
+	import type { NutrientChip } from "$lib/utils/mixUi";
 	import type { FdcFood } from "$lib/utils/types";
 	import { slide } from "svelte/transition";
 	import {
 		SERVING_MEASURE_OPTIONS,
 		type ServingMeasureUnit,
 	} from "../../defaults/servingMeasureDefaults";
-
-	type NutrientChip = {
-		label: string;
-		value: string;
-	};
 
 	let {
 		food,

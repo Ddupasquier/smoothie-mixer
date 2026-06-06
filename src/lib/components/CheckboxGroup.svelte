@@ -10,14 +10,14 @@
         onChange?: (selected: (string | number)[]) => void;
     }>();
 
-    function toggle(id: string | number) {
+    const toggle = (id: string | number) => {
         const idx = selected.indexOf(id);
         const next =
             idx === -1
                 ? [...selected, id]
                 : selected.filter((v: string | number) => v !== id);
         onChange(next);
-    }
+    };
 </script>
 
 <div class="checkbox-group">

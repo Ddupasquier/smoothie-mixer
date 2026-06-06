@@ -15,13 +15,13 @@
 	let debounceTimer: ReturnType<typeof setTimeout>;
 	const dispatch = createEventDispatcher();
 
-	function sortByQualityThenName(items: FdcFood[]) {
+	const sortByQualityThenName = (items: FdcFood[]) => {
 		return items.sort((a, b) => {
 			const qualitySort = compareFoodQuality(a, b);
 			if (qualitySort !== 0) return qualitySort;
 			return a.description.localeCompare(b.description);
 		});
-	}
+	};
 
 	const sortedResults = $derived(() => {
 		const allTerms = [...pills, query.trim()]
@@ -70,7 +70,7 @@
 		return [...firstPart, ...allParts, ...rest];
 	});
 
-	function triggerSearch() {
+	const triggerSearch = () => {
 		clearTimeout(debounceTimer);
 		error = "";
 		const allTerms = [...pills, query.trim()].filter(Boolean);
@@ -95,22 +95,22 @@
 				loading = false;
 			}
 		}, 500);
-	}
+	};
 
-	function handleInput() {
+	const handleInput = () => {
 		triggerSearch();
-	}
+	};
 
 	$effect(() => {
 		pills;
 		triggerSearch();
 	});
 
-	function select(food: FdcFood) {
+	const select = (food: FdcFood) => {
 		onSelect(food);
 		query = "";
 		results = [];
-	}
+	};
 </script>
 
 <div class="search-wrap">

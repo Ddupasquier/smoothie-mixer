@@ -30,7 +30,7 @@ export type FoodQuality = {
 	needsDetails: boolean;
 };
 
-export function getFoodQuality(food: FdcFood): FoodQuality {
+export const getFoodQuality = (food: FdcFood): FoodQuality => {
 	const sourceCounts: Record<FdcNutrientSource, number> = {
 		exact: 0,
 		fallback: 0,
@@ -113,19 +113,19 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 		details,
 		needsDetails,
 	};
-}
+};
 
-export function compareFoodQuality(a: FdcFood, b: FdcFood) {
+export const compareFoodQuality = (a: FdcFood, b: FdcFood) => {
 	const qualityA = getFoodQuality(a);
 	const qualityB = getFoodQuality(b);
 	return qualityB.score - qualityA.score;
-}
+};
 
-function getNutrientQualityDetail(
+const getNutrientQualityDetail = (
 	nutrientId: number,
 	label: string,
 	source: FdcNutrientSource,
-): NutrientQualityDetail {
+): NutrientQualityDetail => {
 	if (source === "missing") {
 		return {
 			nutrientId,
@@ -163,4 +163,4 @@ function getNutrientQualityDetail(
 		sourceLabel: "Exact",
 		detail: "Matched the expected FDC nutrient field.",
 	};
-}
+};
