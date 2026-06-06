@@ -4,6 +4,7 @@
     import NutrientOverageSummary, {
         type NutrientOverage,
     } from "$lib/components/NutrientOverageSummary.svelte";
+    import MixEmptyState from "$lib/components/MixEmptyState.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import SmartWarnings from "$lib/components/SmartWarnings.svelte";
     import TextInputDialog from "$lib/components/TextInputDialog.svelte";
@@ -889,6 +890,8 @@
                         {/each}
                     </div>
                 </section>
+            {:else}
+                <MixEmptyState />
             {/if}
 
             <div class="shape-panel" aria-label="Generated shape">
