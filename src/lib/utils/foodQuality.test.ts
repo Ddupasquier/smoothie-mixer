@@ -65,5 +65,18 @@ describe("food quality", () => {
 		expect(quality.sourceCounts.derived).toBe(1);
 		expect(quality.sourceCounts.missing).toBe(2);
 		expect(quality.symbol).toBe("⚠️");
+		expect(quality.needsDetails).toBe(true);
+		expect(
+			quality.details.filter((detail) => detail.source === "missing"),
+		).toEqual([
+			expect.objectContaining({ label: "Dietary Fiber" }),
+			expect.objectContaining({ label: "Total Sugars" }),
+		]);
+		expect(
+			quality.details.find((detail) => detail.source === "derived"),
+		).toMatchObject({
+			label: "Calories",
+			sourceLabel: "Derived",
+		});
 	});
 });

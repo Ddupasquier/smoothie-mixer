@@ -1,9 +1,6 @@
 <script lang="ts">
     import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
     import IngredientCard from "$lib/components/IngredientCard.svelte";
-    import NutrientOverageSummary, {
-        type NutrientOverage,
-    } from "$lib/components/NutrientOverageSummary.svelte";
     import MixEmptyState from "$lib/components/MixEmptyState.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import SmartWarnings from "$lib/components/SmartWarnings.svelte";
@@ -154,6 +151,27 @@
             servingGrams,
         ),
     );
+    const nutrientOverages = $derived(
+        selectedNutrients.flatMap((nutrient) => {
+            const goal =
+                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
+            const nutrientId = Number(nutrient.id);
+            const total = getNutrientTotal(nutrientId);
+            if (goal <= 0 || total <= goal) return [];
+
+            return [
+                {
+                    nutrientId,
+                    label: nutrient.label,
+                    unit: nutrient.unit,
+                    total,
+                    goal,
+                    overage: total - goal,
+                    contributors: getNutrientContributors(nutrientId),
+                },
+            ];
+        }),
+    );
     const smartWarnings = $derived<SmartWarning[]>([
         ...getNutrientGoalWarnings(
             selectedNutrients.map((nutrient) => {
@@ -168,33 +186,13 @@
                 };
             }),
             { includeUnderTargets: selectedFoods.length > 0 },
-        ),
+        ).map((warning) => withOverageDetails(warning)),
         ...getEstimatedVolumeWarnings(),
     ]);
     const maxNutrientProgress = $derived(
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
     const chartColors = $derived(getChartColors(maxNutrientProgress));
-    const nutrientOverages = $derived<NutrientOverage[]>(
-        selectedNutrients.flatMap((nutrient) => {
-            const goal =
-                nutrientGoals[Number(nutrient.id)] || getDefaultGoal(nutrient);
-            const nutrientId = Number(nutrient.id);
-            const total = getNutrientTotal(nutrientId);
-            if (goal <= 0 || total <= goal) return [];
-
-            return [
-                {
-                    label: nutrient.label,
-                    unit: nutrient.unit,
-                    total,
-                    goal,
-                    overage: total - goal,
-                    contributors: getNutrientContributors(nutrientId),
-                },
-            ];
-        }),
-    );
 
     function getNutrientMeta(id: string | number) {
         return [...vitalNutrients, ...ALL_NUTRIENTS].find(
@@ -590,6 +588,27 @@
         return getServingConversion(food).warning;
     }
 
+    function withOverageDetails(warning: SmartWarning): SmartWarning {
+        if (!warning.id.startsWith("over-")) return warning;
+
+        const nutrientId = Number(warning.id.replace("over-", ""));
+        const overage = nutrientOverages.find(
+            (item) => item.nutrientId === nutrientId,
+        );
+        if (!overage) return warning;
+
+        return {
+            ...warning,
+            detailSummary: `${formatChartNumber(overage.total)} / ${formatChartNumber(
+                overage.goal,
+            )}${overage.unit} (${formatSignedChartNumber(overage.overage)}${overage.unit})`,
+            details: overage.contributors.map((contributor) => ({
+                label: contributor.label,
+                value: `${formatChartNumber(contributor.amount)}${overage.unit} from ${formatChartNumber(contributor.grams)}g`,
+            })),
+        };
+    }
+
     function getEstimatedVolumeWarnings(): SmartWarning[] {
         const estimatedConversions = selectedFoods
             .map((food) => ({
@@ -914,7 +933,6 @@
                 />
             </div>
 
-            <NutrientOverageSummary overages={nutrientOverages} />
         </div>
     </section>
 </div>
@@ -1342,6 +1360,8 @@
     }
 
     .selected-ingredients-panel {
+        display: grid;
+        gap: $app-gap-sm;
         padding: $app-gap-sm;
         background: $app-bg;
         border: $app-border;
@@ -1363,13 +1383,16 @@
         display: flex;
         justify-content: space-between;
         gap: $app-gap-sm;
-        margin-bottom: $app-gap-sm;
     }
 
     .selected-ingredient-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
         gap: $app-gap-sm;
+        max-height: min(52vh, 30rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 0.2rem;
     }
 
     @media (max-width: 680px) {
@@ -1399,6 +1422,11 @@
 
         .goal-template-controls {
             min-width: 0;
+        }
+
+        .selected-ingredient-cards {
+            grid-template-columns: 1fr;
+            max-height: 42vh;
         }
 
         .add-nutrient-controls {

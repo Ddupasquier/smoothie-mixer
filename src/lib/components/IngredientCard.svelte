@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Popover from "$lib/components/Popover.svelte";
 	import type { FdcFood } from "$lib/utils/types";
+	import { slide } from "svelte/transition";
 	import {
 		SERVING_MEASURE_OPTIONS,
 		type ServingMeasureUnit,
@@ -36,6 +37,8 @@
 			unit: ServingMeasureUnit,
 		) => void;
 	} = $props();
+
+	let nutrientsOpen = $state(false);
 </script>
 
 <article class="ingredient-card">
@@ -96,10 +99,31 @@
 	</div>
 
 	{#if nutrientChips.length > 0}
-		<div class="ingredient-card__chips" aria-label="Top nutrient contributions">
-			{#each nutrientChips as chip}
-				<span>{chip.label} {chip.value}</span>
-			{/each}
+		<div class="ingredient-card__details">
+			<button
+				class="ingredient-card__details-toggle"
+				type="button"
+					aria-expanded={nutrientsOpen}
+					onclick={() => (nutrientsOpen = !nutrientsOpen)}
+				>
+					Top nutrients
+					<span
+						class="ingredient-card__chevron"
+						class:ingredient-card__chevron--open={nutrientsOpen}
+						aria-hidden="true"></span
+					>
+				</button>
+			{#if nutrientsOpen}
+				<div
+					class="ingredient-card__chips"
+					aria-label="Top nutrient contributions"
+					transition:slide={{ duration: 160 }}
+				>
+					{#each nutrientChips as chip}
+						<span>{chip.label} {chip.value}</span>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </article>
@@ -110,8 +134,8 @@
 	.ingredient-card {
 		position: relative;
 		display: grid;
-		gap: $app-gap-sm;
-		padding: $app-gap-sm;
+		gap: 0.45rem;
+		padding: 0.55rem;
 		min-width: 0;
 		background: $app-section-bg;
 		border: $app-border;
@@ -134,9 +158,9 @@
 		h5 {
 			margin: 0.1rem 0 0;
 			color: $app-primary;
-			font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+			font-size: clamp(0.8rem, 2.3vw, 0.9rem);
 			font-weight: 800;
-			line-height: 1.25;
+			line-height: 1.2;
 			overflow-wrap: anywhere;
 		}
 	}
@@ -178,7 +202,7 @@
 	.ingredient-card__controls {
 		display: grid;
 		grid-template-columns: minmax(4.25rem, 0.75fr) minmax(0, 1fr);
-		gap: 0.45rem;
+		gap: 0.35rem;
 		align-items: end;
 		min-width: 0;
 	}
@@ -203,6 +227,48 @@
 		border: $app-border;
 		border-radius: 7px;
 		font-size: 0.8rem;
+	}
+
+	.ingredient-card__details {
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.ingredient-card__details-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		width: fit-content;
+		padding: 0;
+		color: $app-primary;
+		background: transparent;
+		cursor: pointer;
+		font-size: 0.72rem;
+		font-weight: 800;
+	}
+
+	.ingredient-card__chevron {
+		display: inline-grid;
+		place-items: center;
+		width: 1rem;
+		height: 1rem;
+		background: $app-accent;
+		border-radius: 999px;
+		transition: transform 0.16s ease;
+		transform: rotate(-90deg);
+
+		&::before {
+			content: "";
+			width: 0.34rem;
+			height: 0.34rem;
+			border-right: 2px solid $app-primary;
+			border-bottom: 2px solid $app-primary;
+			transform: translateY(-0.08rem) rotate(45deg);
+		}
+	}
+
+	.ingredient-card__chevron--open {
+		transform: rotate(0deg);
 	}
 
 	.ingredient-card__meta {

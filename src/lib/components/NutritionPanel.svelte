@@ -1,6 +1,8 @@
 <script lang="ts">
 	import MoveItemPrompt from "$lib/components/MoveItemPrompt.svelte";
+	import NutritionConfidenceDetails from "$lib/components/NutritionConfidenceDetails.svelte";
 	import type { FdcFood } from "$lib/utils/types";
+	import { getFoodQuality } from "$lib/utils/foodQuality";
 	import {
 		addFoodToSmoothieList,
 		readSmoothieList,
@@ -21,6 +23,7 @@
 
 	import { vitalNutrients } from "../../variables/vitalNutrients";
 
+	const foodQuality = $derived(food ? getFoodQuality(food) : null);
 	const vitalRows = $derived(
 		food
 			? vitalNutrients.map((vn) => {
@@ -151,6 +154,9 @@
 	<div class="nf-title">Nutrition Facts</div>
 	{#if food?.description}
 		<div class="nf-food">{food.description}</div>
+	{/if}
+	{#if foodQuality && (foodQuality.label === "Partial" || foodQuality.label === "Limited")}
+		<NutritionConfidenceDetails quality={foodQuality} />
 	{/if}
 	<div class="nf-thick-divider"></div>
 	<div class="nf-columns">

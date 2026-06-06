@@ -6,6 +6,13 @@ export type SmartWarning = {
 	symbol: string;
 	title: string;
 	message: string;
+	detailSummary?: string;
+	details?: SmartWarningDetail[];
+};
+
+export type SmartWarningDetail = {
+	label: string;
+	value: string;
 };
 
 export type NutrientGoalWarningInput = {

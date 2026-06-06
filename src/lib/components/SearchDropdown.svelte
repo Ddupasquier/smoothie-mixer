@@ -1,4 +1,5 @@
 <script lang="ts">
+    import NutritionConfidenceDetails from "$lib/components/NutritionConfidenceDetails.svelte";
     import { getFoodQuality } from "$lib/utils/foodQuality";
     import type { FdcFood } from "$lib/utils/types";
     let { results, onSelect } = $props<{
@@ -42,6 +43,9 @@
                             </span>
                         {/if}
                     </span>
+                    {#if quality.label === "Partial" || quality.label === "Limited"}
+                        <NutritionConfidenceDetails {quality} compact />
+                    {/if}
                 </button>
             </li>
         {/each}

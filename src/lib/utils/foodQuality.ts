@@ -2,13 +2,21 @@ import { resolveFdcNutrient, type FdcNutrientSource } from "./fdcNutrients";
 import { NUTRIENT_IDS, type FdcFood } from "./types";
 
 const VITAL_NUTRIENTS = [
-	NUTRIENT_IDS.CALORIES,
-	NUTRIENT_IDS.FAT,
-	NUTRIENT_IDS.CARBS,
-	NUTRIENT_IDS.FIBER,
-	NUTRIENT_IDS.SUGAR,
-	NUTRIENT_IDS.PROTEIN,
+	{ id: NUTRIENT_IDS.CALORIES, label: "Calories" },
+	{ id: NUTRIENT_IDS.FAT, label: "Total Fat" },
+	{ id: NUTRIENT_IDS.CARBS, label: "Total Carb." },
+	{ id: NUTRIENT_IDS.FIBER, label: "Dietary Fiber" },
+	{ id: NUTRIENT_IDS.SUGAR, label: "Total Sugars" },
+	{ id: NUTRIENT_IDS.PROTEIN, label: "Protein" },
 ];
+
+export type NutrientQualityDetail = {
+	nutrientId: number;
+	label: string;
+	source: FdcNutrientSource;
+	sourceLabel: string;
+	detail: string;
+};
 
 export type FoodQuality = {
 	label: string;
@@ -18,6 +26,8 @@ export type FoodQuality = {
 	completeCount: number;
 	missingCount: number;
 	sourceCounts: Record<FdcNutrientSource, number>;
+	details: NutrientQualityDetail[];
+	needsDetails: boolean;
 };
 
 export function getFoodQuality(food: FdcFood): FoodQuality {
@@ -28,8 +38,18 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 		missing: 0,
 	};
 
-	for (const nutrientId of VITAL_NUTRIENTS) {
-		const source = resolveFdcNutrient(food, nutrientId).source;
+	const details = VITAL_NUTRIENTS.map((nutrient) => {
+		const resolved = resolveFdcNutrient(food, nutrient.id);
+		const detail = getNutrientQualityDetail(
+			nutrient.id,
+			nutrient.label,
+			resolved.source,
+		);
+		return detail;
+	});
+
+	for (const detail of details) {
+		const source = detail.source;
 		sourceCounts[source] += 1;
 	}
 
@@ -37,6 +57,7 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 	const completeCount = VITAL_NUTRIENTS.length - missingCount;
 	const score =
 		sourceCounts.exact * 3 + sourceCounts.fallback * 2 + sourceCounts.derived;
+	const needsDetails = missingCount > 0 || sourceCounts.derived > 0;
 
 	if (missingCount === 0 && sourceCounts.fallback === 0 && sourceCounts.derived === 0) {
 		return {
@@ -47,6 +68,8 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 			completeCount,
 			missingCount,
 			sourceCounts,
+			details,
+			needsDetails,
 		};
 	}
 
@@ -60,6 +83,8 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 			completeCount,
 			missingCount,
 			sourceCounts,
+			details,
+			needsDetails,
 		};
 	}
 
@@ -72,6 +97,8 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 			completeCount,
 			missingCount,
 			sourceCounts,
+			details,
+			needsDetails,
 		};
 	}
 
@@ -83,6 +110,8 @@ export function getFoodQuality(food: FdcFood): FoodQuality {
 		completeCount,
 		missingCount,
 		sourceCounts,
+		details,
+		needsDetails,
 	};
 }
 
@@ -90,4 +119,48 @@ export function compareFoodQuality(a: FdcFood, b: FdcFood) {
 	const qualityA = getFoodQuality(a);
 	const qualityB = getFoodQuality(b);
 	return qualityB.score - qualityA.score;
+}
+
+function getNutrientQualityDetail(
+	nutrientId: number,
+	label: string,
+	source: FdcNutrientSource,
+): NutrientQualityDetail {
+	if (source === "missing") {
+		return {
+			nutrientId,
+			label,
+			source,
+			sourceLabel: "Missing",
+			detail: "Not found in this FDC result.",
+		};
+	}
+
+	if (source === "derived") {
+		return {
+			nutrientId,
+			label,
+			source,
+			sourceLabel: "Derived",
+			detail: "Calculated from available macro nutrients.",
+		};
+	}
+
+	if (source === "fallback") {
+		return {
+			nutrientId,
+			label,
+			source,
+			sourceLabel: "Mapped",
+			detail: "Resolved from an alternate FDC nutrient field.",
+		};
+	}
+
+	return {
+		nutrientId,
+		label,
+		source,
+		sourceLabel: "Exact",
+		detail: "Matched the expected FDC nutrient field.",
+	};
 }
