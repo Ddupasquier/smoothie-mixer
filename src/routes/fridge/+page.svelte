@@ -31,7 +31,16 @@
         const food = list[idx];
         if (!food) return;
         removeFoodFromSmoothieList(key, food.fdcId);
+        if (selectedFood?.fdcId === food.fdcId) {
+            selectedFood = null;
+        }
         loadLists();
+    };
+
+    const getActiveIndices = (items: FdcFood[]) => {
+        if (!selectedFood) return [];
+        const index = items.findIndex((item) => item.fdcId === selectedFood?.fdcId);
+        return index === -1 ? [] : [index];
     };
 
     onMount(() => {
@@ -77,6 +86,8 @@
                 {#if onHand.length > 0}
                     <PillRow
                         pills={onHand.map((item) => item.description)}
+                        activeIndices={getActiveIndices(onHand)}
+                        onSelect={(idx) => handleSelect(onHand[idx])}
                         onRemove={(idx) =>
                             removeFromLocalStorageByIndex(
                                 MIX_STORAGE_KEYS.fridge,
@@ -95,6 +106,8 @@
                 {#if shoppingList.length > 0}
                     <PillRow
                         pills={shoppingList.map((item) => item.description)}
+                        activeIndices={getActiveIndices(shoppingList)}
+                        onSelect={(idx) => handleSelect(shoppingList[idx])}
                         onRemove={(idx) =>
                             removeFromLocalStorageByIndex(
                                 MIX_STORAGE_KEYS.shoppingList,

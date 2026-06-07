@@ -151,7 +151,10 @@
 </script>
 
 <section class="nf-label">
-	<div class="nf-title">Nutrition Facts</div>
+	<div class="nf-heading">
+		<div class="nf-title">Nutrition Facts</div>
+		<div class="nf-basis">Per 100g food data</div>
+	</div>
 	{#if food?.description}
 		<div class="nf-food">{food.description}</div>
 	{/if}
@@ -217,10 +220,6 @@
 			onCancel={movePrompt.onCancel}
 		/>
 	{/if}
-	<div class="nf-note">
-		Values are based on the serving sizes you entered (per 100 g raw food
-		data).
-	</div>
 </section>
 
 <style lang="scss">
@@ -236,15 +235,32 @@
 		box-shadow: none;
 		padding: 0.7rem 1.1rem 1.1rem 1.1rem;
 	}
+	.nf-heading {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.75rem;
+		border-bottom: 8px solid #111;
+		padding-bottom: 0.18rem;
+		margin-bottom: 0.1rem;
+	}
 	.nf-title {
 		font-size: 2.1rem;
 		font-weight: 900;
 		text-transform: uppercase;
 		letter-spacing: 0.01em;
-		border-bottom: 8px solid #111;
-		padding-bottom: 0.18rem;
-		margin-bottom: 0.1rem;
 		line-height: 1.1;
+	}
+	.nf-basis {
+		max-width: 6.8rem;
+		padding-top: 0.18rem;
+		color: #222;
+		font-size: 0.68rem;
+		font-weight: 800;
+		line-height: 1.15;
+		text-align: right;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
 	}
 	.nf-food {
 		font-size: 1.01rem;
@@ -333,15 +349,6 @@
 		font-size: 0.82em;
 		margin-left: 0.13em;
 		text-transform: uppercase;
-	}
-	.nf-note {
-		margin-top: 0.6rem;
-		font-size: 0.77rem;
-		color: #222;
-		line-height: 1.4;
-		letter-spacing: 0.01em;
-		border-top: 2px solid #111;
-		padding-top: 0.3rem;
 	}
 	.nf-actions {
 		display: flex;
