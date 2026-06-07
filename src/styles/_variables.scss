@@ -9,26 +9,35 @@ $app-gap-md: 1.1rem;
 $app-gap-sm: 0.5rem;
 $app-padding: 1.5rem;
 $app-radius: 10px;
-$app-bg: #fcf9f4;
-$app-section-bg: #f3ece3;
-$app-border: 1.5px solid #d1c4d3;
-$app-muted: #756c64;
-$app-primary: #5f564f;
-$app-accent: #ccd5e2;
-$app-danger-bg: #e4c3c4;
-$app-success-bg: #d0d9ca;
-$app-warning-bg: #efd3c2;
-$app-warning-border: 1.5px solid $app-danger-bg;
+
+$app-bg: #fcf9f4; // Cloud Cream
+$app-section-bg: #f5eee5; // Oat Cream
+
+$app-border: 1.5px solid #d8c9d9;
+$app-muted: #726963;
+$app-primary: #4f4842;
+
+$app-accent: #b7c8e3; // Blueberry pop
+
+$app-danger-bg: #e7b0b8; // Strawberry smoothie
+$app-success-bg: #c5d8be; // Pistachio smoothie
+$app-warning-bg: #efc6a9; // Peach smoothie
+
+$app-warning-border: 1.5px solid #d89ca5;
 $app-warning-text: $app-primary;
-$app-warning-strong: #7a4f43;
+$app-warning-strong: #9c5f46;
+
 $app-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+
 $app-card-radius: 12px;
 $app-card-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
+
 $app-border-strong: 3.5px solid #111;
 $app-border-divider: 2px solid #111;
 $app-border-thick: 4px solid #111;
 $app-border-highlight: 8px solid #111;
-$app-btn-bg: #a0968d;
-$app-btn-bg-hover: #756c64;
-$app-btn-disabled: #d1c4d3;
+
+$app-btn-bg: #c894a7; // Acai Berry
+$app-btn-bg-hover: #ae7288;
+$app-btn-disabled: #d8c9d9;
 $app-btn-text: #fcf9f4;
