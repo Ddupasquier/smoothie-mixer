@@ -3,41 +3,172 @@
 // Base variables (keep these as the canonical defaults). To use alternate
 // palettes, restore a commented block here manually.
 // -----------------------------------------------------------------------------
+
+// Palette primitives
+// -----------------------------------------------------------------------------
+// Page canvas color. Use for the app body, large empty areas, card interiors
+// that need to feel lighter than the surrounding section, and high-contrast text
+// on darker buttons.
+$color-cloud-cream: #fcf9f4;
+
+// Primary surface color. Use for cards, panels, saved-drink rows, form sections,
+// modal bodies, and other grouped content blocks that sit on the page canvas.
+$color-oat-cream: #f5eee5;
+
+// Soft structural border color. Use for card outlines, input borders, dividers,
+// disabled button backgrounds, subtle section separators, and non-emphasis
+// pill borders.
+$color-orchid-mist: #d8c9d9;
+
+// Muted copy color. Use for helper text, dates, captions, secondary nutrient
+// values, descriptions, and any text that should be readable but visually quiet.
+$color-warm-stone: #726963;
+
+// Primary readable text color. Use for headings, strong labels, active controls,
+// selected pills, graph labels, and any UI text that needs clear emphasis.
+$color-dark-taupe: #4f4842;
+
+// Cool accent fill. Use for neutral pills, secondary buttons, remove buttons,
+// graph/info accents, and low-priority highlighted UI that should remain calm.
+$color-blueberry-milk: #b7c8e3;
+
+// Danger or over-limit fill. Use for error symbols, exceeded-goal indicators,
+// destructive warning backgrounds, and nutrition warnings that require attention.
+$color-strawberry-cream: #e7b0b8;
+
+// Success or close-to-goal fill. Use for successful feedback, saved/added states,
+// positive badges, and goal-review states where the user is within target range.
+$color-pistachio-cream: #c5d8be;
+
+// Warning or estimate fill. Use for approximate volume-conversion notices,
+// caution badges, popover triggers, and warning states that are not hard errors.
+$color-peach-cream: #efc6a9;
+
+// Strong warning border color. Use for outlines around warning and over-goal
+// panels where the peach fill needs more definition than the default border.
+$color-dusty-rose: #d89ca5;
+
+// Strong warning text color. Use for overage amounts, urgent warning labels,
+// and emphasized caution copy that needs more contrast than the warning fill.
+$color-cinnamon-clay: #9c5f46;
+
+// Primary action fill. Use for main CTA buttons such as Save, Load, Add, and
+// confirmation actions where the user is committing a change.
+$color-acai-mauve: #c894a7;
+
+// Primary action hover fill. Use only for hover/active states of primary CTA
+// buttons so interactive states are visibly related but clearly distinct.
+$color-acai-mauve-dark: #ae7288;
+
+// Nutrition-label ink. Use for the intentionally stark nutrition-facts component
+// borders and text where the design should mimic a printed food label.
+$color-ink-black: #111;
+
+// App layout
+// -----------------------------------------------------------------------------
+// Maximum width for page-level content containers.
 $app-max-width: 600px;
+
+// Large spacing token for major vertical separation between unrelated sections.
 $app-gap-lg: 1.5rem;
+
+// Medium spacing token for card interiors and related section gaps.
 $app-gap-md: 1.1rem;
+
+// Small spacing token for dense controls, pills, compact rows, and helper text.
 $app-gap-sm: 0.5rem;
+
+// Standard page/card padding for primary app sections.
 $app-padding: 1.5rem;
+
+// Standard radius for controls and compact surfaces.
 $app-radius: 10px;
 
-$app-bg: #fcf9f4; // Cloud Cream
-$app-section-bg: #f5eee5; // Oat Cream
+// App color roles
+// -----------------------------------------------------------------------------
+// Default app background. Applied to pages and light nested areas that need to
+// sit behind the oat card surfaces.
+$app-bg: $color-cloud-cream;
 
-$app-border: 1.5px solid #d8c9d9;
-$app-muted: #726963;
-$app-primary: #4f4842;
+// Default grouped-content background. Applied to cards, panels, form sections,
+// saved drink cards, and modal surfaces.
+$app-section-bg: $color-oat-cream;
 
-$app-accent: #b7c8e3; // Blueberry pop
+// Default subtle border. Applied to cards, inputs, pills, graph containers,
+// popovers, and section boundaries.
+$app-border: 1.5px solid $color-orchid-mist;
 
-$app-danger-bg: #e7b0b8; // Strawberry smoothie
-$app-success-bg: #c5d8be; // Pistachio smoothie
-$app-warning-bg: #efc6a9; // Peach smoothie
+// Default secondary text. Applied to helper copy, dates, captions, empty-state
+// descriptions, and less important numeric values.
+$app-muted: $color-warm-stone;
 
-$app-warning-border: 1.5px solid #d89ca5;
+// Default primary text/control color. Applied to headings, labels, active pills,
+// graph labels, primary icons, and selected-state foregrounds.
+$app-primary: $color-dark-taupe;
+
+// Default cool accent. Applied to neutral pills, secondary buttons, info badges,
+// remove buttons, and graph/info affordances.
+$app-accent: $color-blueberry-milk;
+
+// Danger/over-goal background. Applied to exceeded-goal warnings, danger icons,
+// and states where nutritional totals are meaningfully over target.
+$app-danger-bg: $color-strawberry-cream;
+
+// Success/on-target background. Applied to successful add/save feedback and
+// close-to-goal badges.
+$app-success-bg: $color-pistachio-cream;
+
+// Warning/estimate background. Applied to caution panels, estimate badges,
+// popover triggers, and non-critical warning surfaces.
+$app-warning-bg: $color-peach-cream;
+
+// Warning panel border. Applied to warning cards and over-goal panels that need
+// a stronger edge than the default app border.
+$app-warning-border: 1.5px solid $color-dusty-rose;
+
+// Warning panel text. Applied to warning section headings and copy; currently
+// tied to primary text for readability against soft warning backgrounds.
 $app-warning-text: $app-primary;
-$app-warning-strong: #9c5f46;
 
+// Strong warning emphasis. Applied to overage numbers, missing-data labels,
+// and highlighted warning words.
+$app-warning-strong: $color-cinnamon-clay;
+
+// Default soft elevation. Applied to larger panels/cards that need separation
+// from the page without feeling heavy.
 $app-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
 
+// Card radius for larger surfaces like saved drinks, mix panels, graph panels,
+// and ingredient cards.
 $app-card-radius: 12px;
+
+// Card shadow for compact repeated cards and smaller surfaces.
 $app-card-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
 
-$app-border-strong: 3.5px solid #111;
-$app-border-divider: 2px solid #111;
-$app-border-thick: 4px solid #111;
-$app-border-highlight: 8px solid #111;
+// Nutrition label heavy outer border. Keep intentionally high-contrast.
+$app-border-strong: 3.5px solid $color-ink-black;
 
-$app-btn-bg: #c894a7; // Acai Berry
-$app-btn-bg-hover: #ae7288;
-$app-btn-disabled: #d8c9d9;
-$app-btn-text: #fcf9f4;
+// Nutrition label divider border. Use for medium visual breaks inside labels.
+$app-border-divider: 2px solid $color-ink-black;
+
+// Nutrition label thick divider. Use for major nutrient-label rules.
+$app-border-thick: 4px solid $color-ink-black;
+
+// Nutrition label headline divider. Use for the heaviest printed-label rule.
+$app-border-highlight: 8px solid $color-ink-black;
+
+// Primary button background. Applied to main actions such as Save, Load, Add,
+// confirmation, and other commitment buttons.
+$app-btn-bg: $color-acai-mauve;
+
+// Primary button hover background. Applied to hover/active states for primary
+// action buttons.
+$app-btn-bg-hover: $color-acai-mauve-dark;
+
+// Disabled button background. Applied to inactive controls that should remain
+// visible but clearly unavailable.
+$app-btn-disabled: $color-orchid-mist;
+
+// Button foreground text. Applied to primary buttons and selected states that
+// sit on dark or saturated backgrounds.
+$app-btn-text: $color-cloud-cream;
