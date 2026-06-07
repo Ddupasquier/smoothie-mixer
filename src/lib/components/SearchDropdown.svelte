@@ -18,6 +18,7 @@
             <li class="result-item">
                 <button
                     class="result-btn"
+                    class:result-btn--custom={food.customFood}
                     role="option"
                     aria-selected="false"
                     onclick={() => onSelect(food)}
@@ -33,7 +34,11 @@
                             {quality.symbol} {quality.label}
                         </span>
                         {#if food.dataType}
-                            <span class="result-badge result-badge--muted">
+                            <span
+                                class="result-badge"
+                                class:result-badge--custom={food.customFood}
+                                class:result-badge--muted={!food.customFood}
+                            >
                                 {food.dataType}
                             </span>
                         {/if}
@@ -52,7 +57,9 @@
     </ul>
 {/if}
 
-<style>
+<style lang="scss">
+    @use "../../styles/variables" as *;
+
     .results-list {
         list-style: none;
         margin-top: 0.4rem;
@@ -83,6 +90,9 @@
         background: var(--color-primary-light);
         outline: none;
     }
+    .result-btn--custom {
+        box-shadow: inset 0.28rem 0 0 $app-custom-strong;
+    }
     .result-name {
         font-size: 0.9rem;
         font-weight: 500;
@@ -112,5 +122,10 @@
     .result-badge--muted {
         color: var(--color-text-muted);
         background: var(--color-surface);
+    }
+    .result-badge--custom {
+        color: $app-btn-text;
+        background: $app-custom-strong;
+        border-color: $app-custom-strong;
     }
 </style>

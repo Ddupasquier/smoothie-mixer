@@ -673,6 +673,9 @@
                                             : -1,
                                     )
                                     .filter((i) => i !== -1)}
+                                customIndices={fridgeItems
+                                    .map((food, i) => (food.customFood ? i : -1))
+                                    .filter((i) => i !== -1)}
                             />
                         {:else}
                             <p>No fridge items yet.</p>
@@ -696,6 +699,9 @@
                                             ? i
                                             : -1,
                                     )
+                                    .filter((i) => i !== -1)}
+                                customIndices={shoppingItems
+                                    .map((food, i) => (food.customFood ? i : -1))
                                     .filter((i) => i !== -1)}
                             />
                         {:else}

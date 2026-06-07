@@ -5,28 +5,33 @@
         onRemove,
         onSelect,
         activeIndices = [],
+        customIndices = [],
     } = $props<{
         pills: string[];
         onRemove: (idx: number) => void;
         onSelect?: (idx: number) => void;
         activeIndices?: number[];
+        customIndices?: number[];
     }>();
 
     type ArrangedPill = {
         label: string;
         index: number;
         active: boolean;
+        custom: boolean;
     };
 
     const arrangePills = (
         pillLabels: string[],
         selectedIndices: number[],
+        userCreatedIndices: number[],
     ): ArrangedPill[] => {
         return pillLabels
             .map((label, index) => ({
                 label,
                 index,
                 active: selectedIndices.includes(index),
+                custom: userCreatedIndices.includes(index),
             }))
             .sort((a, b) => {
                 if (a.active !== b.active) return a.active ? -1 : 1;
@@ -37,7 +42,7 @@
             });
     };
 
-    const arrangedPills = $derived(arrangePills(pills, activeIndices));
+    const arrangedPills = $derived(arrangePills(pills, activeIndices, customIndices));
 </script>
 
 <div class="pill-row">
@@ -47,6 +52,7 @@
             onRemove={() => onRemove(pill.index)}
             onSelect={() => onSelect && onSelect(pill.index)}
             active={pill.active}
+            custom={pill.custom}
         />
     {/each}
 </div>

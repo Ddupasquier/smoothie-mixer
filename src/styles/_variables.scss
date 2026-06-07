@@ -60,6 +60,14 @@ $color-acai-mauve: #c894a7;
 // buttons so interactive states are visibly related but clearly distinct.
 $color-acai-mauve-dark: #ae7288;
 
+// User-created ingredient fill. Use only for custom foods entered manually by
+// the user so they are visually distinct from API-sourced ingredients.
+$color-lavender-smoothie: #cbb8e8;
+
+// User-created ingredient border/emphasis. Use with lavender smoothie for
+// custom-food pills, badges, and selected ingredient cards.
+$color-lavender-smoothie-dark: #7b5fa3;
+
 // Nutrition-label ink. Use for the intentionally stark nutrition-facts component
 // borders and text where the design should mimic a printed food label.
 $color-ink-black: #111;
@@ -109,6 +117,14 @@ $app-primary: $color-dark-taupe;
 // Default cool accent. Applied to neutral pills, secondary buttons, info badges,
 // remove buttons, and graph/info affordances.
 $app-accent: $color-blueberry-milk;
+
+// Custom ingredient background. Applied to manually added/user-created foods in
+// pills, result badges, ingredient cards, and saved drink ingredient chips.
+$app-custom-bg: $color-lavender-smoothie;
+
+// Custom ingredient emphasis. Applied to borders, text, and badges that identify
+// user-created ingredients across the app.
+$app-custom-strong: $color-lavender-smoothie-dark;
 
 // Danger/over-goal background. Applied to exceeded-goal warnings, danger icons,
 // and states where nutritional totals are meaningfully over target.

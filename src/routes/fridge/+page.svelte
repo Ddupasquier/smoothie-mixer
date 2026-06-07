@@ -87,6 +87,9 @@
                     <PillRow
                         pills={onHand.map((item) => item.description)}
                         activeIndices={getActiveIndices(onHand)}
+                        customIndices={onHand
+                            .map((food, i) => (food.customFood ? i : -1))
+                            .filter((i) => i !== -1)}
                         onSelect={(idx) => handleSelect(onHand[idx])}
                         onRemove={(idx) =>
                             removeFromLocalStorageByIndex(
@@ -107,6 +110,9 @@
                     <PillRow
                         pills={shoppingList.map((item) => item.description)}
                         activeIndices={getActiveIndices(shoppingList)}
+                        customIndices={shoppingList
+                            .map((food, i) => (food.customFood ? i : -1))
+                            .filter((i) => i !== -1)}
                         onSelect={(idx) => handleSelect(shoppingList[idx])}
                         onRemove={(idx) =>
                             removeFromLocalStorageByIndex(

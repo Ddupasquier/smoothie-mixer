@@ -156,7 +156,12 @@
 		<div class="nf-basis">Per 100g food data</div>
 	</div>
 	{#if food?.description}
-		<div class="nf-food">{food.description}</div>
+		<div class="nf-food-row">
+			<div class="nf-food">{food.description}</div>
+			{#if food.customFood}
+				<span class="nf-custom-badge">Custom</span>
+			{/if}
+		</div>
 	{/if}
 	{#if foodQuality && (foodQuality.label === "Partial" || foodQuality.label === "Limited")}
 		<NutritionConfidenceDetails quality={foodQuality} />
@@ -262,11 +267,29 @@
 		text-transform: uppercase;
 		letter-spacing: 0.02em;
 	}
+	.nf-food-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-bottom: 0.2rem;
+	}
 	.nf-food {
 		font-size: 1.01rem;
 		font-weight: 600;
-		margin-bottom: 0.2rem;
 		color: #222;
+	}
+	.nf-custom-badge {
+		width: fit-content;
+		padding: 0.08rem 0.4rem;
+		color: $app-btn-text;
+		background: $app-custom-strong;
+		border-radius: 999px;
+		font-family: Arial, sans-serif;
+		font-size: 0.64rem;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 	.nf-thick-divider {
 		border-bottom: 4px solid #111;

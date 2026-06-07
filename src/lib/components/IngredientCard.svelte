@@ -37,10 +37,15 @@
 	let nutrientsOpen = $state(false);
 </script>
 
-<article class="ingredient-card">
+<article class="ingredient-card" class:ingredient-card--custom={food.customFood}>
 	<header class="ingredient-card__header">
 		<div>
-			<span class="ingredient-card__source">{sourceLabel}</span>
+			<div class="ingredient-card__badges">
+				<span class="ingredient-card__source">{sourceLabel}</span>
+				{#if food.customFood}
+					<span class="ingredient-card__custom-badge">Custom</span>
+				{/if}
+			</div>
 			<h5>{food.description}</h5>
 		</div>
 		<button
@@ -139,6 +144,11 @@
 		box-shadow: $app-card-shadow;
 	}
 
+	.ingredient-card--custom {
+		border-color: $app-custom-strong;
+		box-shadow: 0 0 0 2px rgba(123, 95, 163, 0.12);
+	}
+
 	.ingredient-card__header {
 		display: flex;
 		justify-content: space-between;
@@ -161,7 +171,14 @@
 		}
 	}
 
-	.ingredient-card__source {
+	.ingredient-card__badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+	}
+
+	.ingredient-card__source,
+	.ingredient-card__custom-badge {
 		display: inline-flex;
 		width: fit-content;
 		padding: 0.1rem 0.45rem;
@@ -173,6 +190,12 @@
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
+	}
+
+	.ingredient-card__custom-badge {
+		color: $app-btn-text;
+		background: $app-custom-strong;
+		border-color: $app-custom-strong;
 	}
 
 	.ingredient-card__remove {
