@@ -23,14 +23,6 @@
         }).format(new Date(timestamp));
     };
 
-    const getIngredientSummary = (drink: SavedDrink) => {
-        if (drink.foods.length === 0) return "No ingredients";
-        return drink.foods
-            .slice(0, 3)
-            .map((food) => food.description)
-            .join(", ");
-    };
-
     const loadDrink = (drink: SavedDrink) => {
         restoreSavedDrinkToMix(drink);
         goto("/mix");
@@ -70,8 +62,23 @@
                         <p>{formatDate(drink.createdAt)}</p>
                     </div>
                     <div class="saved-card__details">
-                        <span>{drink.foods.length} ingredients</span>
-                        <p>{getIngredientSummary(drink)}</p>
+                        <span class="saved-card__count">
+                            {drink.foods.length} ingredients
+                        </span>
+                        {#if drink.foods.length > 0}
+                            <div
+                                class="saved-card__ingredients"
+                                aria-label={`${drink.name} ingredients`}
+                            >
+                                {#each drink.foods as food, index (`${food.fdcId}-${index}`)}
+                                    <span class="saved-card__ingredient-pill">
+                                        {food.description}
+                                    </span>
+                                {/each}
+                            </div>
+                        {:else}
+                            <p>No ingredients saved with this drink.</p>
+                        {/if}
                     </div>
                     <div class="saved-card__actions">
                         <button type="button" onclick={() => loadDrink(drink)}>
@@ -154,7 +161,7 @@
         display: grid;
         gap: 0.2rem;
 
-        span {
+        .saved-card__count {
             width: fit-content;
             padding: 0.16rem 0.5rem;
             color: $app-primary;
@@ -164,6 +171,28 @@
             font-size: 0.72rem;
             font-weight: 800;
         }
+    }
+
+    .saved-card__ingredients {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        max-height: 7.5rem;
+        overflow-y: auto;
+        padding: 0.1rem 0.1rem 0.15rem 0;
+    }
+
+    .saved-card__ingredient-pill {
+        max-width: 100%;
+        padding: 0.22rem 0.55rem;
+        color: $app-primary;
+        background: $app-bg;
+        border: $app-border;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
     }
 
     .saved-card__actions {
