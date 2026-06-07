@@ -48,7 +48,7 @@
             .prompt-btn {
                 background: $app-accent;
                 color: $app-primary;
-                border: 1px solid #b3d3f6;
+                border: 1px solid $app-accent;
                 border-radius: 999px;
                 padding: 0.5em 1.3em;
                 font-size: 1em;

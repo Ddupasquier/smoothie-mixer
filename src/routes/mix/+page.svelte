@@ -878,10 +878,10 @@
         text-align: right;
         white-space: nowrap;
 
-        &.near {
-            color: #166534;
-            background: #dcfce7;
-        }
+		&.near {
+			color: $app-primary;
+			background: $app-success-bg;
+		}
 
         &.under {
             color: $app-primary;

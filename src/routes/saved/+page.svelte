@@ -159,7 +159,7 @@
             padding: 0.16rem 0.5rem;
             color: $app-primary;
             background: $app-accent;
-            border: 1px solid #b3d3f6;
+            border: 1px solid $app-accent;
             border-radius: 999px;
             font-size: 0.72rem;
             font-weight: 800;

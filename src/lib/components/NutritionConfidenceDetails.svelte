@@ -122,11 +122,11 @@
 	}
 
 	.confidence-detail--missing strong {
-		color: #991b1b;
+		color: $app-warning-strong;
 	}
 
 	.confidence-detail--derived strong {
-		color: #92400e;
+		color: $app-primary;
 	}
 
 	.confidence-detail--fallback strong {

@@ -1,7 +1,3 @@
-$app-warning-bg: #fff7ed;
-$app-warning-border: 1.5px solid #fed7aa;
-$app-warning-text: #9a3412;
-$app-warning-strong: #c2410c;
 // Global SCSS variables for smoothie-mixer
 // -----------------------------------------------------------------------------
 // Base variables (keep these as the canonical defaults). To use alternate
@@ -13,20 +9,26 @@ $app-gap-md: 1.1rem;
 $app-gap-sm: 0.5rem;
 $app-padding: 1.5rem;
 $app-radius: 10px;
-$app-bg: #fafbfc;
-$app-section-bg: #fff;
-$app-border: 1.5px solid #e3e7ee;
-$app-muted: #7a8599;
+$app-bg: #fcf9f4;
+$app-section-bg: #f3ece3;
+$app-border: 1.5px solid #d1c4d3;
+$app-muted: #756c64;
+$app-primary: #5f564f;
+$app-accent: #ccd5e2;
+$app-danger-bg: #e4c3c4;
+$app-success-bg: #d0d9ca;
+$app-warning-bg: #efd3c2;
+$app-warning-border: 1.5px solid $app-danger-bg;
+$app-warning-text: $app-primary;
+$app-warning-strong: #7a4f43;
 $app-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
 $app-card-radius: 12px;
 $app-card-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
-$app-primary: #1a3a5a;
-$app-accent: #e6f0fa;
 $app-border-strong: 3.5px solid #111;
 $app-border-divider: 2px solid #111;
 $app-border-thick: 4px solid #111;
 $app-border-highlight: 8px solid #111;
-$app-btn-bg: #222;
-$app-btn-bg-hover: #444;
-$app-btn-disabled: #aaa;
-$app-btn-text: #fff;
+$app-btn-bg: #a0968d;
+$app-btn-bg-hover: #756c64;
+$app-btn-disabled: #d1c4d3;
+$app-btn-text: #fcf9f4;

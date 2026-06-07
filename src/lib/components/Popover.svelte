@@ -50,9 +50,9 @@
 
 	.popover__trigger {
 		padding: 0.25rem 0.55rem;
-		color: #9a3412;
-		background: #ffedd5;
-		border: 1px solid #fed7aa;
+		color: $app-primary;
+		background: $app-warning-bg;
+		border: $app-warning-border;
 		border-radius: 999px;
 		font-size: 0.78rem;
 		font-weight: 800;

@@ -224,6 +224,8 @@
 </section>
 
 <style lang="scss">
+	@use "../../styles/variables" as *;
+
 	.nf-label {
 		background: #fff;
 		border: 3.5px solid #111;
@@ -354,7 +356,7 @@
 		gap: 0.35rem;
 		min-height: 1.3rem;
 		margin: 0.2rem 0;
-		color: #166534;
+		color: $app-primary;
 		font-family: Arial, sans-serif;
 		font-size: 0.86rem;
 		font-weight: 800;
@@ -365,8 +367,8 @@
 			place-items: center;
 			width: 1.05rem;
 			height: 1.05rem;
-			color: #fff;
-			background: #16a34a;
+			color: $app-primary;
+			background: $app-success-bg;
 			border-radius: 999px;
 			font-size: 0.72rem;
 			line-height: 1;

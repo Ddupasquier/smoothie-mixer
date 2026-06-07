@@ -147,7 +147,7 @@
 				grid-template-columns: 1fr;
 				gap: 0.15rem;
 				padding: 0.4rem 0;
-				border-bottom: 1px solid #e3e7ee;
+				border-bottom: $app-border;
 				border-radius: 0;
 			}
 

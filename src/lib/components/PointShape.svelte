@@ -280,6 +280,8 @@
 </svg>
 
 <style lang="scss">
+	@use "../../styles/variables" as *;
+
 	.point-shape {
 		display: block;
 		overflow: visible;
@@ -291,13 +293,13 @@
 	}
 
 	.point-shape__label {
-		fill: #1a3a5a;
+		fill: $app-primary;
 		font-size: 0.72rem;
 		font-weight: 700;
 	}
 
 	.point-shape__value-label {
-		fill: rgba(26, 58, 90, 0.72);
+		fill: $app-muted;
 		font-size: 0.54rem;
 		font-weight: 800;
 		letter-spacing: 0.01em;

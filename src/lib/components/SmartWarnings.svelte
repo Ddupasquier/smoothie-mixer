@@ -94,25 +94,25 @@
 	}
 
 	.smart-warning--danger {
-		border-color: #fecaca;
+		border-color: $app-danger-bg;
 
 		.smart-warning__symbol {
-			color: #991b1b;
-			background: #fee2e2;
+			color: $app-primary;
+			background: $app-danger-bg;
 		}
 	}
 
 	.smart-warning--warning {
-		border-color: #fde68a;
+		border-color: $app-warning-bg;
 
 		.smart-warning__symbol {
-			color: #92400e;
-			background: #fef3c7;
+			color: $app-primary;
+			background: $app-warning-bg;
 		}
 	}
 
 	.smart-warning--info {
-		border-color: #bfdbfe;
+		border-color: $app-accent;
 
 		.smart-warning__symbol {
 			color: $app-primary;
@@ -156,7 +156,7 @@
 			display: grid;
 			gap: 0.1rem;
 			padding-bottom: 0.4rem;
-			border-bottom: 1px solid #e3e7ee;
+			border-bottom: $app-border;
 		}
 
 		li:last-child {

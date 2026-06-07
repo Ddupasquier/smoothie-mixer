@@ -46,19 +46,24 @@
         padding: 0.18em 0.7em 0.18em 0.7em;
         font-size: 0.97em;
         font-weight: 500;
-        border: 1px solid #b3d3f6;
+        border: 1px solid $app-accent;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
         margin-bottom: 0.1em;
         cursor: pointer;
         transition: background 0.15s;
     }
     .pill.active {
-        /* Active state: slightly darker than $app-accent for contrast */
-        background: #c6dff0; /* fallback darker tint */
-        color: #fff;
+        background: $app-primary;
+        color: $app-btn-text;
+        border-color: $app-primary;
+
+        .pill-remove {
+            color: $app-btn-text;
+        }
     }
+
     .pill:active {
-        background: #b0cfe6;
+        background: $app-primary;
     }
     .pill-remove {
         background: none;

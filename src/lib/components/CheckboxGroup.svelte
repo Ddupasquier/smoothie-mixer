@@ -64,7 +64,7 @@
             box-shadow 0.15s;
 
         &:hover {
-            border-color: #b3d3f6;
+            border-color: $app-accent;
             background: $app-accent;
         }
 
