@@ -36,7 +36,6 @@
 </span>
 
 <style lang="scss">
-    @use "sass:color";
     @use "../../styles/variables" as *;
     .pill {
         display: inline-flex;
@@ -54,11 +53,12 @@
         transition: background 0.15s;
     }
     .pill.active {
-        background: color.adjust($app-accent, $lightness: -18%);
+        /* Active state: slightly darker than $app-accent for contrast */
+        background: #c6dff0; /* fallback darker tint */
         color: #fff;
     }
     .pill:active {
-        background: color.adjust($app-accent, $lightness: -25%);
+        background: #b0cfe6;
     }
     .pill-remove {
         background: none;

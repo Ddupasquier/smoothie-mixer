@@ -3,6 +3,10 @@ $app-warning-border: 1.5px solid #fed7aa;
 $app-warning-text: #9a3412;
 $app-warning-strong: #c2410c;
 // Global SCSS variables for smoothie-mixer
+// -----------------------------------------------------------------------------
+// Base variables (keep these as the canonical defaults). To use alternate
+// palettes, restore a commented block here manually.
+// -----------------------------------------------------------------------------
 $app-max-width: 600px;
 $app-gap-lg: 1.5rem;
 $app-gap-md: 1.1rem;
