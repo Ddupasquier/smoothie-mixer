@@ -71,7 +71,10 @@
                                 aria-label={`${drink.name} ingredients`}
                             >
                                 {#each drink.foods as food, index (`${food.fdcId}-${index}`)}
-                                    <span class="saved-card__ingredient-pill">
+                                    <span
+                                        class="saved-card__ingredient-pill"
+                                        class:saved-card__ingredient-pill--custom={food.customFood}
+                                    >
                                         {food.description}
                                     </span>
                                 {/each}
@@ -193,6 +196,26 @@
         font-weight: 700;
         line-height: 1.25;
         overflow-wrap: anywhere;
+    }
+
+    .saved-card__ingredient-pill--custom {
+        background: $app-custom-bg;
+        border-color: $app-custom-strong;
+
+        &::after {
+            content: "Custom";
+            display: inline-block;
+            margin-left: 0.35rem;
+            padding: 0.04rem 0.32rem;
+            color: $app-btn-text;
+            background: $app-custom-strong;
+            border-radius: 999px;
+            font-size: 0.68em;
+            font-weight: 900;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
     }
 
     .saved-card__actions {
