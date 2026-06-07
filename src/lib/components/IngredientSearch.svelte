@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { FdcFood } from "$lib/utils/types";
 	import { searchFoods } from "$lib/utils/fdc";
+	import {
+		CUSTOM_FOODS_CHANGED_EVENT,
+		searchCustomFoods,
+	} from "$lib/utils/customFoods";
 	import { compareFoodQuality } from "$lib/utils/foodQuality";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 	import PillRow from "./PillRow.svelte";
 	import SearchDropdown from "./SearchDropdown.svelte";
 
@@ -14,6 +18,15 @@
 	let error = $state("");
 	let debounceTimer: ReturnType<typeof setTimeout>;
 	const dispatch = createEventDispatcher();
+
+	const mergeResults = (customResults: FdcFood[], apiResults: FdcFood[]) => {
+		const seen = new Set<number>();
+		return [...customResults, ...apiResults].filter((food) => {
+			if (seen.has(food.fdcId)) return false;
+			seen.add(food.fdcId);
+			return true;
+		});
+	};
 
 	const sortByQualityThenName = (items: FdcFood[]) => {
 		return items.sort((a, b) => {
@@ -81,15 +94,16 @@
 		}
 		debounceTimer = setTimeout(async () => {
 			loading = true;
+			const customResults = searchCustomFoods(searchString);
 			try {
-				results = await searchFoods(searchString);
+				results = mergeResults(customResults, await searchFoods(searchString));
 				dispatch("results", { results, query: searchString });
 			} catch (e) {
 				error =
 					e instanceof Error
 						? e.message
 						: "Search failed. Check your API key in .env.";
-				results = [];
+				results = customResults;
 				dispatch("results", { results, query: searchString });
 			} finally {
 				loading = false;
@@ -111,6 +125,24 @@
 		query = "";
 		results = [];
 	};
+
+	onMount(() => {
+		const refreshCustomResults = () => {
+			const searchString = [...pills, query.trim()].filter(Boolean).join(" ");
+			if (!searchString) return;
+			results = mergeResults(searchCustomFoods(searchString), results);
+		};
+
+		window.addEventListener(CUSTOM_FOODS_CHANGED_EVENT, refreshCustomResults);
+		window.addEventListener("storage", refreshCustomResults);
+		return () => {
+			window.removeEventListener(
+				CUSTOM_FOODS_CHANGED_EVENT,
+				refreshCustomResults,
+			);
+			window.removeEventListener("storage", refreshCustomResults);
+		};
+	});
 </script>
 
 <div class="search-wrap">

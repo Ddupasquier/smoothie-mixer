@@ -18,6 +18,13 @@ export interface FdcFood {
     dataType?: string;
     servingSize?: number;
     servingSizeUnit?: string;
+    customFood?: boolean;
+    customServingLabel?: string;
+    customServingWeightGrams?: number;
+    customDensityGramsPerMilliliter?: number;
+    customDensityLabel?: string;
+    customDensityVariancePercent?: number;
+    customDensityConfidence?: "known" | "estimated" | "rough";
 }
 
 /** The FDC foods/search response envelope */

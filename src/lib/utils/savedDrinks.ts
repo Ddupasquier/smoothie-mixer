@@ -7,6 +7,7 @@ import {
 	readSmoothieList,
 	writeSmoothieList,
 } from "$lib/utils/smoothieLists";
+import { compactFood } from "$lib/utils/foodRecords";
 import type { FdcFood } from "$lib/utils/types";
 
 export const SAVED_DRINKS_STORAGE_KEY = "smoothie-saved-drinks";
@@ -34,25 +35,6 @@ export type SavedDrinkInput = Omit<SavedDrink, "id" | "createdAt">;
 
 const dispatchSavedDrinksChanged = () => {
 	window.dispatchEvent(new CustomEvent(SAVED_DRINKS_CHANGED_EVENT));
-};
-
-const compactFood = (food: FdcFood): FdcFood => {
-	return {
-		fdcId: food.fdcId,
-		description: food.description,
-		brandOwner: food.brandOwner,
-		foodCategory: food.foodCategory,
-		dataType: food.dataType,
-		servingSize: food.servingSize,
-		servingSizeUnit: food.servingSizeUnit,
-		foodNutrients: food.foodNutrients.map((nutrient) => ({
-			nutrientId: nutrient.nutrientId,
-			nutrientName: nutrient.nutrientName,
-			nutrientNumber: nutrient.nutrientNumber,
-			unitName: nutrient.unitName,
-			value: nutrient.value,
-		})),
-	};
 };
 
 const normalizeDrink = (value: SavedDrink): SavedDrink => {

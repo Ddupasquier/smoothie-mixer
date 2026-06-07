@@ -118,6 +118,15 @@ export const getServingMeasureDimension = (
 };
 
 export const getDensityEstimate = (food?: FdcFood): DensityEstimate => {
+	if (food?.customDensityGramsPerMilliliter) {
+		return {
+			gramsPerMilliliter: food.customDensityGramsPerMilliliter,
+			label: food.customDensityLabel ?? "custom serving",
+			variancePercent: food.customDensityVariancePercent ?? 0,
+			confidence: food.customDensityConfidence ?? "known",
+		};
+	}
+
 	const text = `${food?.description ?? ""} ${food?.foodCategory ?? ""}`.toLowerCase();
 
 	if (/\boil\b|olive oil|sunflower oil|canola oil|avocado oil/.test(text)) {
@@ -223,6 +232,10 @@ const getVolumeWarning = (
 	range: { minGrams: number; maxGrams: number },
 ) => {
 	const rangeText = `${range.minGrams.toFixed(1)}–${range.maxGrams.toFixed(1)}g`;
+	if (density.variancePercent === 0) {
+		return `Volume conversion uses the custom density you entered for this ingredient (${rangeText}). Accuracy depends on how closely this ingredient matches the serving weight and volume you entered.`;
+	}
+
 	const prefix =
 		density.confidence === "known"
 			? "Volume conversion uses a typical"

@@ -1,4 +1,5 @@
 import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
+import { compactFood } from "$lib/utils/foodRecords";
 import type { FdcFood } from "$lib/utils/types";
 import { cacheClearAll } from "$lib/cache";
 
@@ -10,25 +11,6 @@ export type SmoothieListKey =
 
 const dispatchListsChanged = () => {
 	window.dispatchEvent(new CustomEvent(SMOOTHIE_LISTS_CHANGED_EVENT));
-};
-
-const compactFood = (food: FdcFood): FdcFood => {
-	return {
-		fdcId: food.fdcId,
-		description: food.description,
-		brandOwner: food.brandOwner,
-		foodCategory: food.foodCategory,
-		dataType: food.dataType,
-		servingSize: food.servingSize,
-		servingSizeUnit: food.servingSizeUnit,
-		foodNutrients: food.foodNutrients.map((nutrient) => ({
-			nutrientId: nutrient.nutrientId,
-			nutrientName: nutrient.nutrientName,
-			nutrientNumber: nutrient.nutrientNumber,
-			unitName: nutrient.unitName,
-			value: nutrient.value,
-		})),
-	};
 };
 
 const isQuotaExceededError = (error: unknown) => {

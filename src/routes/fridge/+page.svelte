@@ -1,5 +1,6 @@
 <script lang="ts">
     import IngredientSearch from "$lib/components/IngredientSearch.svelte";
+    import CustomIngredientForm from "$lib/components/CustomIngredientForm.svelte";
     import NutritionPanel from "$lib/components/NutritionPanel.svelte";
     import PillRow from "$lib/components/PillRow.svelte";
     import type { FdcFood } from "$lib/utils/types";
@@ -61,6 +62,7 @@
             <p>Pick a result to preview nutrition and add it to a list.</p>
         </div>
         <IngredientSearch onSelect={handleSelect} />
+        <CustomIngredientForm onCreate={handleSelect} />
         {#if selectedFood}
             <div class="nutrition-preview">
                 <NutritionPanel food={selectedFood} />

@@ -26,6 +26,16 @@ const unknownFood = {
 	foodNutrients: [],
 } satisfies FdcFood;
 
+const customFood = {
+	fdcId: -1,
+	description: "Custom scoop",
+	customDensityGramsPerMilliliter: 0.75,
+	customDensityLabel: "custom serving",
+	customDensityVariancePercent: 0,
+	customDensityConfidence: "known",
+	foodNutrients: [],
+} satisfies FdcFood;
+
 describe("serving amount conversion", () => {
 	it("keeps weight conversion exact", () => {
 		expect(getServingMeasureDimension("oz")).toBe("weight");
@@ -57,5 +67,13 @@ describe("serving amount conversion", () => {
 		expect(conversion.grams).toBeCloseTo(240);
 		expect(conversion.density?.confidence).toBe("rough");
 		expect(conversion.warning).toContain("±50%");
+	});
+
+	it("uses user-provided custom density before generic estimates", () => {
+		const conversion = convertServingAmount(2, "tbsp", customFood);
+
+		expect(conversion.grams).toBeCloseTo(22.18, 1);
+		expect(conversion.density?.label).toBe("custom serving");
+		expect(conversion.warning).toContain("custom density you entered");
 	});
 });
