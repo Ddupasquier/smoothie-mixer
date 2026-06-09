@@ -3,6 +3,7 @@ import {
 	type ServingMeasureUnit,
 } from "../../defaults/servingMeasureDefaults";
 import { compactFood } from "$lib/utils/foodRecords";
+import { writeCloudCustomFoods } from "$lib/utils/supabaseData";
 import { NUTRIENT_IDS, type FdcFood, type FdcNutrient } from "$lib/utils/types";
 
 export const CUSTOM_FOODS_STORAGE_KEY = "smoothie-custom-foods";
@@ -155,11 +156,23 @@ export const readCustomFoods = () => {
 	}
 };
 
+export const cacheCustomFoodsLocally = (foods: FdcFood[]) => {
+	try {
+		localStorage.setItem(
+			CUSTOM_FOODS_STORAGE_KEY,
+			JSON.stringify(foods.map(compactFood)),
+		);
+	} catch {
+		// ignore cache write failures; localStorage is only a fallback cache here
+	}
+};
+
 export const writeCustomFoods = (foods: FdcFood[]) => {
 	localStorage.setItem(
 		CUSTOM_FOODS_STORAGE_KEY,
 		JSON.stringify(foods.map(compactFood)),
 	);
+	void writeCloudCustomFoods(foods.map(compactFood));
 	dispatchCustomFoodsChanged();
 };
 

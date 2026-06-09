@@ -16,7 +16,13 @@
 		"test:watch": "vitest",
 		"kill:vite": "pkill -f \"node .*node_modules/.bin/vite dev\" 2>/dev/null || true",
 		"free:dev-port": "pids=$(lsof -ti :5173 2>/dev/null); if [ -n \"$pids\" ]; then kill -9 $pids; fi",
-		"predev": "npm run kill:vite && npm run free:dev-port"
+		"predev": "npm run kill:vite && npm run free:dev-port",
+		"supabase": "supabase",
+		"db:link": "supabase link --project-ref wbqsnipoiqjzppjuawpn",
+		"db:new": "supabase migration new",
+		"db:push": "supabase db push",
+		"db:types": "mkdir -p src/lib/types && supabase gen types typescript --linked > src/lib/types/database.types.ts",
+		"db:push:dry": "supabase db push --dry-run"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
@@ -28,6 +34,7 @@
 		"@types/ws": "^8.18.1",
 		"jsdom": "^29.1.1",
 		"sass": "^1.100.0",
+		"supabase": "^2.105.0",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"typescript": "^6.0.2",

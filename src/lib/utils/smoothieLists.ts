@@ -1,5 +1,10 @@
 import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 import { compactFood } from "$lib/utils/foodRecords";
+import {
+	removeCloudSmoothieListItem,
+	upsertCloudSmoothieListItem,
+	writeCloudSmoothieList,
+} from "$lib/utils/supabaseData";
 import type { FdcFood } from "$lib/utils/types";
 import { cacheClearAll } from "$lib/cache";
 
@@ -31,11 +36,20 @@ export const readSmoothieList = (key: SmoothieListKey) => {
 	}
 };
 
+export const cacheSmoothieListLocally = (key: SmoothieListKey, list: FdcFood[]) => {
+	try {
+		localStorage.setItem(key, JSON.stringify(list.map(compactFood)));
+	} catch {
+		// ignore cache write failures; localStorage is only a fallback cache here
+	}
+};
+
 export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 	const compactList = list.map(compactFood);
 
 	try {
 		localStorage.setItem(key, JSON.stringify(compactList));
+		void writeCloudSmoothieList(key, compactList);
 		dispatchListsChanged();
 		return true;
 	} catch (error) {
@@ -47,6 +61,7 @@ export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 
 		try {
 			localStorage.setItem(key, JSON.stringify(compactList));
+			void writeCloudSmoothieList(key, compactList);
 			dispatchListsChanged();
 			return true;
 		} catch {
@@ -61,10 +76,15 @@ export const addFoodToSmoothieList = (key: SmoothieListKey, food: FdcFood) => {
 		return false;
 	}
 
-	return writeSmoothieList(key, [...list, compactFood(food)]);
+	const foodRecord = compactFood(food);
+	const added = writeSmoothieList(key, [...list, foodRecord]);
+	if (added) void upsertCloudSmoothieListItem(key, foodRecord);
+	return added;
 };
 
 export const removeFoodFromSmoothieList = (key: SmoothieListKey, foodId: number) => {
 	const list = readSmoothieList(key).filter((item) => item.fdcId !== foodId);
-	return writeSmoothieList(key, list);
+	const removed = writeSmoothieList(key, list);
+	if (removed) void removeCloudSmoothieListItem(key, foodId);
+	return removed;
 };

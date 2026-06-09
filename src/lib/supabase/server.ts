@@ -3,6 +3,7 @@ import { dev } from "$app/environment";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieMethodsServer } from "@supabase/ssr";
 import type { WebSocketLikeConstructor } from "@supabase/realtime-js";
+import type { Database } from "$lib/types/database.types";
 import type { Cookies } from "@sveltejs/kit";
 import WebSocket from "ws";
 
@@ -22,7 +23,7 @@ export const createSupabaseServerClient = (cookies: Cookies) => {
 		},
 	};
 
-	return createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+	return createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 		realtime: {
 			transport: websocketTransport,
 		},
