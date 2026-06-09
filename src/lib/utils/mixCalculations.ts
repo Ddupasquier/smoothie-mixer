@@ -2,6 +2,8 @@ import {
 	DEFAULT_GOAL_BY_UNIT,
 	DEFAULT_NUTRIENT_GOALS,
 	DEFAULT_SERVING_GRAMS,
+	NUTRIENT_POINT_COLORS,
+	NUTRIENT_POINT_GOAL_TOLERANCE,
 	NUTRIENT_PROGRESS_COLORS,
 	NUTRIENT_PROGRESS_THRESHOLDS,
 } from "../../defaults/mixDefaults";
@@ -187,6 +189,20 @@ export const getChartColors = (progress: number) => {
 	}
 
 	return NUTRIENT_PROGRESS_COLORS.wayOver;
+};
+
+export const getPointColors = (progressValues: number[]) => {
+	return progressValues.map((progress) => {
+		if (progress > 1 + NUTRIENT_POINT_GOAL_TOLERANCE) {
+			return NUTRIENT_POINT_COLORS.overGoal;
+		}
+
+		if (progress >= 1 - NUTRIENT_POINT_GOAL_TOLERANCE) {
+			return NUTRIENT_POINT_COLORS.nearGoal;
+		}
+
+		return NUTRIENT_POINT_COLORS.belowGoal;
+	});
 };
 
 export const clampChartValue = (value: number) => {

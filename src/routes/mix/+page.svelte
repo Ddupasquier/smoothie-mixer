@@ -53,6 +53,7 @@
         getNutrientContributionBreakdowns,
         getNutrientChartMetrics,
         getNutrientContributors as calculateNutrientContributors,
+        getPointColors,
         getNutrientProgress,
         getNutrientTotal as calculateNutrientTotal,
     } from "$lib/utils/mixCalculations";
@@ -226,6 +227,7 @@
         nutrientProgress.reduce((max, progress) => Math.max(max, progress), 0),
     );
     const chartColors = $derived(getChartColors(maxNutrientProgress));
+    const pointColors = $derived(getPointColors(nutrientProgress));
 
     const getNutrientTotal = (nutrientId: number) => {
         return calculateNutrientTotal(selectedFoods, nutrientId, servingGrams);
@@ -833,6 +835,7 @@
                         {goalValues}
                         labels={nutrientLabels}
                         valueLabels={nutrientValueLabels}
+                        {pointColors}
                         fillColor={chartColors.fill}
                         strokeColor={chartColors.stroke}
                         size={POINT_SHAPE_DEFAULTS.size}

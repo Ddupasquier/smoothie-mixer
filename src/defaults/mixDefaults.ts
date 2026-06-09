@@ -123,3 +123,20 @@ export const NUTRIENT_PROGRESS_COLORS = {
 		stroke: "rgba(220, 38, 38, 0.95)",
 	},
 } as const;
+
+export const NUTRIENT_POINT_COLORS = {
+	belowGoal: {
+		fill: "rgba(250, 204, 21, 0.34)",
+		stroke: "rgba(202, 138, 4, 0.95)",
+	},
+	nearGoal: {
+		fill: "rgba(76, 175, 80, 0.34)",
+		stroke: "rgba(76, 175, 80, 0.95)",
+	},
+	overGoal: {
+		fill: "rgba(248, 113, 113, 0.38)",
+		stroke: "rgba(220, 38, 38, 0.95)",
+	},
+} as const;
+
+export const NUTRIENT_POINT_GOAL_TOLERANCE = 0.1;

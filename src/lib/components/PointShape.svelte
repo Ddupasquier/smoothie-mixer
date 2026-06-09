@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { POINT_SHAPE_DEFAULTS } from "../../defaults/pointShapeDefaults";
 
+	type PointColor = {
+		fill: string;
+		stroke: string;
+	};
+
 	interface Props {
 		points?: number;
 		values?: number[];
 		goalValues?: number[];
 		labels?: string[];
 		valueLabels?: string[];
+		pointColors?: PointColor[];
 		size?: number;
 		fillColor?: string;
 		strokeColor?: string;
@@ -24,6 +30,7 @@
 		goalValues = [],
 		labels = [],
 		valueLabels = [],
+		pointColors = [],
 		size = POINT_SHAPE_DEFAULTS.size,
 		fillColor = POINT_SHAPE_DEFAULTS.fillColor,
 		strokeColor = POINT_SHAPE_DEFAULTS.strokeColor,
@@ -45,6 +52,12 @@
 		Array.from({ length: axisCount }, (_, index) =>
 			Math.max(0, Math.min(values[index] ?? 0, 1)),
 		),
+	);
+	const normalizedPointColors = $derived(
+		Array.from({ length: axisCount }, (_value, index) => ({
+			fill: pointColors[index]?.fill ?? fillColor,
+			stroke: pointColors[index]?.stroke ?? strokeColor,
+		})),
 	);
 	const hasData = $derived(normalizedPoints > 0);
 
@@ -112,6 +125,19 @@
 			pointAt(index, normalizedGoalValues[index]),
 		),
 	);
+	const valueSegments = $derived(
+		Array.from({ length: axisCount }, (_value, index) => {
+			const nextIndex = (index + 1) % axisCount;
+			return {
+				id: `value-segment-${axisCount}-${index}`,
+				fillId: `value-fill-${axisCount}-${index}`,
+				start: valuePoints[index],
+				end: valuePoints[nextIndex],
+				startColor: normalizedPointColors[index],
+				endColor: normalizedPointColors[nextIndex],
+			};
+		}),
+	);
 </script>
 
 <svg
@@ -123,6 +149,33 @@
 	aria-label={`${normalizedPoints}-axis nutrient radar chart`}
 >
 	{#if hasData}
+		<defs>
+			{#each valueSegments as segment}
+				<linearGradient
+					id={segment.id}
+					gradientUnits="userSpaceOnUse"
+					x1={segment.start[0]}
+					y1={segment.start[1]}
+					x2={segment.end[0]}
+					y2={segment.end[1]}
+				>
+					<stop offset="0%" stop-color={segment.startColor.stroke} />
+					<stop offset="100%" stop-color={segment.endColor.stroke} />
+				</linearGradient>
+				<linearGradient
+					id={segment.fillId}
+					gradientUnits="userSpaceOnUse"
+					x1={segment.start[0]}
+					y1={segment.start[1]}
+					x2={segment.end[0]}
+					y2={segment.end[1]}
+				>
+					<stop offset="0%" stop-color={segment.startColor.fill} />
+					<stop offset="100%" stop-color={segment.endColor.fill} />
+				</linearGradient>
+			{/each}
+		</defs>
+
 		{#if axisCount === 1}
 			{#each Array.from({ length: ringCount }) as _ring, index}
 				<circle
@@ -164,8 +217,8 @@
 				cx={center}
 				cy={center}
 				r={chartRadius * normalizedValues[0]}
-				fill={fillColor}
-				stroke={strokeColor}
+				fill={normalizedPointColors[0].fill}
+				stroke={normalizedPointColors[0].stroke}
 				stroke-width={size * 0.007}
 			/>
 		{:else if axisCount === 2}
@@ -204,7 +257,7 @@
 				y1={center}
 				x2={center + chartRadius * normalizedValues[1]}
 				y2={center}
-				stroke={strokeColor}
+				stroke={`url(#${valueSegments[0].id})`}
 				stroke-width={size * 0.03}
 				stroke-linecap="round"
 			/>
@@ -247,13 +300,28 @@
 				stroke-width={size * 0.006}
 			/>
 
-			<polygon
-				class="point-shape__value"
-				points={pointsToString(valuePoints)}
-				fill={fillColor}
-				stroke={strokeColor}
-				stroke-width={size * 0.007}
-			/>
+			<g class="point-shape__value-fill">
+				{#each valueSegments as segment}
+					<polygon
+						points={pointsToString([[center, center], segment.start, segment.end])}
+						fill={`url(#${segment.fillId})`}
+					/>
+				{/each}
+			</g>
+
+			<g class="point-shape__value-stroke">
+				{#each valueSegments as segment}
+					<line
+						x1={segment.start[0]}
+						y1={segment.start[1]}
+						x2={segment.end[0]}
+						y2={segment.end[1]}
+						stroke={`url(#${segment.id})`}
+						stroke-width={size * 0.007}
+						stroke-linecap="round"
+					/>
+				{/each}
+			</g>
 		{/if}
 
 		{#each axisLines as axis, index}
@@ -319,9 +387,14 @@
 			stroke 0.18s ease;
 	}
 
-	.point-shape__value {
+	.point-shape__value-fill,
+	.point-shape__value-stroke {
 		transition:
 			fill 0.18s ease,
 			stroke 0.18s ease;
+	}
+
+	.point-shape__value-fill {
+		opacity: 0.78;
 	}
 </style>

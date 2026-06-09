@@ -10,10 +10,12 @@ import {
 import { compactFood } from "$lib/utils/foodRecords";
 import {
 	deleteCloudSavedDrink,
+	saveCloudSavedDrink,
 	saveCloudMixPreferences,
 	writeCloudSavedDrinks,
 } from "$lib/utils/supabaseData";
 import type { FdcFood } from "$lib/utils/types";
+import { cacheClearAll } from "$lib/cache";
 
 export const SAVED_DRINKS_STORAGE_KEY = "smoothie-saved-drinks";
 export const SAVED_DRINKS_CHANGED_EVENT = "smoothie-saved-drinks-changed";
@@ -42,6 +44,14 @@ const dispatchSavedDrinksChanged = () => {
 	window.dispatchEvent(new CustomEvent(SAVED_DRINKS_CHANGED_EVENT));
 };
 
+const isQuotaExceededError = (error: unknown) => {
+	return (
+		error instanceof DOMException &&
+		(error.name === "QuotaExceededError" ||
+			error.name === "NS_ERROR_DOM_QUOTA_REACHED")
+	);
+};
+
 const normalizeDrink = (value: SavedDrink): SavedDrink => {
 	return {
 		...value,
@@ -65,24 +75,39 @@ export const readSavedDrinks = () => {
 	}
 };
 
-export const cacheSavedDrinksLocally = (drinks: SavedDrink[]) => {
+const persistSavedDrinksLocally = (drinks: SavedDrink[]) => {
+	const serializedDrinks = JSON.stringify(drinks.map(normalizeDrink));
+
 	try {
-		localStorage.setItem(
-			SAVED_DRINKS_STORAGE_KEY,
-			JSON.stringify(drinks.map(normalizeDrink)),
-		);
+		localStorage.setItem(SAVED_DRINKS_STORAGE_KEY, serializedDrinks);
+		return true;
+	} catch (error) {
+		if (!isQuotaExceededError(error)) return false;
+	}
+
+	cacheClearAll();
+
+	try {
+		localStorage.setItem(SAVED_DRINKS_STORAGE_KEY, serializedDrinks);
+		return true;
 	} catch {
-		// ignore cache write failures; localStorage is only a fallback cache here
+		return false;
 	}
 };
 
-export const writeSavedDrinks = (drinks: SavedDrink[]) => {
-	localStorage.setItem(
-		SAVED_DRINKS_STORAGE_KEY,
-		JSON.stringify(drinks.map(normalizeDrink)),
-	);
-	void writeCloudSavedDrinks(drinks.map(normalizeDrink));
+export const cacheSavedDrinksLocally = (drinks: SavedDrink[]) => {
+	persistSavedDrinksLocally(drinks);
+};
+
+export const writeSavedDrinks = (
+	drinks: SavedDrink[],
+	{ syncCloud = true } = {},
+) => {
+	const normalizedDrinks = drinks.map(normalizeDrink);
+	const persistedLocally = persistSavedDrinksLocally(normalizedDrinks);
+	if (syncCloud) void writeCloudSavedDrinks(normalizedDrinks);
 	dispatchSavedDrinksChanged();
+	return persistedLocally;
 };
 
 export const addSavedDrink = (input: SavedDrinkInput) => {
@@ -94,12 +119,15 @@ export const addSavedDrink = (input: SavedDrinkInput) => {
 		foods: input.foods.map(compactFood),
 	};
 	const drinks = readSavedDrinks();
-	writeSavedDrinks([drink, ...drinks]);
+	writeSavedDrinks([drink, ...drinks], { syncCloud: false });
+	void saveCloudSavedDrink(drink);
 	return drink;
 };
 
 export const deleteSavedDrink = (id: string) => {
-	writeSavedDrinks(readSavedDrinks().filter((drink) => drink.id !== id));
+	writeSavedDrinks(readSavedDrinks().filter((drink) => drink.id !== id), {
+		syncCloud: false,
+	});
 	void deleteCloudSavedDrink(id);
 };
 
