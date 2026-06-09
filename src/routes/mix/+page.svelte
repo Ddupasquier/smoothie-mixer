@@ -2,8 +2,7 @@
     import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
     import IngredientCard from "$lib/components/IngredientCard.svelte";
     import MixEmptyState from "$lib/components/MixEmptyState.svelte";
-    import NutrientFoodSuggestions from "$lib/components/NutrientFoodSuggestions.svelte";
-    import NutrientReductionSuggestions from "$lib/components/NutrientReductionSuggestions.svelte";
+    import NutrientAdjustmentSuggestions from "$lib/components/NutrientAdjustmentSuggestions.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import SmartWarnings from "$lib/components/SmartWarnings.svelte";
     import TextInputDialog from "$lib/components/TextInputDialog.svelte";
@@ -904,13 +903,11 @@
                     />
                 </div>
                 <SmartWarnings warnings={smartWarnings} />
-                <NutrientReductionSuggestions
-                    suggestions={nutrientReductionSuggestions}
-                    onApply={applySuggestedReduction}
-                />
-                <NutrientFoodSuggestions
-                    suggestions={nutrientFoodSuggestions}
+                <NutrientAdjustmentSuggestions
+                    foodSuggestions={nutrientFoodSuggestions}
+                    reductionSuggestions={nutrientReductionSuggestions}
                     onAdd={addSuggestedFood}
+                    onReduce={applySuggestedReduction}
                 />
                 <IngredientContributionBreakdown
                     breakdowns={contributionBreakdowns}

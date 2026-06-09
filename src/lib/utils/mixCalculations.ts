@@ -383,14 +383,22 @@ export const getNutrientReductionSuggestions = ({
 				if (currentServingGrams <= 0 || targetAmount <= 0) return [];
 
 				const targetReducedAmount = Math.min(overageAmount, targetAmount);
+				const percentOfOverageResolved =
+					(targetReducedAmount / overageAmount) * 100;
 				const reduceByGrams =
 					targetReducedAmount / (targetAmount / currentServingGrams);
 				const nextServingGrams = Math.max(
 					0,
 					currentServingGrams - reduceByGrams,
 				);
+				const minimumUsefulReductionAmount = Math.max(goal * 0.02, 0.25);
 
-				if (!Number.isFinite(reduceByGrams) || reduceByGrams < 0.5) {
+				if (
+					!Number.isFinite(reduceByGrams) ||
+					reduceByGrams < 2 ||
+					targetReducedAmount < minimumUsefulReductionAmount ||
+					percentOfOverageResolved < 10
+				) {
 					return [];
 				}
 
@@ -461,8 +469,7 @@ export const getNutrientReductionSuggestions = ({
 						reduceByGrams,
 						targetReducedAmount,
 						overageAmount,
-						percentOfOverageResolved:
-							(targetReducedAmount / overageAmount) * 100,
+						percentOfOverageResolved,
 						conflicts,
 						sourceLabel: sourceLabelForFood(food),
 					},
