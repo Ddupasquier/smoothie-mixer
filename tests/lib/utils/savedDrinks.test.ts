@@ -4,8 +4,8 @@ import {
 	addSavedDrink,
 	readSavedDrinks,
 	restoreSavedDrinkToMix,
-} from "$lib/utils/savedDrinks";
-import type { FdcFood } from "$lib/utils/types";
+} from "$lib/utils/storage/savedDrinks";
+import type { FdcFood } from "$lib/utils/food/types";
 
 const food = {
 	fdcId: 1,

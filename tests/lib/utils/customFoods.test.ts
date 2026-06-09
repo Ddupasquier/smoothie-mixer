@@ -5,7 +5,7 @@ const cloudData = vi.hoisted(() => ({
 	writeCloudCustomFoods: vi.fn(),
 }));
 
-vi.mock("$lib/utils/supabaseData", () => cloudData);
+vi.mock("$lib/utils/storage/supabaseData", () => cloudData);
 
 import {
 	CUSTOM_FOODS_STORAGE_KEY,
@@ -13,9 +13,9 @@ import {
 	readCustomFoods,
 	saveCustomFood,
 	searchCustomFoods,
-} from "$lib/utils/customFoods";
-import { NUTRIENT_IDS } from "$lib/utils/types";
-import { getFdcNutrientValue } from "$lib/utils/fdcNutrients";
+} from "$lib/utils/food/customFoods";
+import { NUTRIENT_IDS } from "$lib/utils/food/types";
+import { getFdcNutrientValue } from "$lib/utils/food/fdcNutrients";
 
 describe("custom foods", () => {
 	beforeEach(() => {

@@ -1,24 +1,24 @@
 <script lang="ts">
-    import IngredientSearch from "$lib/components/IngredientSearch.svelte";
-    import CustomIngredientForm from "$lib/components/CustomIngredientForm.svelte";
-    import NutritionPanel from "$lib/components/NutritionPanel.svelte";
-    import PillRow from "$lib/components/PillRow.svelte";
-    import type { FdcFood } from "$lib/utils/types";
+    import IngredientSearch from "$lib/components/ingredients/IngredientSearch.svelte";
+    import CustomIngredientForm from "$lib/components/ingredients/CustomIngredientForm.svelte";
+    import NutritionPanel from "$lib/components/ingredients/NutritionPanel.svelte";
+    import PillRow from "$lib/components/common/PillRow.svelte";
+    import type { FdcFood } from "$lib/utils/food/types";
     import {
         cacheCustomFoodsLocally,
         readCustomFoods,
-    } from "$lib/utils/customFoods";
+    } from "$lib/utils/food/customFoods";
     import {
         cacheSmoothieListLocally,
         readSmoothieList,
         removeFoodFromSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
         type SmoothieListKey,
-    } from "$lib/utils/smoothieLists";
+    } from "$lib/utils/storage/smoothieLists";
     import {
         reconcileCloudCustomFoods,
         reconcileCloudSmoothieList,
-    } from "$lib/utils/supabaseData";
+    } from "$lib/utils/storage/supabaseData";
     import { onMount } from "svelte";
     import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 

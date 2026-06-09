@@ -1,7 +1,7 @@
 <script lang="ts">
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.css";
-	import TabNavigation from "$lib/components/TabNavigation.svelte";
+	import TabNavigation from "$lib/components/app/TabNavigation.svelte";
 	import type { LayoutData } from "./$types";
 
 	let {

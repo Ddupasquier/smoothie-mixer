@@ -7,8 +7,8 @@
         restoreSavedDrinkToMix,
         SAVED_DRINKS_CHANGED_EVENT,
         type SavedDrink,
-    } from "$lib/utils/savedDrinks";
-    import { reconcileCloudSavedDrinks } from "$lib/utils/supabaseData";
+    } from "$lib/utils/storage/savedDrinks";
+    import { reconcileCloudSavedDrinks } from "$lib/utils/storage/supabaseData";
     import { onMount } from "svelte";
 
     let drinks = $state<SavedDrink[]>([]);

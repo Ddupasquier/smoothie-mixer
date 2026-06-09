@@ -6,15 +6,15 @@ const cloudData = vi.hoisted(() => ({
 	writeCloudSmoothieList: vi.fn(),
 }));
 
-vi.mock("$lib/utils/supabaseData", () => cloudData);
+vi.mock("$lib/utils/storage/supabaseData", () => cloudData);
 
 import {
 	addFoodToSmoothieList,
 	readSmoothieList,
 	removeFoodFromSmoothieList,
 	writeSmoothieList,
-} from "$lib/utils/smoothieLists";
-import type { FdcFood } from "$lib/utils/types";
+} from "$lib/utils/storage/smoothieLists";
+import type { FdcFood } from "$lib/utils/food/types";
 import { MIX_STORAGE_KEYS } from "../../../src/defaults/mixDefaults";
 
 const food = {

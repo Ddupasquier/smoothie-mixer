@@ -5,7 +5,7 @@ import {
 	mergeNutrientOptions,
 	normalizeNutrientOptions,
 	normalizeServingUnit,
-} from "$lib/utils/mixUi";
+} from "$lib/utils/mix/mixUi";
 
 describe("mix UI utilities", () => {
 	it("formats compact chart values", () => {

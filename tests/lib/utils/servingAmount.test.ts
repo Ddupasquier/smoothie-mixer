@@ -3,8 +3,8 @@ import {
 	convertServingAmount,
 	convertServingToGrams,
 	getServingMeasureDimension,
-} from "$lib/utils/servingAmount";
-import type { FdcFood } from "$lib/utils/types";
+} from "$lib/utils/serving/servingAmount";
+import type { FdcFood } from "$lib/utils/food/types";
 
 const sunflowerOil = {
 	fdcId: 1,

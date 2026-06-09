@@ -1,32 +1,32 @@
 <script lang="ts">
-    import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
-    import IngredientCard from "$lib/components/IngredientCard.svelte";
-    import MixEmptyState from "$lib/components/MixEmptyState.svelte";
-    import NutrientAdjustmentSuggestions from "$lib/components/NutrientAdjustmentSuggestions.svelte";
-    import PointShape from "$lib/components/PointShape.svelte";
-    import SmartWarnings from "$lib/components/SmartWarnings.svelte";
-    import TextInputDialog from "$lib/components/TextInputDialog.svelte";
+    import CheckboxGroup from "$lib/components/common/CheckboxGroup.svelte";
+    import IngredientCard from "$lib/components/mix/IngredientCard.svelte";
+    import MixEmptyState from "$lib/components/mix/MixEmptyState.svelte";
+    import NutrientAdjustmentSuggestions from "$lib/components/mix/NutrientAdjustmentSuggestions.svelte";
+    import PointShape from "$lib/components/mix/PointShape.svelte";
+    import SmartWarnings from "$lib/components/mix/SmartWarnings.svelte";
+    import TextInputDialog from "$lib/components/common/TextInputDialog.svelte";
     import {
         getNutrientGoalWarnings,
         type SmartWarning,
-    } from "$lib/utils/smartWarnings";
+    } from "$lib/utils/mix/smartWarnings";
     import {
         cacheSmoothieListLocally,
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
-    } from "$lib/utils/smoothieLists";
+    } from "$lib/utils/storage/smoothieLists";
     import {
         readCloudMixPreferences,
         reconcileCloudSmoothieList,
         saveCloudMixPreferences,
-    } from "$lib/utils/supabaseData";
-    import IngredientContributionBreakdown from "$lib/components/IngredientContributionBreakdown.svelte";
-    import { addSavedDrink } from "$lib/utils/savedDrinks";
+    } from "$lib/utils/storage/supabaseData";
+    import IngredientContributionBreakdown from "$lib/components/mix/IngredientContributionBreakdown.svelte";
+    import { addSavedDrink } from "$lib/utils/storage/savedDrinks";
     import {
         convertServingAmount,
         convertServingToGrams,
         parseServingAmount,
-    } from "$lib/utils/servingAmount";
+    } from "$lib/utils/serving/servingAmount";
     import {
         formatChartNumber,
         formatSignedChartNumber,
@@ -45,7 +45,7 @@
         type NutrientOption,
         type SavedMixState,
         withOverageDetails,
-    } from "$lib/utils/mixUi";
+    } from "$lib/utils/mix/mixUi";
     import {
         getChartColors,
         getChartValues,
@@ -59,8 +59,8 @@
         getPointColors,
         getNutrientProgress,
         getNutrientTotal as calculateNutrientTotal,
-    } from "$lib/utils/mixCalculations";
-    import type { FdcFood } from "$lib/utils/types";
+    } from "$lib/utils/mix/mixCalculations";
+    import type { FdcFood } from "$lib/utils/food/types";
     import { onMount } from "svelte";
     import {
         DEFAULT_NUTRIENT_GOALS,
@@ -72,7 +72,7 @@
     import type { ServingMeasureUnit } from "../../defaults/servingMeasureDefaults";
     import { vitalNutrients } from "../../variables/vitalNutrients";
     import { ALL_NUTRIENTS } from "../../variables/allNutrients";
-    import PillRow from "$lib/components/PillRow.svelte";
+    import PillRow from "$lib/components/common/PillRow.svelte";
 
     let selected = $state<(string | number)[]>(vitalNutrients.map((n) => n.id));
     let options = $state<NutrientOption[]>(getDefaultNutrientOptions());

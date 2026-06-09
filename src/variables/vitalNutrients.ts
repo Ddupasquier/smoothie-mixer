@@ -1,6 +1,6 @@
 // Vital nutrients used throughout the app
 // Update this array to add/remove vital nutrients globally
-import { NUTRIENT_IDS } from '../lib/utils/types';
+import { NUTRIENT_IDS } from '../lib/utils/food/types';
 
 export const vitalNutrients = [
     {

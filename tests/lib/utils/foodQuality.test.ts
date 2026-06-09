@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getFoodQuality } from "$lib/utils/foodQuality";
-import { NUTRIENT_IDS, type FdcFood } from "$lib/utils/types";
+import { getFoodQuality } from "$lib/utils/food/foodQuality";
+import { NUTRIENT_IDS, type FdcFood } from "$lib/utils/food/types";
 
 const completeFood = {
 	fdcId: 1,
