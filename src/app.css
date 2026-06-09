@@ -53,6 +53,8 @@ body {
 	padding: 0.75rem 1rem;
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
@@ -60,6 +62,40 @@ body {
 	font-size: 1.2rem;
 	font-weight: 700;
 	letter-spacing: 0.01em;
+}
+
+.auth-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	min-width: 0;
+	font-size: 0.82rem;
+	font-weight: 700;
+}
+
+.auth-status span {
+	max-width: 11rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.auth-status a,
+.auth-status button {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2rem;
+	padding: 0.35rem 0.7rem;
+	color: var(--color-primary);
+	background: var(--color-bg);
+	border-radius: 999px;
+	font-size: 0.82rem;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.auth-status button {
+	border: 0;
 }
 
 /* ---- Main content ---- */

@@ -10,9 +10,15 @@
         type SmartWarning,
     } from "$lib/utils/smartWarnings";
     import {
+        cacheSmoothieListLocally,
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
     } from "$lib/utils/smoothieLists";
+    import {
+        readCloudMixPreferences,
+        reconcileCloudSmoothieList,
+        saveCloudMixPreferences,
+    } from "$lib/utils/supabaseData";
     import IngredientContributionBreakdown from "$lib/components/IngredientContributionBreakdown.svelte";
     import { addSavedDrink } from "$lib/utils/savedDrinks";
     import {
@@ -238,6 +244,27 @@
         shoppingItems = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
     };
 
+    const loadCloudBackedIngredientLists = async () => {
+        const localFridge = readSmoothieList(MIX_STORAGE_KEYS.fridge);
+        const localShoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
+
+        fridgeItems = localFridge;
+        shoppingItems = localShoppingList;
+
+        const [nextFridge, nextShoppingList] = await Promise.all([
+            reconcileCloudSmoothieList(MIX_STORAGE_KEYS.fridge, localFridge),
+            reconcileCloudSmoothieList(
+                MIX_STORAGE_KEYS.shoppingList,
+                localShoppingList,
+            ),
+        ]);
+
+        fridgeItems = nextFridge;
+        shoppingItems = nextShoppingList;
+        cacheSmoothieListLocally(MIX_STORAGE_KEYS.fridge, nextFridge);
+        cacheSmoothieListLocally(MIX_STORAGE_KEYS.shoppingList, nextShoppingList);
+    };
+
     const loadNutrientGoals = () => {
         nutrientGoals = {
             ...DEFAULT_NUTRIENT_GOALS,
@@ -250,6 +277,7 @@
             MIX_STORAGE_KEYS.nutrientGoals,
             JSON.stringify(nextGoals),
         );
+        void saveCloudMixPreferences({ nutrientGoals: nextGoals });
     };
 
     const loadMixState = () => {
@@ -343,17 +371,62 @@
     };
 
     const saveMixState = () => {
+        const mixState = {
+            selected,
+            options,
+            selectedFoodIds,
+            servingGrams,
+            servingQuantities,
+            servingUnits,
+        };
+
         localStorage.setItem(
             MIX_STORAGE_KEYS.mixState,
-            JSON.stringify({
-                selected,
-                options,
-                selectedFoodIds,
-                servingGrams,
-                servingQuantities,
-                servingUnits,
-            }),
+            JSON.stringify(mixState),
         );
+        void saveCloudMixPreferences({ mixState });
+    };
+
+    const loadCloudBackedMixPreferences = async () => {
+        const cloudPreferences = await readCloudMixPreferences();
+        if (!cloudPreferences) return;
+
+        const hasCloudGoals =
+            cloudPreferences.nutrientGoals &&
+            Object.keys(cloudPreferences.nutrientGoals).length > 0;
+        const hasCloudMixState =
+            cloudPreferences.mixState &&
+            Object.keys(cloudPreferences.mixState).length > 0;
+
+        if (hasCloudGoals) {
+            localStorage.setItem(
+                MIX_STORAGE_KEYS.nutrientGoals,
+                JSON.stringify(cloudPreferences.nutrientGoals),
+            );
+            loadNutrientGoals();
+        }
+
+        if (hasCloudMixState) {
+            localStorage.setItem(
+                MIX_STORAGE_KEYS.mixState,
+                JSON.stringify(cloudPreferences.mixState),
+            );
+            loadMixState();
+        }
+
+        if (!hasCloudGoals || !hasCloudMixState) {
+            void saveCloudMixPreferences({
+                nutrientGoals,
+                mixState: {
+                    selected,
+                    options,
+                    selectedFoodIds,
+                    servingGrams,
+                    servingQuantities,
+                    servingUnits,
+                },
+            });
+        }
     };
 
     const resetGoals = () => {
@@ -491,9 +564,10 @@
     };
 
     onMount(() => {
-        loadIngredientLists();
+        void loadCloudBackedIngredientLists();
         loadMixState();
         loadNutrientGoals();
+        void loadCloudBackedMixPreferences();
         window.addEventListener("storage", loadIngredientLists);
         window.addEventListener(
             SMOOTHIE_LISTS_CHANGED_EVENT,

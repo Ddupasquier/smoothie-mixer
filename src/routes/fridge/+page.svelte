@@ -5,11 +5,20 @@
     import PillRow from "$lib/components/PillRow.svelte";
     import type { FdcFood } from "$lib/utils/types";
     import {
+        cacheCustomFoodsLocally,
+        readCustomFoods,
+    } from "$lib/utils/customFoods";
+    import {
+        cacheSmoothieListLocally,
         readSmoothieList,
         removeFoodFromSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
         type SmoothieListKey,
     } from "$lib/utils/smoothieLists";
+    import {
+        reconcileCloudCustomFoods,
+        reconcileCloudSmoothieList,
+    } from "$lib/utils/supabaseData";
     import { onMount } from "svelte";
     import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 
@@ -17,9 +26,27 @@
     let shoppingList = $state<FdcFood[]>([]);
     let selectedFood = $state<FdcFood | null>(null);
 
-    const loadLists = () => {
-        onHand = readSmoothieList(MIX_STORAGE_KEYS.fridge);
-        shoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
+    const loadLists = async () => {
+        const localFridge = readSmoothieList(MIX_STORAGE_KEYS.fridge);
+        const localShoppingList = readSmoothieList(MIX_STORAGE_KEYS.shoppingList);
+
+        onHand = localFridge;
+        shoppingList = localShoppingList;
+
+        const [nextFridge, nextShoppingList, nextCustomFoods] = await Promise.all([
+            reconcileCloudSmoothieList(MIX_STORAGE_KEYS.fridge, localFridge),
+            reconcileCloudSmoothieList(
+                MIX_STORAGE_KEYS.shoppingList,
+                localShoppingList,
+            ),
+            reconcileCloudCustomFoods(readCustomFoods()),
+        ]);
+
+        onHand = nextFridge;
+        shoppingList = nextShoppingList;
+        cacheSmoothieListLocally(MIX_STORAGE_KEYS.fridge, nextFridge);
+        cacheSmoothieListLocally(MIX_STORAGE_KEYS.shoppingList, nextShoppingList);
+        cacheCustomFoodsLocally(nextCustomFoods);
     };
 
     const handleSelect = (food: FdcFood) => {

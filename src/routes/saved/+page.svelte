@@ -1,18 +1,25 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import {
+        cacheSavedDrinksLocally,
         deleteSavedDrink,
         readSavedDrinks,
         restoreSavedDrinkToMix,
         SAVED_DRINKS_CHANGED_EVENT,
         type SavedDrink,
     } from "$lib/utils/savedDrinks";
+    import { reconcileCloudSavedDrinks } from "$lib/utils/supabaseData";
     import { onMount } from "svelte";
 
     let drinks = $state<SavedDrink[]>([]);
 
-    const loadSavedDrinks = () => {
-        drinks = readSavedDrinks();
+    const loadSavedDrinks = async () => {
+        const localDrinks = readSavedDrinks();
+        drinks = localDrinks;
+
+        const nextDrinks = await reconcileCloudSavedDrinks(localDrinks);
+        drinks = nextDrinks;
+        cacheSavedDrinksLocally(nextDrinks);
     };
 
     const formatDate = (timestamp: number) => {

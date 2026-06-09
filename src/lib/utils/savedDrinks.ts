@@ -8,6 +8,11 @@ import {
 	writeSmoothieList,
 } from "$lib/utils/smoothieLists";
 import { compactFood } from "$lib/utils/foodRecords";
+import {
+	deleteCloudSavedDrink,
+	saveCloudMixPreferences,
+	writeCloudSavedDrinks,
+} from "$lib/utils/supabaseData";
 import type { FdcFood } from "$lib/utils/types";
 
 export const SAVED_DRINKS_STORAGE_KEY = "smoothie-saved-drinks";
@@ -60,11 +65,23 @@ export const readSavedDrinks = () => {
 	}
 };
 
+export const cacheSavedDrinksLocally = (drinks: SavedDrink[]) => {
+	try {
+		localStorage.setItem(
+			SAVED_DRINKS_STORAGE_KEY,
+			JSON.stringify(drinks.map(normalizeDrink)),
+		);
+	} catch {
+		// ignore cache write failures; localStorage is only a fallback cache here
+	}
+};
+
 export const writeSavedDrinks = (drinks: SavedDrink[]) => {
 	localStorage.setItem(
 		SAVED_DRINKS_STORAGE_KEY,
 		JSON.stringify(drinks.map(normalizeDrink)),
 	);
+	void writeCloudSavedDrinks(drinks.map(normalizeDrink));
 	dispatchSavedDrinksChanged();
 };
 
@@ -83,6 +100,7 @@ export const addSavedDrink = (input: SavedDrinkInput) => {
 
 export const deleteSavedDrink = (id: string) => {
 	writeSavedDrinks(readSavedDrinks().filter((drink) => drink.id !== id));
+	void deleteCloudSavedDrink(id);
 };
 
 export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
@@ -94,13 +112,7 @@ export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
 		writeSmoothieList(MIX_STORAGE_KEYS.fridge, [...fridge, ...missingFoods]);
 	}
 
-	localStorage.setItem(
-		MIX_STORAGE_KEYS.nutrientGoals,
-		JSON.stringify(drink.nutrientGoals),
-	);
-	localStorage.setItem(
-		MIX_STORAGE_KEYS.mixState,
-		JSON.stringify({
+	const mixState = {
 			selected: drink.selected,
 			options: drink.options,
 			selectedFoodIds: drink.foods.map((food) => food.fdcId),
@@ -119,6 +131,15 @@ export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
 					drink.servingUnits[food.fdcId] ?? "g",
 				]),
 			),
-		}),
+		};
+
+	localStorage.setItem(
+		MIX_STORAGE_KEYS.nutrientGoals,
+		JSON.stringify(drink.nutrientGoals),
 	);
+	localStorage.setItem(MIX_STORAGE_KEYS.mixState, JSON.stringify(mixState));
+	void saveCloudMixPreferences({
+		nutrientGoals: drink.nutrientGoals,
+		mixState,
+	});
 };
