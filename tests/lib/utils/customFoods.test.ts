@@ -1,4 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const cloudData = vi.hoisted(() => ({
+	saveCloudCustomFood: vi.fn(),
+	writeCloudCustomFoods: vi.fn(),
+}));
+
+vi.mock("$lib/utils/supabaseData", () => cloudData);
+
 import {
 	CUSTOM_FOODS_STORAGE_KEY,
 	createCustomFood,
@@ -12,6 +20,7 @@ import { getFdcNutrientValue } from "$lib/utils/fdcNutrients";
 describe("custom foods", () => {
 	beforeEach(() => {
 		localStorage.removeItem(CUSTOM_FOODS_STORAGE_KEY);
+		vi.clearAllMocks();
 	});
 
 	it("converts nutrition facts per serving into per-100g nutrients", () => {
@@ -78,5 +87,27 @@ describe("custom foods", () => {
 		expect(searchCustomFoods("protein crunch")[0]?.description).toBe(
 			"Homemade protein crunch",
 		);
+	});
+
+	it("saves one custom food without rewriting the whole cloud list", () => {
+		const food = createCustomFood({
+			name: "Single row custom food",
+			servingWeightGrams: 40,
+			nutrition: {
+				calories: 100,
+				fat: 1,
+				carbs: 20,
+				fiber: 2,
+				sugar: 6,
+				protein: 4,
+			},
+		});
+
+		saveCustomFood(food);
+
+		expect(cloudData.saveCloudCustomFood).toHaveBeenCalledWith(
+			expect.objectContaining({ fdcId: food.fdcId }),
+		);
+		expect(cloudData.writeCloudCustomFoods).not.toHaveBeenCalled();
 	});
 });

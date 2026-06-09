@@ -1,6 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const cloudData = vi.hoisted(() => ({
+	removeCloudSmoothieListItem: vi.fn(),
+	upsertCloudSmoothieListItem: vi.fn(),
+	writeCloudSmoothieList: vi.fn(),
+}));
+
+vi.mock("$lib/utils/supabaseData", () => cloudData);
+
 import {
+	addFoodToSmoothieList,
 	readSmoothieList,
+	removeFoodFromSmoothieList,
 	writeSmoothieList,
 } from "$lib/utils/smoothieLists";
 import type { FdcFood } from "$lib/utils/types";
@@ -28,6 +39,7 @@ const food = {
 describe("smoothie lists", () => {
 	beforeEach(() => {
 		localStorage.clear();
+		vi.clearAllMocks();
 	});
 
 	it("stores compact food records with serving metadata", () => {
@@ -47,5 +59,32 @@ describe("smoothie lists", () => {
 				},
 			],
 		});
+	});
+
+	it("adds one list item without rewriting the whole cloud list", () => {
+		expect(addFoodToSmoothieList(MIX_STORAGE_KEYS.fridge, food)).toBe(true);
+
+		expect(readSmoothieList(MIX_STORAGE_KEYS.fridge)).toHaveLength(1);
+		expect(cloudData.upsertCloudSmoothieListItem).toHaveBeenCalledWith(
+			MIX_STORAGE_KEYS.fridge,
+			expect.objectContaining({ fdcId: food.fdcId }),
+		);
+		expect(cloudData.writeCloudSmoothieList).not.toHaveBeenCalled();
+	});
+
+	it("removes one list item without rewriting the whole cloud list", () => {
+		writeSmoothieList(MIX_STORAGE_KEYS.fridge, [food]);
+		vi.clearAllMocks();
+
+		expect(removeFoodFromSmoothieList(MIX_STORAGE_KEYS.fridge, food.fdcId)).toBe(
+			true,
+		);
+
+		expect(readSmoothieList(MIX_STORAGE_KEYS.fridge)).toHaveLength(0);
+		expect(cloudData.removeCloudSmoothieListItem).toHaveBeenCalledWith(
+			MIX_STORAGE_KEYS.fridge,
+			food.fdcId,
+		);
+		expect(cloudData.writeCloudSmoothieList).not.toHaveBeenCalled();
 	});
 });

@@ -25,3 +25,13 @@ export const compactFood = (food: FdcFood): FdcFood => {
 		})),
 	};
 };
+
+export const uniqueFoodsById = (foods: FdcFood[]) => {
+	const seen = new Set<number>();
+
+	return foods.filter((food) => {
+		if (seen.has(food.fdcId)) return false;
+		seen.add(food.fdcId);
+		return true;
+	});
+};

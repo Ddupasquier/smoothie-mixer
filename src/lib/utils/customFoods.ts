@@ -2,8 +2,11 @@ import {
 	DEFAULT_MILLILITERS_PER_VOLUME_MEASURE,
 	type ServingMeasureUnit,
 } from "../../defaults/servingMeasureDefaults";
-import { compactFood } from "$lib/utils/foodRecords";
-import { writeCloudCustomFoods } from "$lib/utils/supabaseData";
+import { compactFood, uniqueFoodsById } from "$lib/utils/foodRecords";
+import {
+	saveCloudCustomFood,
+	writeCloudCustomFoods,
+} from "$lib/utils/supabaseData";
 import { NUTRIENT_IDS, type FdcFood, type FdcNutrient } from "$lib/utils/types";
 
 export const CUSTOM_FOODS_STORAGE_KEY = "smoothie-custom-foods";
@@ -160,7 +163,7 @@ export const cacheCustomFoodsLocally = (foods: FdcFood[]) => {
 	try {
 		localStorage.setItem(
 			CUSTOM_FOODS_STORAGE_KEY,
-			JSON.stringify(foods.map(compactFood)),
+			JSON.stringify(uniqueFoodsById(foods).map(compactFood)),
 		);
 	} catch {
 		// ignore cache write failures; localStorage is only a fallback cache here
@@ -168,21 +171,29 @@ export const cacheCustomFoodsLocally = (foods: FdcFood[]) => {
 };
 
 export const writeCustomFoods = (foods: FdcFood[]) => {
+	const compactFoods = uniqueFoodsById(foods).map(compactFood);
+
 	localStorage.setItem(
 		CUSTOM_FOODS_STORAGE_KEY,
-		JSON.stringify(foods.map(compactFood)),
+		JSON.stringify(compactFoods),
 	);
-	void writeCloudCustomFoods(foods.map(compactFood));
+	void writeCloudCustomFoods(compactFoods);
 	dispatchCustomFoodsChanged();
 };
 
 export const saveCustomFood = (food: FdcFood) => {
 	const foods = readCustomFoods();
+	const foodRecord = compactFood(food);
 	const nextFoods = [
-		compactFood(food),
+		foodRecord,
 		...foods.filter((item) => item.fdcId !== food.fdcId),
 	];
-	writeCustomFoods(nextFoods);
+	localStorage.setItem(
+		CUSTOM_FOODS_STORAGE_KEY,
+		JSON.stringify(uniqueFoodsById(nextFoods).map(compactFood)),
+	);
+	void saveCloudCustomFood(foodRecord);
+	dispatchCustomFoodsChanged();
 };
 
 export const searchCustomFoods = (query: string) => {

@@ -2,6 +2,8 @@
     import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
     import IngredientCard from "$lib/components/IngredientCard.svelte";
     import MixEmptyState from "$lib/components/MixEmptyState.svelte";
+    import NutrientFoodSuggestions from "$lib/components/NutrientFoodSuggestions.svelte";
+    import NutrientReductionSuggestions from "$lib/components/NutrientReductionSuggestions.svelte";
     import PointShape from "$lib/components/PointShape.svelte";
     import SmartWarnings from "$lib/components/SmartWarnings.svelte";
     import TextInputDialog from "$lib/components/TextInputDialog.svelte";
@@ -53,6 +55,8 @@
         getNutrientContributionBreakdowns,
         getNutrientChartMetrics,
         getNutrientContributors as calculateNutrientContributors,
+        getNutrientFoodSuggestions,
+        getNutrientReductionSuggestions,
         getPointColors,
         getNutrientProgress,
         getNutrientTotal as calculateNutrientTotal,
@@ -182,6 +186,25 @@
             selectedFoods,
             servingGrams,
         ),
+    );
+    const nutrientFoodSuggestions = $derived(
+        getNutrientFoodSuggestions({
+            nutrients: selectedNutrients,
+            availableFoods: allIngredientItems,
+            selectedFoodIds,
+            nutrientGoals,
+            servingGrams,
+            sourceLabelForFood: (food) => getFoodSourceLabel(food, fridgeItems),
+        }),
+    );
+    const nutrientReductionSuggestions = $derived(
+        getNutrientReductionSuggestions({
+            nutrients: selectedNutrients,
+            selectedFoods,
+            nutrientGoals,
+            servingGrams,
+            sourceLabelForFood: (food) => getFoodSourceLabel(food, fridgeItems),
+        }),
     );
     const nutrientOverages = $derived(
         selectedNutrients.flatMap((nutrient) => {
@@ -540,6 +563,44 @@
         saveMixState();
     };
 
+    const addSuggestedFood = (foodId: number, nextServingGrams: number) => {
+        if (!selectedFoodIds.includes(foodId)) {
+            selectedFoodIds = [...selectedFoodIds, foodId];
+        }
+        servingGrams = {
+            ...servingGrams,
+            [foodId]: nextServingGrams,
+        };
+        servingQuantities = {
+            ...servingQuantities,
+            [foodId]: nextServingGrams,
+        };
+        servingUnits = {
+            ...servingUnits,
+            [foodId]: "g",
+        };
+        saveMixState();
+    };
+
+    const applySuggestedReduction = (
+        foodId: number,
+        nextServingGrams: number,
+    ) => {
+        servingGrams = {
+            ...servingGrams,
+            [foodId]: nextServingGrams,
+        };
+        servingQuantities = {
+            ...servingQuantities,
+            [foodId]: nextServingGrams,
+        };
+        servingUnits = {
+            ...servingUnits,
+            [foodId]: "g",
+        };
+        saveMixState();
+    };
+
     const getServingConversionWarning = (food: FdcFood) => {
         return getServingConversion(food).warning;
     };
@@ -843,6 +904,14 @@
                     />
                 </div>
                 <SmartWarnings warnings={smartWarnings} />
+                <NutrientReductionSuggestions
+                    suggestions={nutrientReductionSuggestions}
+                    onApply={applySuggestedReduction}
+                />
+                <NutrientFoodSuggestions
+                    suggestions={nutrientFoodSuggestions}
+                    onAdd={addSuggestedFood}
+                />
                 <IngredientContributionBreakdown
                     breakdowns={contributionBreakdowns}
                 />

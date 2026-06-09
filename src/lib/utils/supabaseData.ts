@@ -1,6 +1,6 @@
 import { MIX_STORAGE_KEYS } from "../../defaults/mixDefaults";
 import { getSupabaseBrowserClient } from "$lib/supabase/client";
-import { compactFood } from "$lib/utils/foodRecords";
+import { compactFood, uniqueFoodsById } from "$lib/utils/foodRecords";
 import type { SavedDrink } from "$lib/utils/savedDrinks";
 import type { FdcFood } from "$lib/utils/types";
 import type { Json } from "$lib/types/database.types";
@@ -76,22 +76,16 @@ export const writeCloudSmoothieList = async (
 	if (!supabase) return false;
 
 	const listType = getCloudListType(key);
-	const { error: deleteError } = await supabase
-		.from("user_food_list_items")
-		.delete()
-		.eq("user_id", userId)
-		.eq("list_type", listType);
-
-	if (deleteError) return false;
 	if (foods.length === 0) return true;
 
-	const { error } = await supabase.from("user_food_list_items").insert(
-		foods.map((food) => ({
+	const { error } = await supabase.from("user_food_list_items").upsert(
+		uniqueFoodsById(foods).map((food) => ({
 			user_id: userId,
 			list_type: listType,
 			fdc_id: food.fdcId,
 			food: toJson(compactFood(food)),
 		})),
+		{ onConflict: "user_id,list_type,fdc_id" },
 	);
 
 	return !error;
@@ -172,20 +166,15 @@ export const writeCloudCustomFoods = async (foods: FdcFood[]) => {
 	const supabase = getSupabaseBrowserClient();
 	if (!supabase) return false;
 
-	const { error: deleteError } = await supabase
-		.from("custom_foods")
-		.delete()
-		.eq("user_id", userId);
-
-	if (deleteError) return false;
 	if (foods.length === 0) return true;
 
-	const { error } = await supabase.from("custom_foods").insert(
-		foods.map((food) => ({
+	const { error } = await supabase.from("custom_foods").upsert(
+		uniqueFoodsById(foods).map((food) => ({
 			user_id: userId,
 			fdc_id: food.fdcId,
 			food: toJson(compactFood(food)),
 		})),
+		{ onConflict: "user_id,fdc_id" },
 	);
 
 	return !error;
