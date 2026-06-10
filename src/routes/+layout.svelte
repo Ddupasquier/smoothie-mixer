@@ -60,7 +60,6 @@
 	<span class="logo">🥤 Smoothie Mixer</span>
 	<div class="auth-status">
 		{#if data.authUser}
-			<span>{data.authUser.email ?? "Signed in"}</span>
 			<form method="POST" action="/auth/logout">
 				<button type="submit">Sign out</button>
 			</form>
