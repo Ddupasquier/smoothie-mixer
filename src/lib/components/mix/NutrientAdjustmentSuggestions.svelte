@@ -403,7 +403,7 @@
 		}
 	}
 
-	@media (max-width: 520px) {
+	@media (max-width: $app-breakpoint-sm) {
 		.nutrient-adjustment {
 			grid-template-columns: 1fr;
 		}

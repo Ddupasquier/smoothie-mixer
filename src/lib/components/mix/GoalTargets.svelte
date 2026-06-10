@@ -199,7 +199,7 @@
 		}
 	}
 
-	@media (max-width: 680px) {
+	@media (max-width: $app-breakpoint-md) {
 		.section-heading {
 			display: grid;
 		}

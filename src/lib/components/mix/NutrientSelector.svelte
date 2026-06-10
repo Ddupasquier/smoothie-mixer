@@ -145,7 +145,7 @@
 		}
 	}
 
-	@media (max-width: 680px) {
+	@media (max-width: $app-breakpoint-md) {
 		.panel-header {
 			grid-template-columns: 1fr;
 		}

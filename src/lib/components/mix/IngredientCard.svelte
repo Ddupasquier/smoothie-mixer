@@ -337,7 +337,7 @@
 		}
 	}
 
-	@media (max-width: 520px) {
+	@media (max-width: $app-breakpoint-sm) {
 		.ingredient-card__controls {
 			grid-template-columns: 1fr 1fr;
 		}

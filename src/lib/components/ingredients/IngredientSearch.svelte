@@ -178,46 +178,70 @@
 	<SearchDropdown results={sortedResults()} onSelect={select} />
 </div>
 
-<style>
+<style lang="scss">
+	@use "../../../styles/variables" as *;
+
 	.search-wrap {
 		position: relative;
+		display: grid;
+		gap: $app-gap-sm;
 	}
+
 	.search-label {
 		display: block;
-		font-weight: 600;
-		margin-bottom: 0.4rem;
-		font-size: 0.95rem;
-		color: var(--color-text);
+		color: $app-primary;
+		font-size: $app-font-size-lg;
+		font-weight: 800;
 	}
+
 	.search-row {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: $app-gap-sm;
 	}
+
 	.search-input {
 		flex: 1;
-		padding: 0.65rem 0.9rem;
-		border: 2px solid var(--color-border);
-		border-radius: var(--radius-sm);
+		min-width: 0;
+		height: 2.55rem;
+		padding: 0 0.9rem;
+		color: $app-primary;
+		background: $app-bg;
+		border: $app-border;
+		border-radius: $app-radius;
 		outline: none;
-		transition: border-color 0.15s;
-		background: var(--color-surface);
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&::placeholder {
+			color: $app-muted;
+		}
+
+		&:focus {
+			border-color: $app-primary;
+			box-shadow: 0 0 0 3px rgba(79, 72, 66, 0.1);
+		}
 	}
-	.search-input:focus {
-		border-color: var(--color-primary);
-	}
+
 	.spinner {
 		font-size: 1.1rem;
 		animation: spin 1s linear infinite;
 	}
+
 	@keyframes spin {
 		to {
 			transform: rotate(360deg);
 		}
 	}
+
 	.search-error {
-		margin-top: 0.4rem;
-		font-size: 0.85rem;
-		color: var(--color-danger);
+		padding: 0.45rem 0.6rem;
+		color: $app-warning-strong;
+		background: $app-warning-bg;
+		border: $app-warning-border;
+		border-radius: $app-radius-sm;
+		font-size: $app-font-size-sm;
+		font-weight: 800;
 	}
 </style>

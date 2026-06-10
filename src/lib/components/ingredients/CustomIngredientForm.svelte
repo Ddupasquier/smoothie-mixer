@@ -382,7 +382,7 @@
 		}
 	}
 
-	@media (max-width: 520px) {
+	@media (max-width: $app-breakpoint-sm) {
 		.custom-ingredient__grid,
 		.custom-ingredient__nutrition-grid {
 			grid-template-columns: 1fr;

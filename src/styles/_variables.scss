@@ -81,6 +81,22 @@ $app-font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 // Maximum width for page-level content containers.
 $app-max-width: 600px;
 
+// Extra-small phone breakpoint. Use for the tightest layouts where dense
+// components like nutrition labels need to stack or shrink aggressively.
+$app-breakpoint-xs: 420px;
+
+// Small phone breakpoint. Use for compact cards, ingredient rows, dialog
+// controls, and components that need single-column behavior on narrow phones.
+$app-breakpoint-sm: 520px;
+
+// Standard mobile/tablet breakpoint. Use for main app sections that switch from
+// multi-column to single-column layouts on most phones.
+$app-breakpoint-md: 680px;
+
+// Wide mobile/tablet breakpoint. Use for page-level grids that need more room
+// before collapsing, such as ingredient list columns.
+$app-breakpoint-lg: 760px;
+
 // Large spacing token for major vertical separation between unrelated sections.
 $app-gap-lg: 1.5rem;
 

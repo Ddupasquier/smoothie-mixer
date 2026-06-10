@@ -151,7 +151,7 @@
 		}
 	}
 
-	@media (max-width: 680px) {
+	@media (max-width: $app-breakpoint-md) {
 		.ingredient-lists {
 			grid-template-columns: 1fr;
 		}

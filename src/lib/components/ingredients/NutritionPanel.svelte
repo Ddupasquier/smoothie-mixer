@@ -231,6 +231,8 @@
 	@use "../../../styles/variables" as *;
 
 	.nf-label {
+		width: 100%;
+		max-width: 100%;
 		background: $nutrition-label-bg;
 		border: $app-border-strong;
 		border-radius: 0;
@@ -239,6 +241,7 @@
 		color: $nutrition-label-text;
 		box-shadow: none;
 		padding: 0.7rem 1.1rem 1.1rem 1.1rem;
+		overflow: hidden;
 	}
 	.nf-heading {
 		display: flex;
@@ -275,9 +278,11 @@
 		margin-bottom: 0.2rem;
 	}
 	.nf-food {
+		min-width: 0;
 		font-size: 1.01rem;
 		font-weight: 600;
 		color: $nutrition-label-muted;
+		overflow-wrap: anywhere;
 	}
 	.nf-custom-badge {
 		width: fit-content;
@@ -306,6 +311,7 @@
 		align-items: stretch;
 		margin-bottom: 0.2rem;
 		min-height: 120px;
+		min-width: 0;
 	}
 	.vital-list {
 		flex: 0 0 220px;
@@ -320,6 +326,7 @@
 		min-width: 0;
 		padding-left: 1.1rem;
 		overflow-y: auto;
+		overflow-x: hidden;
 		max-height: 100%;
 		border-left: $app-border-strong;
 		display: flex;
@@ -334,6 +341,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: baseline;
+		gap: 0.45rem;
 		padding: 0.13rem 0.1rem 0.13rem 0.1rem;
 		font-size: 1.01rem;
 		font-weight: 600;
@@ -345,17 +353,20 @@
 		font-weight: 900;
 	}
 	.nf-label-text {
+		min-width: 0;
 		color: $nutrition-label-text;
 		font-weight: 700;
 		letter-spacing: 0.01em;
 		font-size: 1.01rem;
 		text-transform: uppercase;
+		overflow-wrap: anywhere;
 	}
 	.nf-calories-label {
 		font-size: 1.18rem;
 		font-weight: 900;
 	}
 	.nf-value {
+		flex: 0 0 auto;
 		font-weight: 900;
 		color: $nutrition-label-text;
 		font-size: 1.01rem;
@@ -419,6 +430,78 @@
 		}
 		&:not(:disabled):hover {
 			background: $nutrition-label-hover;
+		}
+	}
+
+	@media (max-width: $app-breakpoint-xs) {
+		.nf-label {
+			padding: 0.65rem 0.85rem 0.95rem;
+		}
+
+		.nf-heading {
+			gap: 0.5rem;
+		}
+
+		.nf-title {
+			font-size: clamp(1.75rem, 10vw, 2.1rem);
+		}
+
+		.nf-basis {
+			max-width: 5.5rem;
+			font-size: 0.58rem;
+		}
+
+		.nf-columns {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 0.55rem;
+			min-height: 0;
+		}
+
+		.vital-list {
+			flex: none;
+			width: 100%;
+			min-width: 0;
+			max-width: none;
+			padding-right: 0;
+		}
+
+		.nf-scroll-wrap {
+			width: 100%;
+			max-height: 9.5rem !important;
+			padding-top: 0.55rem;
+			padding-left: 0;
+			border-top: $app-border-strong;
+			border-left: 0;
+		}
+
+		.nf-row {
+			font-size: 0.92rem;
+		}
+
+		.nf-label-text,
+		.nf-value {
+			font-size: 0.92rem;
+		}
+
+		.nf-highlight,
+		.nf-calories-label,
+		.nf-calories-value {
+			font-size: 1.05rem;
+		}
+
+		.nf-actions {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.55rem;
+		}
+
+		.nf-btn {
+			width: 100%;
+			min-width: 0;
+			padding: 0.5rem 0.45rem;
+			font-size: 0.9rem;
+			line-height: 1.15;
 		}
 	}
 

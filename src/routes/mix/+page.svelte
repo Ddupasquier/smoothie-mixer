@@ -713,7 +713,7 @@
         box-shadow: $app-card-shadow;
     }
 
-    @media (max-width: 680px) {
+    @media (max-width: $app-breakpoint-md) {
         .mix-page {
             padding-top: $app-gap-sm;
         }

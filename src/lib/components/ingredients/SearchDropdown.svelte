@@ -62,15 +62,15 @@
 
     .results-list {
         list-style: none;
-        margin-top: 0.4rem;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
+        border: $app-border;
+        border-radius: $app-radius;
         overflow: hidden;
-        box-shadow: var(--shadow);
-        background: var(--color-surface);
+        box-shadow: $app-card-shadow;
+        background: $app-bg;
         max-height: 280px;
         overflow-y: auto;
     }
+
     .result-btn {
         width: 100%;
         text-align: left;
@@ -80,49 +80,58 @@
         display: flex;
         flex-direction: column;
         gap: 0.1rem;
-        border-bottom: 1px solid var(--color-border);
+        border-bottom: $app-border;
     }
+
     .result-item:last-child .result-btn {
         border-bottom: none;
     }
+
     .result-btn:hover,
     .result-btn:focus-visible {
-        background: var(--color-primary-light);
+        background: $app-accent;
         outline: none;
     }
+
     .result-btn--custom {
         box-shadow: inset 0.28rem 0 0 $app-custom-strong;
     }
+
     .result-name {
         font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--color-text);
+        font-weight: 800;
+        color: $app-primary;
     }
+
     .result-category {
         font-size: 0.75rem;
-        color: var(--color-text-muted);
+        color: $app-muted;
     }
+
     .result-badges {
         display: flex;
         flex-wrap: wrap;
         gap: 0.25rem;
         margin-top: 0.18rem;
     }
+
     .result-badge {
         width: fit-content;
         padding: 0.12rem 0.38rem;
-        color: var(--color-text);
-        background: var(--color-primary-light);
-        border: 1px solid var(--color-border);
+        color: $app-primary;
+        background: $app-accent;
+        border: $app-border;
         border-radius: $app-radius-pill;
         font-size: 0.68rem;
         font-weight: 700;
         line-height: 1.2;
     }
+
     .result-badge--muted {
-        color: var(--color-text-muted);
-        background: var(--color-surface);
+        color: $app-muted;
+        background: $app-section-bg;
     }
+
     .result-badge--custom {
         color: $app-btn-text;
         background: $app-custom-strong;

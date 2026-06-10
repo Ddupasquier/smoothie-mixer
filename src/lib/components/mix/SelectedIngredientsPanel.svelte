@@ -106,7 +106,7 @@
 		padding-right: 0.2rem;
 	}
 
-	@media (max-width: 680px) {
+	@media (max-width: $app-breakpoint-md) {
 		.selected-ingredient-cards {
 			grid-template-columns: 1fr;
 			max-height: 42vh;

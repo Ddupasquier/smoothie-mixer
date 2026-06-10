@@ -242,7 +242,7 @@
         }
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: $app-breakpoint-lg) {
         .ingredients-page {
             padding-top: $app-gap-sm;
         }
