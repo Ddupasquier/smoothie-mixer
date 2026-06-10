@@ -26,27 +26,32 @@
     import IngredientContributionBreakdown from "$lib/components/mix/IngredientContributionBreakdown.svelte";
     import { addSavedDrink } from "$lib/utils/storage/savedDrinks";
     import {
-        convertServingAmount,
-        convertServingToGrams,
-        parseServingAmount,
-    } from "$lib/utils/serving/servingAmount";
-    import {
 		formatChartNumber,
 		getDefaultNutrientOptions,
-		getDefaultServingAmount,
 		getEstimatedVolumeWarnings,
 		getFoodSourceLabel,
 		getNutrientMeta,
-		mergeNutrientOptions,
-		normalizeNutrientOptions,
-		normalizeServingUnit,
-		optionsFromSelectedNutrientIds,
-		readNutrientGoalsFromStorage,
 		type NutrientOption,
 		type SaveGoalDiff,
-		type SavedMixState,
 		withOverageDetails,
 	} from "$lib/utils/mix/mixUi";
+	import {
+		getDefaultMixState,
+		getEmptyServingState,
+		getMixStateSnapshot,
+		getServingConversion as getServingConversionFromState,
+		getServingQuantity as getServingQuantityFromState,
+		getServingUnit as getServingUnitFromState,
+		getStateWithGramServing,
+		getStateWithServingAmount,
+		getStateWithToggledFood,
+		readStoredMixState,
+		readStoredNutrientGoals,
+		writeStoredMixState,
+		writeStoredRawMixState,
+		writeStoredNutrientGoals,
+		type MixStateSnapshot,
+	} from "$lib/utils/mix/mixState";
     import {
         getChartColors,
         getChartValues,
@@ -65,7 +70,6 @@
     import { onMount } from "svelte";
     import {
         DEFAULT_NUTRIENT_GOALS,
-        DEFAULT_SERVING_GRAMS,
         GOAL_TEMPLATES,
         MIX_STORAGE_KEYS,
     } from "../../defaults/mixDefaults";
@@ -88,20 +92,36 @@
     let saveDialogOpen = $state(false);
     let selectedGoalTemplateId = $state("");
 
+	const assignMixState = (state: MixStateSnapshot) => {
+		selected = state.selected;
+		options = state.options;
+		selectedFoodIds = state.selectedFoodIds;
+		servingGrams = state.servingGrams;
+		servingQuantities = state.servingQuantities;
+		servingUnits = state.servingUnits;
+	};
+
+	const getCurrentMixState = () => {
+		return getMixStateSnapshot({
+			selected,
+			options,
+			selectedFoodIds,
+			servingGrams,
+			servingQuantities,
+			servingUnits,
+		});
+	};
+
     const getServingQuantity = (food: FdcFood) => {
-        return servingQuantities[food.fdcId] ?? DEFAULT_SERVING_GRAMS;
+        return getServingQuantityFromState(food, servingQuantities);
     };
 
     const getServingUnit = (food: FdcFood) => {
-        return normalizeServingUnit(servingUnits[food.fdcId]) ?? "g";
+        return getServingUnitFromState(food, servingUnits);
     };
 
     const getServingConversion = (food: FdcFood) => {
-        return convertServingAmount(
-            getServingQuantity(food),
-            getServingUnit(food),
-            food,
-        );
+        return getServingConversionFromState(food, servingQuantities, servingUnits);
     };
 
     const selectedCount = $derived(selected.length);
@@ -289,124 +309,21 @@
     };
 
     const loadNutrientGoals = () => {
-        nutrientGoals = {
-            ...DEFAULT_NUTRIENT_GOALS,
-            ...readNutrientGoalsFromStorage(),
-        };
+        nutrientGoals = readStoredNutrientGoals();
     };
 
     const saveNutrientGoals = (nextGoals: Record<number, number>) => {
-        localStorage.setItem(
-            MIX_STORAGE_KEYS.nutrientGoals,
-            JSON.stringify(nextGoals),
-        );
+        writeStoredNutrientGoals(nextGoals);
         void saveCloudMixPreferences({ nutrientGoals: nextGoals });
     };
 
     const loadMixState = () => {
-        try {
-            const rawState = localStorage.getItem(MIX_STORAGE_KEYS.mixState);
-            if (!rawState) return;
-
-            const savedState = JSON.parse(rawState) as SavedMixState;
-            const savedSelected = Array.isArray(savedState.selected)
-                ? savedState.selected
-                : selected;
-            const savedOptions = normalizeNutrientOptions(savedState.options);
-
-            selected = savedSelected;
-            options = mergeNutrientOptions(
-                getDefaultNutrientOptions(),
-                savedOptions,
-                optionsFromSelectedNutrientIds(savedSelected, [
-                    vitalNutrients,
-                    ALL_NUTRIENTS,
-                ]),
-            );
-            selectedFoodIds = Array.isArray(savedState.selectedFoodIds)
-                ? savedState.selectedFoodIds.filter((id) => Number.isFinite(id))
-                : [];
-            servingGrams = Object.fromEntries(
-                Object.entries(savedState.servingGrams ?? {})
-                    .map(([id, grams]) => [Number(id), Number(grams)])
-                    .filter(
-                        ([id, grams]) =>
-                            Number.isFinite(id) && Number.isFinite(grams),
-                    ),
-            );
-            servingQuantities = Object.fromEntries(
-                selectedFoodIds.map((foodId) => {
-                    const parsedInput = savedState.servingInputs?.[foodId]
-                        ? parseServingAmount(savedState.servingInputs[foodId])
-                        : null;
-                    const savedQuantity = Number(
-                        savedState.servingQuantities?.[foodId],
-                    );
-                    return [
-                        foodId,
-                        Number.isFinite(savedQuantity)
-                            ? savedQuantity
-                            : (parsedInput?.quantity ??
-                              servingGrams[foodId] ??
-                              DEFAULT_SERVING_GRAMS),
-                    ];
-                }),
-            );
-            servingUnits = Object.fromEntries(
-                selectedFoodIds.map((foodId) => {
-                    const parsedInput = savedState.servingInputs?.[foodId]
-                        ? parseServingAmount(savedState.servingInputs[foodId])
-                        : null;
-                    return [
-                        foodId,
-                        normalizeServingUnit(
-                            savedState.servingUnits?.[foodId],
-                        ) ??
-                            parsedInput?.unit ??
-                            "g",
-                    ];
-                }),
-            );
-            servingGrams = Object.fromEntries(
-                selectedFoodIds.map((foodId) => {
-                    const food = allIngredientItems.find(
-                        (item) => item.fdcId === foodId,
-                    );
-                    const quantity =
-                        servingQuantities[foodId] ??
-                        servingGrams[foodId] ??
-                        DEFAULT_SERVING_GRAMS;
-                    const unit = servingUnits[foodId] ?? "g";
-                    return [
-                        foodId,
-                        convertServingToGrams(quantity, unit, food),
-                    ];
-                }),
-            );
-        } catch {
-            selected = vitalNutrients.map((nutrient) => nutrient.id);
-            options = getDefaultNutrientOptions();
-            selectedFoodIds = [];
-            servingGrams = {};
-            servingQuantities = {};
-            servingUnits = {};
-        }
+        assignMixState(readStoredMixState(getCurrentMixState(), allIngredientItems));
     };
 
     const saveMixState = () => {
-        const mixState = {
-            selected,
-            options,
-            selectedFoodIds,
-            servingGrams,
-            servingQuantities,
-            servingUnits,
-        };
-
-        localStorage.setItem(
-            MIX_STORAGE_KEYS.mixState,
-            JSON.stringify(mixState),
-        );
+        const mixState = getCurrentMixState();
+        writeStoredMixState(mixState);
         void saveCloudMixPreferences({ mixState });
     };
 
@@ -422,18 +339,12 @@
             Object.keys(cloudPreferences.mixState).length > 0;
 
         if (hasCloudGoals) {
-            localStorage.setItem(
-                MIX_STORAGE_KEYS.nutrientGoals,
-                JSON.stringify(cloudPreferences.nutrientGoals),
-            );
+            writeStoredNutrientGoals(cloudPreferences.nutrientGoals ?? {});
             loadNutrientGoals();
         }
 
         if (hasCloudMixState) {
-            localStorage.setItem(
-                MIX_STORAGE_KEYS.mixState,
-                JSON.stringify(cloudPreferences.mixState),
-            );
+            writeStoredRawMixState(cloudPreferences.mixState ?? {});
             loadMixState();
         }
 
@@ -460,15 +371,15 @@
 
     const clearIngredients = () => {
         selectedFoodIds = [];
-        servingGrams = {};
-        servingQuantities = {};
-        servingUnits = {};
+		const emptyServingState = getEmptyServingState();
+        servingGrams = emptyServingState.servingGrams;
+        servingQuantities = emptyServingState.servingQuantities;
+        servingUnits = emptyServingState.servingUnits;
         saveMixState();
     };
 
     const resetMix = () => {
-        selected = vitalNutrients.map((n) => n.id);
-        options = getDefaultNutrientOptions();
+		assignMixState(getDefaultMixState());
         clearIngredients();
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
         selectedGoalTemplateId = "";
@@ -532,52 +443,21 @@
     };
 
     const toggleFood = (foodId: number) => {
-        if (selectedFoodIds.includes(foodId)) {
-            selectedFoodIds = selectedFoodIds.filter((id) => id !== foodId);
-            saveMixState();
-            return;
-        }
-
-        selectedFoodIds = [...selectedFoodIds, foodId];
-        const food = allIngredientItems.find((item) => item.fdcId === foodId);
-        const defaultServing = getDefaultServingAmount(food);
-        servingGrams = {
-            ...servingGrams,
-            [foodId]:
-                servingGrams[foodId] ??
-                convertServingToGrams(
-                    defaultServing.quantity,
-                    defaultServing.unit,
-                    food,
-                ),
-        };
-        servingQuantities = {
-            ...servingQuantities,
-            [foodId]: servingQuantities[foodId] ?? defaultServing.quantity,
-        };
-        servingUnits = {
-            ...servingUnits,
-            [foodId]: servingUnits[foodId] ?? defaultServing.unit,
-        };
+		assignMixState(
+			getStateWithToggledFood(getCurrentMixState(), foodId, allIngredientItems),
+		);
         saveMixState();
     };
 
     const addSuggestedFood = (foodId: number, nextServingGrams: number) => {
-        if (!selectedFoodIds.includes(foodId)) {
-            selectedFoodIds = [...selectedFoodIds, foodId];
-        }
-        servingGrams = {
-            ...servingGrams,
-            [foodId]: nextServingGrams,
-        };
-        servingQuantities = {
-            ...servingQuantities,
-            [foodId]: nextServingGrams,
-        };
-        servingUnits = {
-            ...servingUnits,
-            [foodId]: "g",
-        };
+		assignMixState(
+			getStateWithGramServing(
+				getCurrentMixState(),
+				foodId,
+				nextServingGrams,
+				true,
+			),
+		);
         saveMixState();
     };
 
@@ -585,18 +465,13 @@
         foodId: number,
         nextServingGrams: number,
     ) => {
-        servingGrams = {
-            ...servingGrams,
-            [foodId]: nextServingGrams,
-        };
-        servingQuantities = {
-            ...servingQuantities,
-            [foodId]: nextServingGrams,
-        };
-        servingUnits = {
-            ...servingUnits,
-            [foodId]: "g",
-        };
+		assignMixState(
+			getStateWithGramServing(
+				getCurrentMixState(),
+				foodId,
+				nextServingGrams,
+			),
+		);
         saveMixState();
     };
 
@@ -609,19 +484,14 @@
         quantityValue: string,
         unit: ServingMeasureUnit,
     ) => {
-        const quantity = Math.max(0, Number(quantityValue) || 0);
-        servingQuantities = {
-            ...servingQuantities,
-            [food.fdcId]: quantity,
-        };
-        servingUnits = {
-            ...servingUnits,
-            [food.fdcId]: unit,
-        };
-        servingGrams = {
-            ...servingGrams,
-            [food.fdcId]: convertServingToGrams(quantity, unit, food),
-        };
+		assignMixState(
+			getStateWithServingAmount(
+				getCurrentMixState(),
+				food,
+				quantityValue,
+				unit,
+			),
+		);
         saveMixState();
     };
 

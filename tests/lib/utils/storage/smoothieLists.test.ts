@@ -15,7 +15,7 @@ import {
 	writeSmoothieList,
 } from "$lib/utils/storage/smoothieLists";
 import type { FdcFood } from "$lib/utils/food/types";
-import { MIX_STORAGE_KEYS } from "../../../src/defaults/mixDefaults";
+import { MIX_STORAGE_KEYS } from "../../../../src/defaults/mixDefaults";
 
 const food = {
 	fdcId: 1,

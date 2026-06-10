@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { FdcFood } from "$lib/utils/food/types";
-	import { searchFoods } from "$lib/utils/food/fdc";
+	import { FdcConfigurationError, searchFoods } from "$lib/utils/food/fdc";
 	import {
 		CUSTOM_FOODS_CHANGED_EVENT,
 		searchCustomFoods,
@@ -99,10 +99,9 @@
 				results = mergeResults(customResults, await searchFoods(searchString));
 				dispatch("results", { results, query: searchString });
 			} catch (e) {
-				error =
-					e instanceof Error
-						? e.message
-						: "Search failed. Check your API key in .env.";
+				error = e instanceof FdcConfigurationError
+					? e.message
+					: "Food search failed. Try again in a moment.";
 				results = customResults;
 				dispatch("results", { results, query: searchString });
 			} finally {

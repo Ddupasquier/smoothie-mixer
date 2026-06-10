@@ -1,0 +1,107 @@
+import { MIX_STORAGE_KEYS } from "../../../../defaults/mixDefaults";
+import { getSupabaseBrowserClient } from "$lib/supabase/client";
+import { compactFood, uniqueFoodsById } from "$lib/utils/food/foodRecords";
+import type { FdcFood } from "$lib/utils/food/types";
+import type { SmoothieListKey } from "$lib/utils/storage/smoothieLists";
+import { getCurrentUserId, toJson } from "./shared";
+
+type CloudListType = "fridge" | "shopping";
+
+const getCloudListType = (key: SmoothieListKey): CloudListType => {
+	return key === MIX_STORAGE_KEYS.fridge ? "fridge" : "shopping";
+};
+
+export const readCloudSmoothieList = async (key: SmoothieListKey) => {
+	const userId = await getCurrentUserId();
+	if (!userId) return null;
+	const supabase = getSupabaseBrowserClient();
+	if (!supabase) return null;
+
+	const { data, error } = await supabase
+		.from("user_food_list_items")
+		.select("food")
+		.eq("user_id", userId)
+		.eq("list_type", getCloudListType(key))
+		.order("created_at", { ascending: true });
+
+	if (error) return null;
+	return data.map((row) => compactFood(row.food as unknown as FdcFood));
+};
+
+export const writeCloudSmoothieList = async (
+	key: SmoothieListKey,
+	foods: FdcFood[],
+) => {
+	const userId = await getCurrentUserId();
+	if (!userId) return false;
+	const supabase = getSupabaseBrowserClient();
+	if (!supabase) return false;
+
+	const listType = getCloudListType(key);
+	if (foods.length === 0) return true;
+
+	const { error } = await supabase.from("user_food_list_items").upsert(
+		uniqueFoodsById(foods).map((food) => ({
+			user_id: userId,
+			list_type: listType,
+			fdc_id: food.fdcId,
+			food: toJson(compactFood(food)),
+		})),
+		{ onConflict: "user_id,list_type,fdc_id" },
+	);
+
+	return !error;
+};
+
+export const upsertCloudSmoothieListItem = async (
+	key: SmoothieListKey,
+	food: FdcFood,
+) => {
+	const userId = await getCurrentUserId();
+	if (!userId) return false;
+	const supabase = getSupabaseBrowserClient();
+	if (!supabase) return false;
+
+	const { error } = await supabase.from("user_food_list_items").upsert(
+		{
+			user_id: userId,
+			list_type: getCloudListType(key),
+			fdc_id: food.fdcId,
+			food: toJson(compactFood(food)),
+		},
+		{ onConflict: "user_id,list_type,fdc_id" },
+	);
+
+	return !error;
+};
+
+export const removeCloudSmoothieListItem = async (
+	key: SmoothieListKey,
+	foodId: number,
+) => {
+	const userId = await getCurrentUserId();
+	if (!userId) return false;
+	const supabase = getSupabaseBrowserClient();
+	if (!supabase) return false;
+
+	const { error } = await supabase
+		.from("user_food_list_items")
+		.delete()
+		.eq("user_id", userId)
+		.eq("list_type", getCloudListType(key))
+		.eq("fdc_id", foodId);
+
+	return !error;
+};
+
+export const reconcileCloudSmoothieList = async (
+	key: SmoothieListKey,
+	localFoods: FdcFood[],
+) => {
+	const cloudFoods = await readCloudSmoothieList(key);
+	if (!cloudFoods) return localFoods;
+
+	if (cloudFoods.length > 0) return cloudFoods;
+	if (localFoods.length > 0) await writeCloudSmoothieList(key, localFoods);
+	return localFoods;
+};

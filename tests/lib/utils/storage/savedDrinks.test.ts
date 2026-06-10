@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { MIX_STORAGE_KEYS } from "../../../src/defaults/mixDefaults";
+import { MIX_STORAGE_KEYS } from "../../../../src/defaults/mixDefaults";
 import {
 	addSavedDrink,
 	readSavedDrinks,
