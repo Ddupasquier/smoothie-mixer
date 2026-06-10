@@ -151,6 +151,7 @@
 	<div class="search-row">
 		<input
 			id="ingredient-search"
+			name="ingredient-search"
 			type="search"
 			class="search-input"
 			placeholder="Type and press Enter or Space to add…"

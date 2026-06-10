@@ -66,6 +66,8 @@
 			<label>
 				<span>{label}</span>
 				<input
+					id="text-input-dialog-value"
+					name="text-input-dialog-value"
 					type="text"
 					bind:value
 					{placeholder}

@@ -62,6 +62,8 @@
 		<label>
 			<span>Amount</span>
 			<input
+				id={`ingredient-${food.fdcId}-quantity`}
+				name={`ingredient-${food.fdcId}-quantity`}
 				type="number"
 				min="0"
 				step="any"
@@ -74,6 +76,8 @@
 		<label>
 			<span>Unit</span>
 			<select
+				id={`ingredient-${food.fdcId}-unit`}
+				name={`ingredient-${food.fdcId}-unit`}
 				value={unit}
 				aria-label={`Measure for ${food.description}`}
 				onchange={(event) =>

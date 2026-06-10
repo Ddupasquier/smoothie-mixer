@@ -110,6 +110,8 @@
 			<label class="custom-ingredient__wide">
 				<span>Ingredient name</span>
 				<input
+					id="custom-ingredient-name"
+					name="custom-ingredient-name"
 					type="text"
 					placeholder="Oreos, homemade smoothie base..."
 					bind:value={name}
@@ -119,6 +121,8 @@
 			<label>
 				<span>Serving label</span>
 				<input
+					id="custom-ingredient-serving-label"
+					name="custom-ingredient-serving-label"
 					type="text"
 					placeholder="3 cookies, 1 scoop..."
 					bind:value={servingLabel}
@@ -129,6 +133,8 @@
 				<span>Serving weight</span>
 				<div class="custom-ingredient__inline-input">
 					<input
+						id="custom-ingredient-serving-weight"
+						name="custom-ingredient-serving-weight"
 						type="number"
 						min="0.1"
 						step="any"
@@ -151,6 +157,8 @@
 				<label>
 					<span>Volume amount</span>
 					<input
+						id="custom-ingredient-volume-amount"
+						name="custom-ingredient-volume-amount"
 						type="number"
 						min="0"
 						step="any"
@@ -161,7 +169,11 @@
 
 				<label>
 					<span>Volume unit</span>
-					<select bind:value={volumeUnit}>
+					<select
+						id="custom-ingredient-volume-unit"
+						name="custom-ingredient-volume-unit"
+						bind:value={volumeUnit}
+					>
 						{#each volumeOptions as option}
 							<option value={option.value}>{option.label}</option>
 						{/each}
@@ -183,6 +195,8 @@
 				<label>
 					<span>Calories</span>
 					<input
+						id="custom-ingredient-calories"
+						name="custom-ingredient-calories"
 						type="number"
 						min="0"
 						step="any"
@@ -194,6 +208,8 @@
 				<label>
 					<span>Total Fat (g)</span>
 					<input
+						id="custom-ingredient-fat"
+						name="custom-ingredient-fat"
 						type="number"
 						min="0"
 						step="any"
@@ -205,6 +221,8 @@
 				<label>
 					<span>Total Carb. (g)</span>
 					<input
+						id="custom-ingredient-carbs"
+						name="custom-ingredient-carbs"
 						type="number"
 						min="0"
 						step="any"
@@ -216,6 +234,8 @@
 				<label>
 					<span>Dietary Fiber (g)</span>
 					<input
+						id="custom-ingredient-fiber"
+						name="custom-ingredient-fiber"
 						type="number"
 						min="0"
 						step="any"
@@ -227,6 +247,8 @@
 				<label>
 					<span>Total Sugars (g)</span>
 					<input
+						id="custom-ingredient-sugar"
+						name="custom-ingredient-sugar"
 						type="number"
 						min="0"
 						step="any"
@@ -238,6 +260,8 @@
 				<label>
 					<span>Protein (g)</span>
 					<input
+						id="custom-ingredient-protein"
+						name="custom-ingredient-protein"
 						type="number"
 						min="0"
 						step="any"

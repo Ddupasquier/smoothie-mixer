@@ -24,6 +24,8 @@
     {#each options as opt}
         <label class:selected={selected.includes(opt.id)} class="checkbox-item">
             <input
+                id={`checkbox-${opt.id}`}
+                name={`checkbox-${opt.id}`}
                 type="checkbox"
                 checked={selected.includes(opt.id)}
                 onchange={() => toggle(opt.id)}

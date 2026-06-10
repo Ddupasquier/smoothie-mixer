@@ -33,6 +33,7 @@
 			<label for="goal-template">Template</label>
 			<select
 				id="goal-template"
+				name="goal-template"
 				value={selectedGoalTemplateId}
 				onchange={(event) => onTemplateChange(event.currentTarget.value)}
 			>
@@ -53,6 +54,8 @@
 			<label class="goal-input">
 				<span>{nutrient.label}</span>
 				<input
+					id={`goal-${nutrient.id}`}
+					name={`goal-${nutrient.id}`}
 					type="number"
 					min="0"
 					step="any"

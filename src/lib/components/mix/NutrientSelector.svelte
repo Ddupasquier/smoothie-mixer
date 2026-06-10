@@ -34,7 +34,7 @@
 		</div>
 		<div class="add-nutrient-controls">
 			<label for="add-nutrient">Add nutrient</label>
-			<select id="add-nutrient" bind:value={addNutrientId}>
+			<select id="add-nutrient" name="add-nutrient" bind:value={addNutrientId}>
 				<option value="">Select nutrient</option>
 				{#each ALL_NUTRIENTS.filter((nutrient) => !options.some((option) => option.id == nutrient.id)) as nutrient}
 					<option value={nutrient.id}>{nutrient.label}</option>
