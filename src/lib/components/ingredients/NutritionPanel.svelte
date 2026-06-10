@@ -231,12 +231,12 @@
 	@use "../../../styles/variables" as *;
 
 	.nf-label {
-		background: #fff;
-		border: 3.5px solid #111;
+		background: $nutrition-label-bg;
+		border: $app-border-strong;
 		border-radius: 0;
 		margin: 0 auto;
 		font-family: "Arial Narrow", Arial, sans-serif;
-		color: #111;
+		color: $nutrition-label-text;
 		box-shadow: none;
 		padding: 0.7rem 1.1rem 1.1rem 1.1rem;
 	}
@@ -245,7 +245,7 @@
 		align-items: flex-start;
 		justify-content: space-between;
 		gap: 0.75rem;
-		border-bottom: 8px solid #111;
+		border-bottom: $app-border-highlight;
 		padding-bottom: 0.18rem;
 		margin-bottom: 0.1rem;
 	}
@@ -259,7 +259,7 @@
 	.nf-basis {
 		max-width: 6.8rem;
 		padding-top: 0.18rem;
-		color: #222;
+		color: $nutrition-label-muted;
 		font-size: 0.68rem;
 		font-weight: 800;
 		line-height: 1.15;
@@ -277,14 +277,14 @@
 	.nf-food {
 		font-size: 1.01rem;
 		font-weight: 600;
-		color: #222;
+		color: $nutrition-label-muted;
 	}
 	.nf-custom-badge {
 		width: fit-content;
 		padding: 0.08rem 0.4rem;
 		color: $app-btn-text;
 		background: $app-custom-strong;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-family: Arial, sans-serif;
 		font-size: 0.64rem;
 		font-weight: 900;
@@ -292,11 +292,11 @@
 		letter-spacing: 0.04em;
 	}
 	.nf-thick-divider {
-		border-bottom: 4px solid #111;
+		border-bottom: $app-border-thick;
 		margin: 0.2rem 0 0.3rem 0;
 	}
 	.nf-divider {
-		border-bottom: 2px solid #111;
+		border-bottom: $app-border-divider;
 		margin: 0.1rem 0 0.1rem 0;
 	}
 	.nf-columns {
@@ -311,7 +311,6 @@
 		flex: 0 0 220px;
 		margin: 0;
 		padding: 0;
-		/* border-right: 3px solid #111; */
 		padding-right: 1.1rem;
 		min-width: 180px;
 		max-width: 220px;
@@ -319,11 +318,10 @@
 	.nf-scroll-wrap {
 		flex: 1 1 0;
 		min-width: 0;
-		/* max-width: 220px; */
 		padding-left: 1.1rem;
 		overflow-y: auto;
 		max-height: 100%;
-		border-left: 3px solid #111;
+		border-left: $app-border-strong;
 		display: flex;
 		align-items: stretch;
 	}
@@ -340,14 +338,14 @@
 		font-size: 1.01rem;
 		font-weight: 600;
 		background: none;
-		color: #111;
+		color: $nutrition-label-text;
 	}
 	.nf-highlight {
 		font-size: 1.18rem;
 		font-weight: 900;
 	}
 	.nf-label-text {
-		color: #111;
+		color: $nutrition-label-text;
 		font-weight: 700;
 		letter-spacing: 0.01em;
 		font-size: 1.01rem;
@@ -359,7 +357,7 @@
 	}
 	.nf-value {
 		font-weight: 900;
-		color: #111;
+		color: $nutrition-label-text;
 		font-size: 1.01rem;
 	}
 	.nf-calories-value {
@@ -368,7 +366,7 @@
 	}
 	.nf-unit {
 		font-weight: 400;
-		color: #222;
+		color: $nutrition-label-muted;
 		font-size: 0.82em;
 		margin-left: 0.13em;
 		text-transform: uppercase;
@@ -399,16 +397,16 @@
 			height: 1.05rem;
 			color: $app-primary;
 			background: $app-success-bg;
-			border-radius: 999px;
+			border-radius: $app-radius-pill;
 			font-size: 0.72rem;
 			line-height: 1;
 		}
 	}
 	.nf-btn {
-		background: #222;
-		color: #fff;
+		background: $nutrition-label-muted;
+		color: $nutrition-label-bg;
 		border: none;
-		border-radius: 3px;
+		border-radius: $nutrition-label-button-radius;
 		font-size: 1rem;
 		font-weight: 700;
 		padding: 0.45em 1.1em;
@@ -416,11 +414,11 @@
 		transition: background 0.15s;
 
 		&:disabled {
-			background: #aaa;
+			background: $nutrition-label-disabled;
 			cursor: not-allowed;
 		}
 		&:not(:disabled):hover {
-			background: #444;
+			background: $nutrition-label-hover;
 		}
 	}
 

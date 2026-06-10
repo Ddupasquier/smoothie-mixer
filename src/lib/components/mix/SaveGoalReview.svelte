@@ -43,7 +43,7 @@
 
 		> p {
 			color: $app-muted;
-			font-size: 0.86rem;
+			font-size: $app-font-size-md;
 			line-height: 1.4;
 		}
 	}
@@ -74,12 +74,12 @@
 
 		strong {
 			color: $app-primary;
-			font-size: 0.86rem;
+			font-size: $app-font-size-md;
 		}
 
 		span {
 			color: $app-muted;
-			font-size: 0.76rem;
+			font-size: $app-font-size-sm;
 			font-weight: 700;
 		}
 	}
@@ -89,7 +89,7 @@
 		width: fit-content;
 		max-width: 8rem;
 		padding: 0.2rem 0.5rem;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		text-align: right;
 		white-space: nowrap;
 

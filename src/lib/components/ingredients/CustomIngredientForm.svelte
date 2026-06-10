@@ -374,7 +374,7 @@
 		padding: 0.55rem 0.9rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-weight: 800;
 
 		&:hover {

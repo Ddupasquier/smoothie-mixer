@@ -86,13 +86,13 @@
 
 		h4 {
 			color: $app-primary;
-			font-size: 0.92rem;
+			font-size: $app-font-size-lg;
 			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.8rem;
+			font-size: $app-font-size-sm;
 			line-height: 1.35;
 		}
 	}
@@ -121,14 +121,14 @@
 			color: $app-primary;
 			background: $app-section-bg;
 			border-bottom: $app-border;
-			font-size: 0.84rem;
+			font-size: $app-font-size-sm;
 			font-weight: 800;
 		}
 
 		p {
 			padding: 0 0.45rem 0.45rem;
 			color: $app-muted;
-			font-size: 0.82rem;
+			font-size: $app-font-size-sm;
 		}
 
 		:global(.pill-row) {
@@ -140,7 +140,7 @@
 		:global(.pill) {
 			max-width: 100%;
 			padding: 0.16rem 0.55rem;
-			font-size: 0.82rem;
+			font-size: $app-font-size-sm;
 			line-height: 1.2;
 			overflow-wrap: anywhere;
 		}

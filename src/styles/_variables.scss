@@ -74,6 +74,10 @@ $color-ink-black: #111;
 
 // App layout
 // -----------------------------------------------------------------------------
+// Default app font stack. Use for the app shell, form controls, body copy, and
+// general UI components. Specialized displays like nutrition labels can override.
+$app-font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+
 // Maximum width for page-level content containers.
 $app-max-width: 600px;
 
@@ -91,6 +95,36 @@ $app-padding: 1.5rem;
 
 // Standard radius for controls and compact surfaces.
 $app-radius: 10px;
+
+// Small radius for compact inputs and dense controls.
+$app-radius-sm: 8px;
+
+// Fully rounded radius for pills, badges, circular buttons, and token chips.
+$app-radius-pill: 15px;
+
+// Standard form-control height for text inputs, selects, and compact buttons.
+$app-control-height: 2.1rem;
+
+// Smaller control height for dense ingredient and graph-related controls.
+$app-control-height-sm: 2rem;
+
+// Base body font size. Use on the root document/body only.
+$app-font-size-base: 16px;
+
+// Extra-small text. Use for tiny badges, compact metadata, and microcopy.
+$app-font-size-xs: 0.68rem;
+
+// Small text. Use for helper copy, captions, badges, and compact labels.
+$app-font-size-sm: 0.78rem;
+
+// Default compact UI text. Use for buttons, pills, form labels, and dense rows.
+$app-font-size-md: 0.86rem;
+
+// Section heading text. Use for card headings and compact panel titles.
+$app-font-size-lg: 0.95rem;
+
+// Page/subsection title text. Use for modal titles and prominent card headers.
+$app-font-size-xl: 1.15rem;
 
 // App color roles
 // -----------------------------------------------------------------------------
@@ -142,6 +176,10 @@ $app-warning-bg: $color-peach-cream;
 // a stronger edge than the default app border.
 $app-warning-border: 1.5px solid $color-dusty-rose;
 
+// Warning border color. Use when only the border color changes on an existing
+// border declaration.
+$app-warning-border-color: $color-dusty-rose;
+
 // Warning panel text. Applied to warning section headings and copy; currently
 // tied to primary text for readability against soft warning backgrounds.
 $app-warning-text: $app-primary;
@@ -154,12 +192,36 @@ $app-warning-strong: $color-cinnamon-clay;
 // from the page without feeling heavy.
 $app-box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
 
+// Header elevation. Applied to the sticky app header.
+$app-header-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
 // Card radius for larger surfaces like saved drinks, mix panels, graph panels,
 // and ingredient cards.
 $app-card-radius: 12px;
 
 // Card shadow for compact repeated cards and smaller surfaces.
 $app-card-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
+
+// Very subtle pill shadow. Applied to chips and pills that need minimal lift.
+$app-pill-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+
+// Modal overlay background. Applied behind dialogs/popups to dim app content.
+$app-overlay-bg: rgba(26, 58, 90, 0.28);
+
+// Modal shadow. Applied to centered dialogs and blocking confirmation surfaces.
+$app-modal-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+
+// Popover shadow. Applied to small floating explanation panels.
+$app-popover-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+
+// Prompt shadow. Applied to smaller inline prompt cards.
+$app-prompt-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.13);
+
+// Custom-food ring shadow. Applied around user-created ingredient cards.
+$app-custom-ring-shadow: 0 0 0 2px rgba(123, 95, 163, 0.12);
+
+// Focus outline. Applied to keyboard-focused buttons and interactive chips.
+$app-focus-outline: 2px solid $app-primary;
 
 // Nutrition label heavy outer border. Keep intentionally high-contrast.
 $app-border-strong: 3.5px solid $color-ink-black;
@@ -172,6 +234,24 @@ $app-border-thick: 4px solid $color-ink-black;
 
 // Nutrition label headline divider. Use for the heaviest printed-label rule.
 $app-border-highlight: 8px solid $color-ink-black;
+
+// Nutrition label paper background. Keep stark white to mimic printed labels.
+$nutrition-label-bg: #fff;
+
+// Nutrition label main ink. Use for label text, dividers, and printed rules.
+$nutrition-label-text: $color-ink-black;
+
+// Nutrition label muted ink. Use for secondary label copy and units.
+$nutrition-label-muted: #222;
+
+// Nutrition label disabled control fill. Use only inside the label-style panel.
+$nutrition-label-disabled: #aaa;
+
+// Nutrition label hover fill. Use only inside the label-style panel.
+$nutrition-label-hover: #444;
+
+// Nutrition label button radius. Keep small to preserve printed-label styling.
+$nutrition-label-button-radius: 3px;
 
 // Primary button background. Applied to main actions such as Save, Load, Add,
 // confirmation, and other commitment buttons.

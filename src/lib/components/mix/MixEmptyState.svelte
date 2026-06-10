@@ -111,7 +111,7 @@
 		height: 1.35rem;
 		color: $app-primary;
 		background: $app-accent;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.72rem;
 		font-weight: 900;
 	}

@@ -53,8 +53,8 @@
 		color: $app-primary;
 		background: $app-warning-bg;
 		border: $app-warning-border;
-		border-radius: 999px;
-		font-size: 0.78rem;
+		border-radius: $app-radius-pill;
+		font-size: $app-font-size-sm;
 		font-weight: 800;
 	}
 
@@ -68,13 +68,13 @@
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
-		box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+		box-shadow: $app-popover-shadow;
 		color: $app-primary;
 	}
 
 	h5 {
 		margin-bottom: $app-gap-sm;
-		font-size: 0.92rem;
+		font-size: $app-font-size-lg;
 		font-weight: 800;
 	}
 
@@ -83,8 +83,8 @@
 		padding: 0.35rem 0.7rem;
 		background: $app-btn-bg;
 		color: $app-btn-text;
-		border-radius: 999px;
-		font-size: 0.82rem;
+		border-radius: $app-radius-pill;
+		font-size: $app-font-size-sm;
 		font-weight: 700;
 	}
 </style>

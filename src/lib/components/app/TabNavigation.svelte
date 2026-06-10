@@ -36,7 +36,7 @@
     display: flex;
     gap: $app-gap-sm;
     background: $app-bg;
-    border-radius: 999px;
+    border-radius: $app-radius-pill;
     padding: 0.3em 0.4em;
     margin-bottom: $app-gap-lg;
     justify-content: center;
@@ -48,7 +48,7 @@
       font-size: 1.08em;
       font-weight: 500;
       padding: 0.5em 1.3em;
-      border-radius: 999px;
+      border-radius: $app-radius-pill;
       cursor: pointer;
       transition:
         background 0.13s,
@@ -60,7 +60,7 @@
       }
 
       &:focus {
-        outline: 2px solid $app-primary;
+        outline: $app-focus-outline;
       }
     }
   }

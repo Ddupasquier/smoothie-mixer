@@ -1,3 +1,5 @@
+@use "./styles/variables" as *;
+
 /* ============================================================
    Global styles — mobile-first, single-column layout
    ============================================================ */
@@ -10,35 +12,16 @@
 	padding: 0;
 }
 
-:root {
-	--color-primary: #5f564f;
-	--color-primary-dark: #4f4741;
-	--color-primary-light: #ccd5e2;
-	--color-accent: #efd3c2;
-	--color-bg: #fcf9f4;
-	--color-surface: #f3ece3;
-	--color-border: #d1c4d3;
-	--color-text: #5f564f;
-	--color-text-muted: #756c64;
-	--color-danger: #7a4f43;
-
-	--radius: 12px;
-	--radius-sm: 8px;
-	--shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-	--font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-	--max-width: 600px;
-}
-
 html,
 body {
 	height: 100%;
 }
 
 body {
-	font-family: var(--font);
-	background: var(--color-bg);
-	color: var(--color-text);
-	font-size: 16px;
+	font-family: $app-font-family;
+	background: $app-bg;
+	color: $app-primary;
+	font-size: $app-font-size-base;
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 }
@@ -48,14 +31,14 @@ body {
 	position: sticky;
 	top: 0;
 	z-index: 100;
-	background: var(--color-primary);
-	color: #fcf9f4;
-	padding: 0.75rem 1rem;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 1rem;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	gap: $app-gap-md;
+	padding: 0.75rem 1rem;
+	background: $app-primary;
+	color: $app-btn-text;
+	box-shadow: $app-header-shadow;
 }
 
 .app-header .logo {
@@ -84,11 +67,11 @@ body {
 .auth-status button {
 	display: inline-flex;
 	align-items: center;
-	min-height: 2rem;
+	min-height: $app-control-height-sm;
 	padding: 0.35rem 0.7rem;
-	color: var(--color-primary);
-	background: var(--color-bg);
-	border-radius: 999px;
+	color: $app-primary;
+	background: $app-bg;
+	border-radius: $app-radius-pill;
 	font-size: 0.82rem;
 	font-weight: 800;
 	text-decoration: none;
@@ -100,7 +83,7 @@ body {
 
 /* ---- Main content ---- */
 .app-main {
-	max-width: var(--max-width);
+	max-width: $app-max-width;
 	margin: 0 auto;
 	padding: 1rem;
 	padding-bottom: 2rem;
@@ -112,9 +95,11 @@ button {
 	font-family: inherit;
 	font-size: 1rem;
 	border: none;
-	border-radius: var(--radius-sm);
-	padding: 0.5rem 1rem;
-	transition: background 0.15s, transform 0.1s;
+	border-radius: $app-radius-sm;
+	padding: $app-gap-sm 1rem;
+	transition:
+		background 0.15s,
+		transform 0.1s;
 }
 
 button:active {
@@ -128,5 +113,5 @@ select {
 }
 
 a {
-	color: var(--color-primary-dark);
+	color: $app-primary;
 }

@@ -247,9 +247,9 @@
 		place-items: center;
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #fff;
+		color: $app-btn-text;
 		background: $app-warning-strong;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.8rem;
 		font-weight: 900;
 		line-height: 1;
@@ -303,7 +303,7 @@
 		border-radius: $app-radius;
 
 		&.has-warning {
-			border-color: $app-warning-border;
+			border-color: $app-warning-border-color;
 		}
 	}
 
@@ -334,7 +334,7 @@
 		padding: 0.12rem 0.42rem;
 		color: $app-primary;
 		background: $app-accent;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.66rem;
 		font-weight: 800;
 		line-height: 1.2;
@@ -382,7 +382,7 @@
 		padding: 0.34rem 0.42rem;
 		color: $app-primary;
 		background: $app-warning-bg;
-		border-radius: 8px;
+		border-radius: $app-radius-sm;
 
 		span {
 			font-weight: 900;
@@ -394,7 +394,7 @@
 		padding: 0.34rem 0.62rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.74rem;
 		font-weight: 800;
 

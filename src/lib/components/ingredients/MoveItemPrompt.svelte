@@ -23,7 +23,7 @@
     .move-prompt {
         background: $app-section-bg;
         border-radius: $app-card-radius;
-        box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.13);
+        box-shadow: $app-prompt-shadow;
         padding: 2em 2.2em 1.5em 2.2em;
         min-width: 320px;
         max-width: 90vw;
@@ -49,7 +49,7 @@
                 background: $app-accent;
                 color: $app-primary;
                 border: 1px solid $app-accent;
-                border-radius: 999px;
+                border-radius: $app-radius-pill;
                 padding: 0.5em 1.3em;
                 font-size: 1em;
                 font-weight: 500;
@@ -63,7 +63,7 @@
                 }
 
                 &:focus {
-                    outline: 2px solid $app-primary;
+                    outline: $app-focus-outline;
                 }
             }
         }

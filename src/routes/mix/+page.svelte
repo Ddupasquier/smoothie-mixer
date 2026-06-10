@@ -795,7 +795,7 @@
             background: $app-btn-bg;
             color: $app-btn-text;
             border-radius: $app-radius;
-            font-size: 0.8rem;
+            font-size: $app-font-size-sm;
             font-weight: 700;
             padding: 0.42rem 0.7rem;
 

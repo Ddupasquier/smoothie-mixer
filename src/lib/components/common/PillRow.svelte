@@ -58,10 +58,12 @@
 </div>
 
 <style lang="scss">
+    @use "../../../styles/variables" as *;
+
     .pill-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4em;
-        margin: 0.5em 0 0.2em 0;
+        gap: $app-gap-sm;
+        margin: $app-gap-sm 0 0.2em 0;
     }
 </style>

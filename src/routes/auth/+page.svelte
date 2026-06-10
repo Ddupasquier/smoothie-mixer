@@ -99,7 +99,7 @@
 		padding: 0.7rem 1rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-weight: 900;
 
 		&:hover {
@@ -113,7 +113,7 @@
 			height: 1.35rem;
 			color: $app-primary;
 			background: $app-btn-text;
-			border-radius: 999px;
+			border-radius: $app-radius-pill;
 			font-weight: 900;
 		}
 	}

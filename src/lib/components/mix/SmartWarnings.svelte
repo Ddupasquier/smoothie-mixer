@@ -84,7 +84,7 @@
 		place-items: center;
 		width: 1.25rem;
 		height: 1.25rem;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.68rem;
 		font-weight: 900;
 	}

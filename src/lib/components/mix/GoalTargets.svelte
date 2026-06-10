@@ -93,13 +93,13 @@
 
 		h4 {
 			color: $app-primary;
-			font-size: 0.92rem;
+			font-size: $app-font-size-lg;
 			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.8rem;
+			font-size: $app-font-size-sm;
 			line-height: 1.35;
 		}
 	}
@@ -113,29 +113,29 @@
 		label {
 			grid-column: 1 / -1;
 			color: $app-muted;
-			font-size: 0.72rem;
+			font-size: $app-font-size-xs;
 			font-weight: 800;
 		}
 
 		select {
 			width: 100%;
 			min-width: 0;
-			height: 2rem;
+			height: $app-control-height-sm;
 			padding: 0 0.5rem;
 			color: $app-primary;
 			background: $app-section-bg;
 			border: $app-border;
-			border-radius: 8px;
-			font-size: 0.82rem;
+			border-radius: $app-radius-sm;
+			font-size: $app-font-size-sm;
 		}
 
 		button {
-			height: 2rem;
+			height: $app-control-height-sm;
 			padding: 0 0.6rem;
 			color: $app-btn-text;
 			background: $app-btn-bg;
-			border-radius: 8px;
-			font-size: 0.8rem;
+			border-radius: $app-radius-sm;
+			font-size: $app-font-size-sm;
 			font-weight: 800;
 
 			&:hover:not(:disabled) {
@@ -166,7 +166,7 @@
 		border: $app-border;
 		border-radius: $app-radius;
 		color: $app-primary;
-		font-size: 0.82rem;
+		font-size: $app-font-size-sm;
 		font-weight: 800;
 
 		span {
@@ -177,24 +177,24 @@
 		input {
 			width: 100%;
 			min-width: 0;
-			height: 1.85rem;
+			height: $app-control-height-sm;
 			padding: 0 0.45rem;
 			color: $app-primary;
 			background: $app-bg;
 			border: $app-border;
-			border-radius: 7px;
-			font-size: 0.86rem;
+			border-radius: $app-radius-sm;
+			font-size: $app-font-size-md;
 		}
 
 		.goal-unit {
 			color: $app-muted;
-			font-size: 0.76rem;
+			font-size: $app-font-size-sm;
 		}
 
 		small {
 			grid-column: 1 / -1;
 			color: $app-muted;
-			font-size: 0.72rem;
+			font-size: $app-font-size-xs;
 			font-weight: 600;
 		}
 	}

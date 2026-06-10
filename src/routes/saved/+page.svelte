@@ -177,7 +177,7 @@
             color: $app-primary;
             background: $app-accent;
             border: 1px solid $app-accent;
-            border-radius: 999px;
+            border-radius: $app-radius-pill;
             font-size: 0.72rem;
             font-weight: 800;
         }
@@ -198,7 +198,7 @@
         color: $app-primary;
         background: $app-bg;
         border: $app-border;
-        border-radius: 999px;
+        border-radius: $app-radius-pill;
         font-size: 0.78rem;
         font-weight: 700;
         line-height: 1.25;
@@ -216,7 +216,7 @@
             padding: 0.04rem 0.32rem;
             color: $app-btn-text;
             background: $app-custom-strong;
-            border-radius: 999px;
+            border-radius: $app-radius-pill;
             font-size: 0.68em;
             font-weight: 900;
             line-height: 1.2;
@@ -234,7 +234,7 @@
             padding: 0.45rem 0.9rem;
             color: $app-btn-text;
             background: $app-btn-bg;
-            border-radius: 999px;
+            border-radius: $app-radius-pill;
             font-weight: 800;
 
             &:hover {
@@ -266,7 +266,7 @@
             padding: 0.5rem 1rem;
             color: $app-btn-text;
             background: $app-btn-bg;
-            border-radius: 999px;
+            border-radius: $app-radius-pill;
             font-weight: 800;
         }
     }

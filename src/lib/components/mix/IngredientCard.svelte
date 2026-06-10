@@ -146,7 +146,7 @@
 
 	.ingredient-card--custom {
 		border-color: $app-custom-strong;
-		box-shadow: 0 0 0 2px rgba(123, 95, 163, 0.12);
+		box-shadow: $app-custom-ring-shadow;
 	}
 
 	.ingredient-card__header {
@@ -185,7 +185,7 @@
 		color: $app-muted;
 		background: $app-bg;
 		border: $app-border;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.68rem;
 		font-weight: 800;
 		text-transform: uppercase;
@@ -207,7 +207,7 @@
 		padding: 0;
 		color: $app-primary;
 		background: $app-accent;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 1.2rem;
 		font-weight: 800;
 		line-height: 1;
@@ -244,7 +244,7 @@
 		color: $app-primary;
 		background: $app-bg;
 		border: $app-border;
-		border-radius: 7px;
+		border-radius: $app-radius-sm;
 		font-size: 0.8rem;
 	}
 
@@ -272,7 +272,7 @@
 		width: 1rem;
 		height: 1rem;
 		background: $app-accent;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		transition: transform 0.16s ease;
 		transform: rotate(-90deg);
 
@@ -308,7 +308,7 @@
 		color: $app-muted;
 		background: $app-bg;
 		border: $app-border;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-size: 0.7rem;
 		font-weight: 800;
 	}
@@ -330,7 +330,7 @@
 			color: $app-primary;
 			background: $app-accent;
 			border: 1px solid $app-accent;
-			border-radius: 999px;
+			border-radius: $app-radius-pill;
 			font-size: 0.68rem;
 			font-weight: 800;
 			overflow-wrap: anywhere;

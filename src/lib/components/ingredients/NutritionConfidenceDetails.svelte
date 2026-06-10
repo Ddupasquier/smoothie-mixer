@@ -94,7 +94,7 @@
 		padding: 0.35rem 0.4rem;
 		background: $app-section-bg;
 		border: $app-border;
-		border-radius: 8px;
+		border-radius: $app-radius-sm;
 
 		span {
 			min-width: 0;

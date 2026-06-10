@@ -51,9 +51,9 @@
         color: $app-primary;
         background: $app-section-bg;
         border: $app-border;
-        border-radius: 999px;
+        border-radius: $app-radius-pill;
         box-shadow: $app-card-shadow;
-        font-size: 0.95rem;
+        font-size: $app-font-size-lg;
         font-weight: 600;
         line-height: 1;
         cursor: pointer;

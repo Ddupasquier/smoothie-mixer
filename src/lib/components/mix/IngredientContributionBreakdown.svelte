@@ -162,7 +162,7 @@
 		height: 0.35rem;
 		overflow: hidden;
 		background: $app-accent;
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 
 		span {
 			display: block;

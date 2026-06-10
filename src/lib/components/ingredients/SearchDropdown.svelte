@@ -114,7 +114,7 @@
         color: var(--color-text);
         background: var(--color-primary-light);
         border: 1px solid var(--color-border);
-        border-radius: 999px;
+        border-radius: $app-radius-pill;
         font-size: 0.68rem;
         font-weight: 700;
         line-height: 1.2;

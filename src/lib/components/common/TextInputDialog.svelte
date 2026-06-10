@@ -98,7 +98,7 @@
 		display: grid;
 		place-items: center;
 		padding: $app-padding;
-		background: rgba(26, 58, 90, 0.28);
+		background: $app-overlay-bg;
 		backdrop-filter: blur(2px);
 	}
 
@@ -108,7 +108,7 @@
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
-		box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+		box-shadow: $app-modal-shadow;
 	}
 
 	header {
@@ -117,13 +117,13 @@
 		h3 {
 			margin-bottom: 0.25rem;
 			color: $app-primary;
-			font-size: 1.15rem;
+			font-size: $app-font-size-xl;
 			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.9rem;
+			font-size: $app-font-size-md;
 			line-height: 1.4;
 		}
 	}
@@ -136,7 +136,7 @@
 		display: grid;
 		gap: 0.35rem;
 		color: $app-primary;
-		font-size: 0.88rem;
+		font-size: $app-font-size-md;
 		font-weight: 800;
 	}
 
@@ -148,7 +148,7 @@
 		background: $app-bg;
 		border: $app-border;
 		border-radius: $app-radius;
-		font-size: 0.95rem;
+		font-size: $app-font-size-lg;
 		box-sizing: border-box;
 	}
 
@@ -160,7 +160,7 @@
 	}
 
 	button {
-		border-radius: 999px;
+		border-radius: $app-radius-pill;
 		font-weight: 800;
 		padding: 0.55rem 1rem;
 	}

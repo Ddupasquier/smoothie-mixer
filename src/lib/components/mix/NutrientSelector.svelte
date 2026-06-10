@@ -71,13 +71,13 @@
 		h3 {
 			margin-bottom: 0.1rem;
 			color: $app-primary;
-			font-size: 0.98rem;
+			font-size: $app-font-size-lg;
 			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.8rem;
+			font-size: $app-font-size-sm;
 			font-weight: 600;
 		}
 	}
@@ -90,7 +90,7 @@
 		label {
 			grid-column: 1 / -1;
 			color: $app-muted;
-			font-size: 0.75rem;
+			font-size: $app-font-size-xs;
 			font-weight: 700;
 			line-height: 1;
 		}
@@ -98,21 +98,21 @@
 		select {
 			width: 100%;
 			min-width: 0;
-			height: 2.1rem;
+			height: $app-control-height;
 			padding: 0 0.55rem;
 			color: $app-primary;
 			background: $app-bg;
 			border: $app-border;
-			border-radius: 8px;
-			font-size: 0.86rem;
+			border-radius: $app-radius-sm;
+			font-size: $app-font-size-md;
 		}
 
 		button {
-			height: 2.1rem;
+			height: $app-control-height;
 			padding: 0 0.65rem;
 			background: $app-btn-bg;
 			color: $app-btn-text;
-			font-size: 0.84rem;
+			font-size: $app-font-size-sm;
 
 			&:hover:not(:disabled) {
 				background: $app-btn-bg-hover;
@@ -136,7 +136,7 @@
 		:global(.checkbox-item) {
 			min-height: 1.85rem;
 			padding: 0.3rem 0.55rem;
-			font-size: 0.84rem;
+			font-size: $app-font-size-sm;
 		}
 
 		:global(input) {
