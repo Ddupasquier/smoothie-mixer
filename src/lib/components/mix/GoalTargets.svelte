@@ -52,7 +52,7 @@
 	<div class="goal-grid" aria-label="Nutrient goals">
 		{#each selectedNutrients as nutrient}
 			<label class="goal-input">
-				<span>{nutrient.label}</span>
+				<span class="goal-label">{nutrient.label}</span>
 				<input
 					id={`goal-${nutrient.id}`}
 					name={`goal-${nutrient.id}`}
@@ -160,7 +160,7 @@
 
 	.goal-input {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(3.8rem, 4.8rem) auto;
+		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: center;
 		gap: 0.35rem;
 		min-width: 0;
@@ -172,9 +172,13 @@
 		font-size: $app-font-size-sm;
 		font-weight: 800;
 
-		span {
+		.goal-label {
+			grid-column: 1;
+			grid-row: 1;
 			min-width: 0;
-			overflow-wrap: anywhere;
+			line-height: 1.2;
+			overflow-wrap: normal;
+			word-break: normal;
 		}
 
 		input {
@@ -190,15 +194,21 @@
 		}
 
 		.goal-unit {
+			min-width: 0;
 			color: $app-muted;
 			font-size: $app-font-size-sm;
 		}
 
 		small {
-			grid-column: 1 / -1;
+			grid-column: 2;
+			grid-row: 1;
+			align-self: start;
 			color: $app-muted;
 			font-size: $app-font-size-xs;
 			font-weight: 600;
+			line-height: 1.2;
+			text-align: right;
+			white-space: nowrap;
 		}
 	}
 
@@ -209,6 +219,12 @@
 
 		.goal-template-controls {
 			min-width: 0;
+		}
+	}
+
+	@media (max-width: $app-breakpoint-xs) {
+		.goal-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
