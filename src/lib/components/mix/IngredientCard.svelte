@@ -35,6 +35,12 @@
 	} = $props();
 
 	let nutrientsOpen = $state(false);
+
+	const getDisplayName = (name: string, maxLength = 34): string => {
+		if (name.length <= maxLength) return name;
+
+		return `${name.slice(0, maxLength - 1).trimEnd()}…`;
+	};
 </script>
 
 <article class="ingredient-card" class:ingredient-card--custom={food.customFood}>
@@ -46,7 +52,9 @@
 					<span class="ingredient-card__custom-badge">Custom</span>
 				{/if}
 			</div>
-			<h5>{food.description}</h5>
+			<h5 title={food.description} aria-label={food.description}>
+				{getDisplayName(food.description)}
+			</h5>
 		</div>
 		<button
 			class="ingredient-card__remove"
