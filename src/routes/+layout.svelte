@@ -2,6 +2,10 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.scss";
 	import TabNavigation from "$lib/components/app/TabNavigation.svelte";
+	import {
+		clearLegacyAppStorage,
+		setActiveStorageUserId,
+	} from "$lib/utils/storage/storageScope";
 	import type { LayoutData } from "./$types";
 
 	let {
@@ -11,6 +15,14 @@
 		children: import("svelte").Snippet;
 		data: LayoutData;
 	} = $props();
+
+	$effect.pre(() => {
+		setActiveStorageUserId(data.authUser?.id ?? null);
+
+		if (data.authUser) {
+			clearLegacyAppStorage();
+		}
+	});
 </script>
 
 <svelte:head>
@@ -58,7 +70,9 @@
 	</div>
 </header>
 
-<TabNavigation />
+{#if data.authUser}
+	<TabNavigation />
+{/if}
 
 <main class="app-main">
 	{@render children()}

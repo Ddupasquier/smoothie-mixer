@@ -87,8 +87,5 @@ export const deleteCloudSavedDrink = async (drinkId: string) => {
 export const reconcileCloudSavedDrinks = async (localDrinks: SavedDrink[]) => {
 	const cloudDrinks = await readCloudSavedDrinks();
 	if (!cloudDrinks) return localDrinks;
-
-	if (cloudDrinks.length > 0) return cloudDrinks;
-	if (localDrinks.length > 0) await writeCloudSavedDrinks(localDrinks);
-	return localDrinks;
+	return cloudDrinks;
 };

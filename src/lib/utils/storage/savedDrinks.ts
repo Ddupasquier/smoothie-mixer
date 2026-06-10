@@ -16,6 +16,7 @@ import {
 } from "$lib/utils/storage/supabaseData";
 import type { FdcFood } from "$lib/utils/food/types";
 import { cacheClearAll } from "$lib/cache";
+import { getScopedStorageKey } from "$lib/utils/storage/storageScope";
 
 export const SAVED_DRINKS_STORAGE_KEY = "smoothie-saved-drinks";
 export const SAVED_DRINKS_CHANGED_EVENT = "smoothie-saved-drinks-changed";
@@ -67,7 +68,7 @@ const normalizeDrink = (value: SavedDrink): SavedDrink => {
 
 export const readSavedDrinks = () => {
 	try {
-		const raw = localStorage.getItem(SAVED_DRINKS_STORAGE_KEY);
+		const raw = localStorage.getItem(getScopedStorageKey(SAVED_DRINKS_STORAGE_KEY));
 		const drinks = raw ? (JSON.parse(raw) as SavedDrink[]) : [];
 		return drinks.map(normalizeDrink);
 	} catch {
@@ -79,7 +80,10 @@ const persistSavedDrinksLocally = (drinks: SavedDrink[]) => {
 	const serializedDrinks = JSON.stringify(drinks.map(normalizeDrink));
 
 	try {
-		localStorage.setItem(SAVED_DRINKS_STORAGE_KEY, serializedDrinks);
+		localStorage.setItem(
+			getScopedStorageKey(SAVED_DRINKS_STORAGE_KEY),
+			serializedDrinks,
+		);
 		return true;
 	} catch (error) {
 		if (!isQuotaExceededError(error)) return false;
@@ -88,7 +92,10 @@ const persistSavedDrinksLocally = (drinks: SavedDrink[]) => {
 	cacheClearAll();
 
 	try {
-		localStorage.setItem(SAVED_DRINKS_STORAGE_KEY, serializedDrinks);
+		localStorage.setItem(
+			getScopedStorageKey(SAVED_DRINKS_STORAGE_KEY),
+			serializedDrinks,
+		);
 		return true;
 	} catch {
 		return false;
@@ -162,10 +169,13 @@ export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
 		};
 
 	localStorage.setItem(
-		MIX_STORAGE_KEYS.nutrientGoals,
+		getScopedStorageKey(MIX_STORAGE_KEYS.nutrientGoals),
 		JSON.stringify(drink.nutrientGoals),
 	);
-	localStorage.setItem(MIX_STORAGE_KEYS.mixState, JSON.stringify(mixState));
+	localStorage.setItem(
+		getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
+		JSON.stringify(mixState),
+	);
 	void saveCloudMixPreferences({
 		nutrientGoals: drink.nutrientGoals,
 		mixState,

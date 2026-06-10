@@ -100,8 +100,5 @@ export const reconcileCloudSmoothieList = async (
 ) => {
 	const cloudFoods = await readCloudSmoothieList(key);
 	if (!cloudFoods) return localFoods;
-
-	if (cloudFoods.length > 0) return cloudFoods;
-	if (localFoods.length > 0) await writeCloudSmoothieList(key, localFoods);
-	return localFoods;
+	return cloudFoods;
 };

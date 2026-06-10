@@ -348,19 +348,6 @@
             loadMixState();
         }
 
-        if (!hasCloudGoals || !hasCloudMixState) {
-            void saveCloudMixPreferences({
-                nutrientGoals,
-                mixState: {
-                    selected,
-                    options,
-                    selectedFoodIds,
-                    servingGrams,
-                    servingQuantities,
-                    servingUnits,
-                },
-            });
-        }
     };
 
     const resetGoals = () => {

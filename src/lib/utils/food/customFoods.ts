@@ -7,6 +7,7 @@ import {
 	saveCloudCustomFood,
 	writeCloudCustomFoods,
 } from "$lib/utils/storage/supabaseData";
+import { getScopedStorageKey } from "$lib/utils/storage/storageScope";
 import { NUTRIENT_IDS, type FdcFood, type FdcNutrient } from "$lib/utils/food/types";
 
 export const CUSTOM_FOODS_STORAGE_KEY = "smoothie-custom-foods";
@@ -151,7 +152,7 @@ export const createCustomFood = (input: CustomFoodInput): FdcFood => {
 
 export const readCustomFoods = () => {
 	try {
-		const raw = localStorage.getItem(CUSTOM_FOODS_STORAGE_KEY);
+		const raw = localStorage.getItem(getScopedStorageKey(CUSTOM_FOODS_STORAGE_KEY));
 		const foods = raw ? (JSON.parse(raw) as FdcFood[]) : [];
 		return foods.map(compactFood);
 	} catch {
@@ -162,7 +163,7 @@ export const readCustomFoods = () => {
 export const cacheCustomFoodsLocally = (foods: FdcFood[]) => {
 	try {
 		localStorage.setItem(
-			CUSTOM_FOODS_STORAGE_KEY,
+			getScopedStorageKey(CUSTOM_FOODS_STORAGE_KEY),
 			JSON.stringify(uniqueFoodsById(foods).map(compactFood)),
 		);
 	} catch {
@@ -174,7 +175,7 @@ export const writeCustomFoods = (foods: FdcFood[]) => {
 	const compactFoods = uniqueFoodsById(foods).map(compactFood);
 
 	localStorage.setItem(
-		CUSTOM_FOODS_STORAGE_KEY,
+		getScopedStorageKey(CUSTOM_FOODS_STORAGE_KEY),
 		JSON.stringify(compactFoods),
 	);
 	void writeCloudCustomFoods(compactFoods);
@@ -189,7 +190,7 @@ export const saveCustomFood = (food: FdcFood) => {
 		...foods.filter((item) => item.fdcId !== food.fdcId),
 	];
 	localStorage.setItem(
-		CUSTOM_FOODS_STORAGE_KEY,
+		getScopedStorageKey(CUSTOM_FOODS_STORAGE_KEY),
 		JSON.stringify(uniqueFoodsById(nextFoods).map(compactFood)),
 	);
 	void saveCloudCustomFood(foodRecord);

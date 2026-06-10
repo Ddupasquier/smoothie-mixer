@@ -7,6 +7,7 @@ import {
 } from "$lib/utils/storage/supabaseData";
 import type { FdcFood } from "$lib/utils/food/types";
 import { cacheClearAll } from "$lib/cache";
+import { getScopedStorageKey } from "$lib/utils/storage/storageScope";
 
 export const SMOOTHIE_LISTS_CHANGED_EVENT = "smoothie-lists-changed";
 
@@ -28,7 +29,7 @@ const isQuotaExceededError = (error: unknown) => {
 
 export const readSmoothieList = (key: SmoothieListKey) => {
 	try {
-		const raw = localStorage.getItem(key);
+		const raw = localStorage.getItem(getScopedStorageKey(key));
 		const list = raw ? (JSON.parse(raw) as FdcFood[]) : [];
 		return list.map(compactFood);
 	} catch {
@@ -39,7 +40,7 @@ export const readSmoothieList = (key: SmoothieListKey) => {
 export const cacheSmoothieListLocally = (key: SmoothieListKey, list: FdcFood[]) => {
 	try {
 		localStorage.setItem(
-			key,
+			getScopedStorageKey(key),
 			JSON.stringify(uniqueFoodsById(list).map(compactFood)),
 		);
 	} catch {
@@ -51,7 +52,7 @@ export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 	const compactList = uniqueFoodsById(list).map(compactFood);
 
 	try {
-		localStorage.setItem(key, JSON.stringify(compactList));
+		localStorage.setItem(getScopedStorageKey(key), JSON.stringify(compactList));
 		void writeCloudSmoothieList(key, compactList);
 		dispatchListsChanged();
 		return true;
@@ -63,7 +64,7 @@ export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 		cacheClearAll();
 
 		try {
-			localStorage.setItem(key, JSON.stringify(compactList));
+			localStorage.setItem(getScopedStorageKey(key), JSON.stringify(compactList));
 			void writeCloudSmoothieList(key, compactList);
 			dispatchListsChanged();
 			return true;

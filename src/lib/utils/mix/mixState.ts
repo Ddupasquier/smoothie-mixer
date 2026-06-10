@@ -7,6 +7,7 @@ import type { ServingMeasureUnit } from "../../../defaults/servingMeasureDefault
 import { ALL_NUTRIENTS } from "../../../variables/allNutrients";
 import { vitalNutrients } from "../../../variables/vitalNutrients";
 import type { FdcFood } from "../food/types";
+import { getScopedStorageKey } from "../storage/storageScope";
 import {
 	convertServingAmount,
 	convertServingToGrams,
@@ -80,7 +81,9 @@ export const getServingConversion = (
 
 export const readStoredNutrientGoals = () => {
 	try {
-		const rawGoals = localStorage.getItem(MIX_STORAGE_KEYS.nutrientGoals);
+		const rawGoals = localStorage.getItem(
+			getScopedStorageKey(MIX_STORAGE_KEYS.nutrientGoals),
+		);
 		return rawGoals
 			? {
 					...DEFAULT_NUTRIENT_GOALS,
@@ -96,7 +99,7 @@ export const writeStoredNutrientGoals = (
 	nextGoals: Record<number, number>,
 ) => {
 	localStorage.setItem(
-		MIX_STORAGE_KEYS.nutrientGoals,
+		getScopedStorageKey(MIX_STORAGE_KEYS.nutrientGoals),
 		JSON.stringify(nextGoals),
 	);
 };
@@ -106,7 +109,9 @@ export const readStoredMixState = (
 	allIngredientItems: FdcFood[],
 ): MixStateSnapshot => {
 	try {
-		const rawState = localStorage.getItem(MIX_STORAGE_KEYS.mixState);
+		const rawState = localStorage.getItem(
+			getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
+		);
 		if (!rawState) return fallbackState;
 
 		const savedState = JSON.parse(rawState) as SavedMixState;
@@ -184,11 +189,17 @@ export const readStoredMixState = (
 };
 
 export const writeStoredMixState = (mixState: MixStateSnapshot) => {
-	localStorage.setItem(MIX_STORAGE_KEYS.mixState, JSON.stringify(mixState));
+	localStorage.setItem(
+		getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
+		JSON.stringify(mixState),
+	);
 };
 
 export const writeStoredRawMixState = (mixState: Record<string, unknown>) => {
-	localStorage.setItem(MIX_STORAGE_KEYS.mixState, JSON.stringify(mixState));
+	localStorage.setItem(
+		getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
+		JSON.stringify(mixState),
+	);
 };
 
 export const getMixStateSnapshot = ({

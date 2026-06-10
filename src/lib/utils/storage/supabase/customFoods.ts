@@ -60,8 +60,5 @@ export const saveCloudCustomFood = async (food: FdcFood) => {
 export const reconcileCloudCustomFoods = async (localFoods: FdcFood[]) => {
 	const cloudFoods = await readCloudCustomFoods();
 	if (!cloudFoods) return localFoods;
-
-	if (cloudFoods.length > 0) return cloudFoods;
-	if (localFoods.length > 0) await writeCloudCustomFoods(localFoods);
-	return localFoods;
+	return cloudFoods;
 };
