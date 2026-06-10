@@ -44,6 +44,7 @@
 	"dependencies": {
 		"@supabase/ssr": "^0.10.3",
 		"@supabase/supabase-js": "^2.107.0",
+		"@vercel/speed-insights": "^2.0.0",
 		"dotenv": "^17.4.2",
 		"node-fetch": "^3.3.2",
 		"ws": "^8.21.0"

@@ -43,6 +43,16 @@ export type NutrientOverageDetail = {
 	}[];
 };
 
+export type SaveGoalDiff = {
+	label: string;
+	unit: string;
+	total: number;
+	goal: number;
+	difference: number;
+	percentOfGoal: number;
+	status: "near" | "over" | "under";
+};
+
 export const getDefaultNutrientOptions = () => {
 	return vitalNutrients.map((nutrient) => ({
 		id: nutrient.id,
