@@ -44,7 +44,7 @@
 
 	const ringCount = POINT_SHAPE_DEFAULTS.ringCount;
 	const center = $derived(size / 2);
-	const chartRadius = $derived(size * 0.34);
+	const chartRadius = $derived(size * 0.3);
 	const labelRadius = $derived(size * 0.43);
 	const normalizedPoints = $derived(Math.max(0, Math.floor(points)));
 	const axisCount = $derived(normalizedPoints);
@@ -103,9 +103,45 @@
 	);
 
 	const getTextAnchor = (x: number) => {
-		if (x < center - 4) return "end";
-		if (x > center + 4) return "start";
+		if (x < center - 4) return "start";
+		if (x > center + 4) return "end";
 		return "middle";
+	};
+	const getLabelX = (x: number) => {
+		return Math.max(size * 0.08, Math.min(x, size * 0.92));
+	};
+	const getLabelY = (y: number) => {
+		if (axisCount === 2) return center - size * 0.11;
+
+		return Math.max(size * 0.1, Math.min(y, size * 0.86));
+	};
+	const getLabelAnchor = (x: number) => {
+		return getTextAnchor(x);
+	};
+	const getLabelLines = (label: string) => {
+		const cleanLabel = label.trim();
+		if (!cleanLabel) return [""];
+		if (cleanLabel.length <= 11) return [cleanLabel];
+
+		const words = cleanLabel.split(/\s+/);
+		if (words.length === 1) {
+			return [cleanLabel.length > 13 ? `${cleanLabel.slice(0, 12)}…` : cleanLabel];
+		}
+
+		const lines = words.reduce<string[]>((accumulator, word) => {
+			const currentLine = accumulator[accumulator.length - 1] ?? "";
+			const nextLine = `${currentLine} ${word}`.trim();
+
+			if (!currentLine || nextLine.length <= 11) {
+				accumulator[accumulator.length - 1] = nextLine;
+				return accumulator;
+			}
+
+			accumulator.push(word);
+			return accumulator;
+		}, [""]);
+
+		return lines.slice(0, 2);
 	};
 	const goalPoints = $derived(
 		Array.from({ length: axisCount }, (_value, index) => pointAt(index)),
@@ -325,19 +361,26 @@
 		{/if}
 
 		{#each axisLines as axis, index}
+			{@const labelX = getLabelX(axis.label[0])}
+			{@const labelY = getLabelY(axis.label[1])}
+			{@const labelLines = getLabelLines(labels[index] ?? "")}
 			<text
 				class="point-shape__label"
-				x={axis.label[0]}
-				y={axis.label[1]}
-				text-anchor={getTextAnchor(axis.label[0])}
+				x={labelX}
+				y={labelY}
+				text-anchor={getLabelAnchor(axis.label[0])}
 				dominant-baseline="middle"
 			>
-				<tspan x={axis.label[0]}>{labels[index] ?? ""}</tspan>
+				{#each labelLines as labelLine, lineIndex}
+					<tspan x={labelX} dy={lineIndex === 0 ? 0 : "1.1em"}>
+						{labelLine}
+					</tspan>
+				{/each}
 				{#if valueLabels[index]}
 					<tspan
 						class="point-shape__value-label"
-						x={axis.label[0]}
-						dy="1.35em"
+						x={labelX}
+						dy="1.2em"
 					>
 						{valueLabels[index]}
 					</tspan>
@@ -352,7 +395,7 @@
 
 	.point-shape {
 		display: block;
-		overflow: visible;
+		overflow: hidden;
 	}
 
 	.point-shape--full {
@@ -362,13 +405,13 @@
 
 	.point-shape__label {
 		fill: $app-primary;
-		font-size: 0.72rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 	}
 
 	.point-shape__value-label {
 		fill: $app-muted;
-		font-size: 0.54rem;
+		font-size: 0.62rem;
 		font-weight: 800;
 		letter-spacing: 0.01em;
 	}
