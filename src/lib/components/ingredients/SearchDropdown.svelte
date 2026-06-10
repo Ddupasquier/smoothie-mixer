@@ -12,15 +12,13 @@
 </script>
 
 {#if results.length > 0}
-    <ul class="results-list" role="listbox" aria-label="Search results">
+    <ul class="results-list" aria-label="Search results">
         {#each results as food (food.fdcId)}
             {@const quality = getFoodQuality(food)}
             <li class="result-item">
                 <button
                     class="result-btn"
                     class:result-btn--custom={food.customFood}
-                    role="option"
-                    aria-selected="false"
                     onclick={() => onSelect(food)}
                 >
                     <span class="result-name"
@@ -48,10 +46,10 @@
                             </span>
                         {/if}
                     </span>
-                    {#if quality.label === "Partial" || quality.label === "Limited"}
-                        <NutritionConfidenceDetails {quality} compact />
-                    {/if}
                 </button>
+                {#if quality.label === "Partial" || quality.label === "Limited"}
+                    <NutritionConfidenceDetails {quality} compact />
+                {/if}
             </li>
         {/each}
     </ul>
@@ -71,6 +69,14 @@
         overflow-y: auto;
     }
 
+    .result-item {
+        border-bottom: $app-border;
+    }
+
+    .result-item:last-child {
+        border-bottom: 0;
+    }
+
     .result-btn {
         width: 100%;
         text-align: left;
@@ -80,11 +86,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.1rem;
-        border-bottom: $app-border;
-    }
-
-    .result-item:last-child .result-btn {
-        border-bottom: none;
+        border: 0;
     }
 
     .result-btn:hover,

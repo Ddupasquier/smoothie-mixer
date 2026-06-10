@@ -9,6 +9,9 @@
 		compact?: boolean;
 	} = $props();
 
+	let isOpen = $state(false);
+	let hasInitializedOpenState = false;
+
 	const noteworthyDetails = $derived(
 		quality.details.filter(
 			(detail) =>
@@ -17,6 +20,15 @@
 				detail.source === "fallback",
 		),
 	);
+
+	const totalVitalCount = $derived(quality.completeCount + quality.missingCount);
+
+	$effect(() => {
+		if (hasInitializedOpenState) return;
+
+		isOpen = !compact;
+		hasInitializedOpenState = true;
+	});
 </script>
 
 {#if quality.needsDetails && noteworthyDetails.length > 0}
@@ -24,22 +36,39 @@
 		class="confidence-details {compact ? 'confidence-details--compact' : ''}"
 		aria-label="Nutrition confidence details"
 	>
-		<div class="confidence-details__header">
-			<strong>{quality.symbol} {quality.label} nutrition data</strong>
-			<span>
-				{quality.completeCount}/{quality.completeCount + quality.missingCount}
-				vital nutrients available
+		<button
+			type="button"
+			class="confidence-details__toggle"
+			aria-expanded={isOpen}
+			onclick={() => (isOpen = !isOpen)}
+		>
+			<span class="confidence-details__indicator" aria-hidden="true">!</span>
+			<span class="confidence-details__header">
+				<strong>{quality.label} nutrition data</strong>
+				<span>
+					{quality.completeCount}/{totalVitalCount} vital nutrients available
+				</span>
 			</span>
-		</div>
-		<ul>
-			{#each noteworthyDetails as detail}
-				<li class={`confidence-detail confidence-detail--${detail.source}`}>
-					<span>{detail.label}</span>
-					<strong>{detail.sourceLabel}</strong>
-					<small>{detail.detail}</small>
-				</li>
-			{/each}
-		</ul>
+			<span
+				class="confidence-details__chevron"
+				class:confidence-details__chevron--open={isOpen}
+				aria-hidden="true"
+			>
+				⌄
+			</span>
+		</button>
+
+		{#if isOpen}
+			<ul>
+				{#each noteworthyDetails as detail}
+					<li class={`confidence-detail confidence-detail--${detail.source}`}>
+						<span>{detail.label}</span>
+						<strong>{detail.sourceLabel}</strong>
+						<small>{detail.detail}</small>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	</section>
 {/if}
 
@@ -55,12 +84,49 @@
 		border: $app-border;
 		border-radius: $app-radius;
 		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-			sans-serif;
+		sans-serif;
 	}
 
 	.confidence-details--compact {
-		margin: 0.25rem 0 0;
+		margin: 0 0.75rem 0.65rem;
 		padding: 0.45rem;
+	}
+
+	.confidence-details__toggle {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 0.5rem;
+		align-items: center;
+		width: 100%;
+		padding: 0;
+		color: inherit;
+		text-align: left;
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+
+		&:hover,
+		&:focus-visible {
+			background: transparent;
+			outline: none;
+
+			.confidence-details__header strong {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	.confidence-details__indicator {
+		display: grid;
+		place-items: center;
+		width: 1.2rem;
+		height: 1.2rem;
+		color: $app-warning-strong;
+		background: $app-danger-bg;
+		border-radius: $app-radius-pill;
+		font-size: 0.75rem;
+		font-weight: 900;
+		line-height: 1;
 	}
 
 	.confidence-details__header {
@@ -78,6 +144,18 @@
 			font-size: 0.7rem;
 			font-weight: 700;
 		}
+	}
+
+	.confidence-details__chevron {
+		color: $app-primary;
+		font-size: 1rem;
+		font-weight: 900;
+		line-height: 1;
+		transition: transform 160ms ease;
+	}
+
+	.confidence-details__chevron--open {
+		transform: rotate(180deg);
 	}
 
 	ul {
