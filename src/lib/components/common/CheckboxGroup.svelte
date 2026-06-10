@@ -47,16 +47,16 @@
     .checkbox-item {
         display: inline-flex;
         align-items: center;
-        gap: 0.45rem;
-        min-height: 2.2rem;
-        padding: 0.4rem 0.7rem;
+        gap: 0.4rem;
+        min-height: $app-control-height-sm;
+        padding: 0.32rem 0.62rem;
         color: $app-primary;
         background: $app-section-bg;
         border: $app-border;
         border-radius: $app-radius-pill;
         box-shadow: $app-card-shadow;
-        font-size: $app-font-size-lg;
-        font-weight: 600;
+        font-size: $app-font-size-md;
+        font-weight: 750;
         line-height: 1;
         cursor: pointer;
         transition:
@@ -79,8 +79,8 @@
     }
 
     input {
-        width: 0.95rem;
-        height: 0.95rem;
+        width: 0.85rem;
+        height: 0.85rem;
         margin: 0;
         accent-color: $app-primary;
 

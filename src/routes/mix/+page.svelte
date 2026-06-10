@@ -620,7 +620,7 @@
     .mix-page {
         max-width: $app-max-width;
         margin: 0 auto;
-        padding: $app-padding 0;
+        padding: $app-gap-sm 0;
         box-sizing: border-box;
     }
 
@@ -632,12 +632,15 @@
         margin-bottom: $app-gap-md;
 
         h2 {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.18rem;
             color: $app-primary;
+            font-size: $app-font-size-xl;
+            font-weight: 800;
         }
 
         p {
             color: $app-muted;
+            font-size: $app-font-size-md;
         }
     }
 
@@ -653,8 +656,8 @@
             color: $app-btn-text;
             border-radius: $app-radius;
             font-size: $app-font-size-sm;
-            font-weight: 700;
-            padding: 0.42rem 0.7rem;
+            font-weight: 800;
+            padding: 0.38rem 0.65rem;
 
             &:hover {
                 background: $app-btn-bg-hover;
@@ -685,7 +688,7 @@
     .shape-panel {
         display: grid;
         place-items: center;
-        padding: $app-gap-md;
+        padding: $app-gap-sm;
         background: $app-bg;
         border: $app-border;
         border-radius: $app-card-radius;

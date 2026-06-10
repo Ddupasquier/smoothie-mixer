@@ -128,7 +128,7 @@
 		display: grid;
 		gap: $app-gap-md;
 		width: min(100%, 26rem);
-		padding: $app-gap-lg;
+		padding: $app-gap-md;
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
@@ -141,12 +141,13 @@
 
 		h2 {
 			color: $app-primary;
-			font-size: 1.4rem;
+			font-size: $app-font-size-xl;
+			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.92rem;
+			font-size: $app-font-size-md;
 			line-height: 1.4;
 		}
 	}
@@ -165,13 +166,13 @@
 
 		input {
 			width: 100%;
-			height: 2.45rem;
+			height: $app-control-height;
 			padding: 0 0.75rem;
 			color: $app-primary;
 			background: $app-bg;
 			border: $app-border;
 			border-radius: $app-radius;
-			font-size: $app-font-size-lg;
+			font-size: $app-font-size-md;
 			box-sizing: border-box;
 		}
 	}
@@ -188,9 +189,9 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.6rem;
+		gap: $app-gap-sm;
 		width: 100%;
-		padding: 0.7rem 1rem;
+		padding: 0.6rem 0.85rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
 		border-radius: $app-radius-pill;
@@ -250,7 +251,7 @@
 		background: $app-warning-bg;
 		border: $app-warning-border;
 		border-radius: $app-radius;
-		font-size: 0.85rem;
+		font-size: $app-font-size-sm;
 		font-weight: 800;
 	}
 
@@ -260,13 +261,13 @@
 		background: $app-success-bg;
 		border: $app-border;
 		border-radius: $app-radius;
-		font-size: 0.85rem;
+		font-size: $app-font-size-sm;
 		font-weight: 800;
 	}
 
 	.auth-note {
 		color: $app-muted;
-		font-size: 0.78rem;
+		font-size: $app-font-size-sm;
 		line-height: 1.35;
 	}
 

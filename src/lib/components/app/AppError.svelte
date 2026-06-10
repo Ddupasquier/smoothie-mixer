@@ -26,7 +26,7 @@
 		gap: $app-gap-sm;
 		max-width: 32rem;
 		margin: $app-gap-lg auto;
-		padding: $app-gap-lg;
+		padding: $app-gap-md;
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
@@ -36,7 +36,7 @@
 
 	.app-error__eyebrow {
 		color: $app-muted;
-		font-size: 0.78rem;
+		font-size: $app-font-size-sm;
 		font-weight: 900;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
@@ -50,14 +50,14 @@
 
 	p {
 		color: $app-muted;
-		font-size: 0.95rem;
+		font-size: $app-font-size-md;
 		line-height: 1.4;
 	}
 
 	.app-error__actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: $app-gap-sm;
 		justify-content: center;
 		margin-top: $app-gap-sm;
 	}
@@ -67,11 +67,11 @@
 		align-items: center;
 		justify-content: center;
 		min-height: 2.25rem;
-		padding: 0 0.9rem;
+		padding: 0 0.85rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
 		border-radius: $app-radius;
-		font-size: 0.86rem;
+		font-size: $app-font-size-md;
 		font-weight: 800;
 		text-decoration: none;
 

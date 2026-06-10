@@ -161,7 +161,7 @@
     .ingredients-page {
         max-width: $app-max-width;
         margin: 0 auto;
-        padding: $app-padding 0;
+        padding: $app-gap-sm 0;
         box-sizing: border-box;
     }
 
@@ -169,18 +169,21 @@
         margin-bottom: $app-gap-md;
 
         h2 {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.18rem;
             color: $app-primary;
+            font-size: $app-font-size-xl;
+            font-weight: 800;
         }
 
         p {
             color: $app-muted;
+            font-size: $app-font-size-md;
         }
     }
 
     .ingredient-search-panel {
-        padding: $app-gap-md;
-        margin-bottom: $app-gap-lg;
+        padding: $app-gap-sm;
+        margin-bottom: $app-gap-md;
         background: $app-section-bg;
         border: $app-border;
         border-radius: $app-card-radius;
@@ -193,13 +196,13 @@
         h3 {
             margin-bottom: 0.1rem;
             color: $app-primary;
-            font-size: 1.05rem;
-            font-weight: 700;
+            font-size: $app-font-size-lg;
+            font-weight: 800;
         }
 
         p {
             color: $app-muted;
-            font-size: 0.9rem;
+            font-size: $app-font-size-sm;
         }
     }
 
@@ -219,16 +222,16 @@
         h3 {
             margin-bottom: $app-gap-sm;
             color: $app-primary;
-            font-size: 1.13em;
-            font-weight: 600;
+            font-size: $app-font-size-lg;
+            font-weight: 800;
         }
 
         .fridge-container {
             background: $app-bg;
             border-radius: $app-card-radius;
-            padding: $app-gap-md $app-gap-lg 0.7em $app-gap-lg;
+            padding: $app-gap-sm;
             min-height: 48px;
-            margin-bottom: 0.5em;
+            margin-bottom: $app-gap-sm;
             box-shadow: $app-card-shadow;
             display: flex;
             align-items: center;
@@ -237,8 +240,8 @@
 
         .placeholder {
             color: $app-muted;
-            font-size: 0.98em;
-            margin: 0.2em 0;
+            font-size: $app-font-size-sm;
+            margin: 0.2rem 0;
         }
     }
 

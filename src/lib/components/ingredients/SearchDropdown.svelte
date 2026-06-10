@@ -82,7 +82,7 @@
         text-align: left;
         background: transparent;
         border-radius: 0;
-        padding: 0.65rem 0.9rem;
+        padding: 0.55rem 0.7rem;
         display: flex;
         flex-direction: column;
         gap: 0.1rem;
@@ -100,13 +100,13 @@
     }
 
     .result-name {
-        font-size: 0.9rem;
+        font-size: $app-font-size-md;
         font-weight: 800;
         color: $app-primary;
     }
 
     .result-category {
-        font-size: 0.75rem;
+        font-size: $app-font-size-sm;
         color: $app-muted;
     }
 
@@ -119,12 +119,12 @@
 
     .result-badge {
         width: fit-content;
-        padding: 0.12rem 0.38rem;
+        padding: 0.12rem 0.36rem;
         color: $app-primary;
         background: $app-accent;
         border: $app-border;
         border-radius: $app-radius-pill;
-        font-size: 0.68rem;
+        font-size: $app-font-size-xs;
         font-weight: 700;
         line-height: 1.2;
     }

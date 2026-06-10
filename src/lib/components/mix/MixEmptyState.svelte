@@ -53,7 +53,7 @@
 	.mix-empty-state {
 		display: grid;
 		gap: $app-gap-sm;
-		padding: $app-gap-md;
+		padding: $app-gap-sm;
 		background: $app-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
@@ -66,20 +66,20 @@
 
 		h4 {
 			color: $app-primary;
-			font-size: 1rem;
+			font-size: $app-font-size-lg;
 			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: 0.86rem;
+			font-size: $app-font-size-sm;
 			line-height: 1.4;
 		}
 	}
 
 	.mix-empty-state__intro .mix-empty-state__eyebrow {
 		color: $app-primary;
-		font-size: 0.72rem;
+		font-size: $app-font-size-xs;
 		font-weight: 900;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
@@ -88,17 +88,17 @@
 	.mix-empty-state__steps {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
-		gap: 0.45rem;
+		gap: $app-gap-sm;
 		list-style: none;
 	}
 
 	li {
 		display: grid;
 		grid-template-columns: auto minmax(0, 1fr);
-		gap: 0.45rem;
+		gap: 0.4rem;
 		align-items: start;
 		min-width: 0;
-		padding: 0.55rem;
+		padding: $app-gap-sm;
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-radius;
@@ -112,20 +112,20 @@
 		color: $app-primary;
 		background: $app-accent;
 		border-radius: $app-radius-pill;
-		font-size: 0.72rem;
+		font-size: $app-font-size-xs;
 		font-weight: 900;
 	}
 
 	strong {
 		display: block;
 		color: $app-primary;
-		font-size: 0.8rem;
+		font-size: $app-font-size-sm;
 		font-weight: 800;
 	}
 
 	li p {
 		color: $app-muted;
-		font-size: 0.74rem;
+		font-size: $app-font-size-xs;
 		font-weight: 600;
 		line-height: 1.3;
 	}
@@ -133,7 +133,7 @@
 	.mix-empty-state__actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: $app-gap-sm;
 		align-items: center;
 
 		a {
@@ -145,7 +145,7 @@
 			color: $app-btn-text;
 			background: $app-btn-bg;
 			border-radius: $app-radius;
-			font-size: 0.82rem;
+			font-size: $app-font-size-sm;
 			font-weight: 800;
 			text-decoration: none;
 
@@ -156,7 +156,7 @@
 
 		p {
 			color: $app-muted;
-			font-size: 0.78rem;
+			font-size: $app-font-size-sm;
 			font-weight: 600;
 			line-height: 1.35;
 		}

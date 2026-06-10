@@ -29,7 +29,7 @@
 		display: grid;
 		gap: $app-gap-md;
 		width: min(100%, 31rem);
-		padding: $app-gap-lg;
+		padding: $app-gap-md;
 		background: $app-section-bg;
 		border: $app-border;
 		border-radius: $app-card-radius;
@@ -50,13 +50,13 @@
 
 	h1 {
 		color: $app-primary;
-		font-size: clamp(2rem, 9vw, 3rem);
-		line-height: 1.05;
+		font-size: clamp(1.75rem, 8vw, 2.5rem);
+		line-height: 1.08;
 	}
 
 	p {
 		color: $app-muted;
-		font-size: $app-font-size-lg;
+		font-size: $app-font-size-md;
 		line-height: 1.45;
 	}
 
@@ -64,7 +64,7 @@
 		display: inline-flex;
 		justify-content: center;
 		width: fit-content;
-		padding: 0.72rem 1.05rem;
+		padding: 0.65rem 1rem;
 		color: $app-btn-text;
 		background: $app-btn-bg;
 		border-radius: $app-radius-pill;

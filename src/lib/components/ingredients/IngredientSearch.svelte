@@ -191,7 +191,7 @@
 	.search-label {
 		display: block;
 		color: $app-primary;
-		font-size: $app-font-size-lg;
+		font-size: $app-font-size-md;
 		font-weight: 800;
 	}
 
@@ -204,8 +204,8 @@
 	.search-input {
 		flex: 1;
 		min-width: 0;
-		height: 2.55rem;
-		padding: 0 0.9rem;
+		height: $app-control-height;
+		padding: 0 0.75rem;
 		color: $app-primary;
 		background: $app-bg;
 		border: $app-border;
@@ -226,7 +226,7 @@
 	}
 
 	.spinner {
-		font-size: 1.1rem;
+		font-size: $app-font-size-lg;
 		animation: spin 1s linear infinite;
 	}
 

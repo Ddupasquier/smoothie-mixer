@@ -81,12 +81,12 @@
 		h4 {
 			color: $app-primary;
 			font-size: $app-font-size-lg;
-			font-weight: 700;
+			font-weight: 800;
 		}
 
 		p {
 			color: $app-muted;
-			font-size: $app-font-size-md;
+			font-size: $app-font-size-sm;
 		}
 	}
 

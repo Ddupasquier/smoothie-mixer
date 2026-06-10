@@ -49,12 +49,13 @@
         background: $app-accent;
         color: $app-primary;
         border-radius: $app-radius-pill;
-        padding: 0.18em 0.7em 0.18em 0.7em;
-        font-size: $app-font-size-lg;
-        font-weight: 500;
+        padding: 0.22rem 0.62rem;
+        font-size: $app-font-size-md;
+        font-weight: 700;
         border: 1px solid $app-accent;
         box-shadow: $app-pill-shadow;
-        margin-bottom: 0.1em;
+        margin-bottom: 0.1rem;
+        line-height: 1.2;
         cursor: pointer;
         transition: background 0.15s;
     }
@@ -78,7 +79,7 @@
         color: $app-btn-text;
         background: $app-custom-strong;
         border-radius: $app-radius-pill;
-        font-size: 0.62em;
+        font-size: $app-font-size-xs;
         font-weight: 800;
         line-height: 1.2;
         text-transform: uppercase;
@@ -101,10 +102,10 @@
         background: none;
         border: none;
         color: $app-primary;
-        font-size: 1.1em;
-        margin-left: 0.3em;
+        font-size: 1rem;
+        margin-left: 0.25rem;
         cursor: pointer;
-        padding: 0 0.1em;
+        padding: 0 0.1rem;
         line-height: 1;
         &:focus {
             outline: $app-focus-outline;

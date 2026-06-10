@@ -22,8 +22,21 @@ body {
 	background: $app-bg;
 	color: $app-primary;
 	font-size: $app-font-size-base;
-	line-height: 1.5;
+	line-height: 1.45;
 	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	line-height: 1.15;
+}
+
+p {
+	line-height: 1.4;
 }
 
 /* ---- Header ---- */
@@ -106,7 +119,7 @@ body {
 .app-main {
 	max-width: $app-max-width;
 	margin: 0 auto;
-	padding: 1rem;
+	padding: $app-gap-md $app-gap-sm;
 	padding-bottom: 2rem;
 }
 
@@ -114,10 +127,10 @@ body {
 button {
 	cursor: pointer;
 	font-family: inherit;
-	font-size: 1rem;
+	font-size: $app-font-size-md;
 	border: none;
 	border-radius: $app-radius-sm;
-	padding: $app-gap-sm 1rem;
+	padding: $app-gap-sm 0.85rem;
 	transition:
 		background 0.15s,
 		transform 0.1s;
@@ -130,7 +143,7 @@ button:active {
 input,
 select {
 	font-family: inherit;
-	font-size: 1rem;
+	font-size: $app-font-size-md;
 }
 
 a {

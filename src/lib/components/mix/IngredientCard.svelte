@@ -147,8 +147,8 @@
 	.ingredient-card {
 		position: relative;
 		display: grid;
-		gap: 0.45rem;
-		padding: 0.55rem;
+		gap: $app-gap-sm;
+		padding: $app-gap-sm;
 		min-width: 0;
 		background: $app-section-bg;
 		border: $app-border;
@@ -174,9 +174,9 @@
 		}
 
 		h5 {
-			margin: 0.1rem 0 0;
+			margin: 0.08rem 0 0;
 			color: $app-primary;
-			font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+			font-size: $app-font-size-md;
 			font-weight: 800;
 			line-height: 1.2;
 			overflow-wrap: anywhere;
@@ -186,19 +186,19 @@
 	.ingredient-card__badges {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
+		gap: 0.22rem;
 	}
 
 	.ingredient-card__source,
 	.ingredient-card__custom-badge {
 		display: inline-flex;
 		width: fit-content;
-		padding: 0.1rem 0.45rem;
+		padding: 0.1rem 0.4rem;
 		color: $app-muted;
 		background: $app-bg;
 		border: $app-border;
 		border-radius: $app-radius-pill;
-		font-size: 0.68rem;
+		font-size: $app-font-size-xs;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
@@ -212,15 +212,15 @@
 
 	.ingredient-card__remove {
 		position: absolute;
-		top: 0.45rem;
-		right: 0.45rem;
-		width: 1.85rem;
-		height: 1.85rem;
+		top: $app-gap-sm;
+		right: $app-gap-sm;
+		width: 1.75rem;
+		height: 1.75rem;
 		padding: 0;
 		color: $app-primary;
 		background: $app-accent;
 		border-radius: $app-radius-pill;
-		font-size: 1.2rem;
+		font-size: 1.1rem;
 		font-weight: 800;
 		line-height: 1;
 
@@ -233,31 +233,31 @@
 	.ingredient-card__controls {
 		display: grid;
 		grid-template-columns: minmax(4.25rem, 0.75fr) minmax(0, 1fr);
-		gap: 0.35rem;
+		gap: 0.3rem;
 		align-items: end;
 		min-width: 0;
 	}
 
 	label {
 		display: grid;
-		gap: 0.18rem;
+		gap: 0.16rem;
 		min-width: 0;
 		color: $app-muted;
-		font-size: 0.68rem;
+		font-size: $app-font-size-xs;
 		font-weight: 800;
 	}
 
 	input,
 	select {
 		width: 100%;
-		height: 2rem;
+		height: $app-control-height-sm;
 		min-width: 0;
 		padding: 0 0.45rem;
 		color: $app-primary;
 		background: $app-bg;
 		border: $app-border;
 		border-radius: $app-radius-sm;
-		font-size: 0.8rem;
+		font-size: $app-font-size-sm;
 	}
 
 	.ingredient-card__details {
@@ -274,7 +274,7 @@
 		color: $app-primary;
 		background: transparent;
 		cursor: pointer;
-		font-size: 0.72rem;
+		font-size: $app-font-size-xs;
 		font-weight: 800;
 	}
 
@@ -321,20 +321,20 @@
 		background: $app-bg;
 		border: $app-border;
 		border-radius: $app-radius-pill;
-		font-size: 0.7rem;
+		font-size: $app-font-size-xs;
 		font-weight: 800;
 	}
 
 	.ingredient-card__grams strong {
 		color: $app-primary;
-		font-size: 0.78rem;
+		font-size: $app-font-size-sm;
 		white-space: nowrap;
 	}
 
 	.ingredient-card__chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.3rem;
+		gap: 0.25rem;
 
 		span {
 			max-width: 100%;
@@ -343,7 +343,7 @@
 			background: $app-accent;
 			border: 1px solid $app-accent;
 			border-radius: $app-radius-pill;
-			font-size: 0.68rem;
+			font-size: $app-font-size-xs;
 			font-weight: 800;
 			overflow-wrap: anywhere;
 		}
