@@ -15,6 +15,7 @@
     } from "$lib/utils/mix/smartWarnings";
     import {
         cacheSmoothieListLocally,
+		preserveSelectedListItems,
         readSmoothieList,
         SMOOTHIE_LISTS_CHANGED_EVENT,
     } from "$lib/utils/storage/smoothieLists";
@@ -24,7 +25,15 @@
         saveCloudMixPreferences,
     } from "$lib/utils/storage/supabaseData";
     import IngredientContributionBreakdown from "$lib/components/mix/IngredientContributionBreakdown.svelte";
-    import { addSavedDrink } from "$lib/utils/storage/savedDrinks";
+    import {
+        addSavedDrink,
+        clearLoadedSavedDrink,
+        readLoadedSavedDrink,
+        updateSavedDrink,
+        writeLoadedSavedDrink,
+        type LoadedSavedDrink,
+        type SavedDrinkInput,
+    } from "$lib/utils/storage/savedDrinks";
     import {
 		formatChartNumber,
 		getDefaultNutrientOptions,
@@ -91,6 +100,7 @@
     });
     let saveDialogOpen = $state(false);
     let selectedGoalTemplateId = $state("");
+    let loadedSavedDrink = $state<LoadedSavedDrink | null>(null);
 
 	const assignMixState = (state: MixStateSnapshot) => {
 		selected = state.selected;
@@ -111,6 +121,25 @@
 			servingUnits,
 		});
 	};
+
+    const setLoadedSavedDrink = (drink: LoadedSavedDrink | null) => {
+        loadedSavedDrink = drink;
+        if (drink) {
+            writeLoadedSavedDrink(drink);
+            return;
+        }
+
+        clearLoadedSavedDrink();
+    };
+
+    const markLoadedSavedDrinkDirty = () => {
+        if (!loadedSavedDrink || loadedSavedDrink.isDirty) return;
+        setLoadedSavedDrink({ ...loadedSavedDrink, isDirty: true });
+    };
+
+    const detachLoadedSavedDrink = () => {
+        setLoadedSavedDrink(null);
+    };
 
     const getServingQuantity = (food: FdcFood) => {
         return getServingQuantityFromState(food, servingQuantities);
@@ -139,6 +168,10 @@
         allIngredientItems.filter((item) =>
             selectedFoodIds.includes(item.fdcId),
         ),
+    );
+    const canSaveCurrentMix = $derived(
+        selectedFoods.length > 0 &&
+            (!loadedSavedDrink || loadedSavedDrink.isDirty),
     );
     const nutrientProgress = $derived(
         getNutrientProgress(
@@ -302,10 +335,24 @@
             ),
         ]);
 
-        fridgeItems = nextFridge;
-        shoppingItems = nextShoppingList;
-        cacheSmoothieListLocally(MIX_STORAGE_KEYS.fridge, nextFridge);
-        cacheSmoothieListLocally(MIX_STORAGE_KEYS.shoppingList, nextShoppingList);
+		const preservedFridge = preserveSelectedListItems(
+			nextFridge,
+			localFridge,
+			selectedFoodIds,
+		);
+		const preservedShoppingList = preserveSelectedListItems(
+			nextShoppingList,
+			localShoppingList,
+			selectedFoodIds,
+		);
+
+        fridgeItems = preservedFridge;
+        shoppingItems = preservedShoppingList;
+        cacheSmoothieListLocally(MIX_STORAGE_KEYS.fridge, preservedFridge);
+		cacheSmoothieListLocally(
+			MIX_STORAGE_KEYS.shoppingList,
+			preservedShoppingList,
+		);
     };
 
     const loadNutrientGoals = () => {
@@ -351,12 +398,14 @@
     };
 
     const resetGoals = () => {
+        detachLoadedSavedDrink();
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
         selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
     };
 
     const clearIngredients = () => {
+        detachLoadedSavedDrink();
         selectedFoodIds = [];
 		const emptyServingState = getEmptyServingState();
         servingGrams = emptyServingState.servingGrams;
@@ -366,16 +415,16 @@
     };
 
     const resetMix = () => {
+		detachLoadedSavedDrink();
 		assignMixState(getDefaultMixState());
-        clearIngredients();
         nutrientGoals = { ...DEFAULT_NUTRIENT_GOALS };
         selectedGoalTemplateId = "";
         saveNutrientGoals(nutrientGoals);
         saveMixState();
     };
 
-    const saveCurrentDrink = (name: string) => {
-        addSavedDrink({
+    const getCurrentSavedDrinkInput = (name: string): SavedDrinkInput => {
+        return {
             name,
             foods: selectedFoods,
             selected,
@@ -384,12 +433,42 @@
             servingGrams,
             servingQuantities,
             servingUnits,
+        };
+    };
+
+    const saveCurrentDrinkAsNew = (name: string) => {
+        const drink = addSavedDrink(getCurrentSavedDrinkInput(name));
+        setLoadedSavedDrink({
+            id: drink.id,
+            name: drink.name,
+            isDirty: false,
+        });
+        saveDialogOpen = false;
+    };
+
+    const overwriteLoadedDrink = (name: string) => {
+        if (!loadedSavedDrink) return;
+
+        const drink = updateSavedDrink(
+            loadedSavedDrink.id,
+            getCurrentSavedDrinkInput(name),
+        );
+        if (!drink) {
+            saveCurrentDrinkAsNew(name);
+            return;
+        }
+
+        setLoadedSavedDrink({
+            id: drink.id,
+            name: drink.name,
+            isDirty: false,
         });
         saveDialogOpen = false;
     };
 
     const handleChange = (next: (string | number)[]) => {
         selected = next;
+        markLoadedSavedDrinkDirty();
         saveMixState();
     };
 
@@ -397,6 +476,7 @@
         const nutrient = ALL_NUTRIENTS.find((n) => n.id == nutrientId);
         if (nutrient && !options.some((opt) => opt.id == nutrient.id)) {
             options = [...options, { id: nutrient.id, label: nutrient.label }];
+            markLoadedSavedDrinkDirty();
             saveMixState();
         }
     };
@@ -407,6 +487,7 @@
             [Number(id)]: Math.max(0, Number(value) || 0),
         };
         nutrientGoals = nextGoals;
+        markLoadedSavedDrinkDirty();
         saveNutrientGoals(nextGoals);
         selectedGoalTemplateId = "";
     };
@@ -426,6 +507,7 @@
             ...template.goals,
         };
         nutrientGoals = nextGoals;
+        markLoadedSavedDrinkDirty();
         saveNutrientGoals(nextGoals);
     };
 
@@ -433,6 +515,7 @@
 		assignMixState(
 			getStateWithToggledFood(getCurrentMixState(), foodId, allIngredientItems),
 		);
+        markLoadedSavedDrinkDirty();
         saveMixState();
     };
 
@@ -445,6 +528,7 @@
 				true,
 			),
 		);
+        markLoadedSavedDrinkDirty();
         saveMixState();
     };
 
@@ -459,6 +543,7 @@
 				nextServingGrams,
 			),
 		);
+        markLoadedSavedDrinkDirty();
         saveMixState();
     };
 
@@ -479,14 +564,17 @@
 				unit,
 			),
 		);
+        markLoadedSavedDrinkDirty();
         saveMixState();
     };
 
     onMount(() => {
+        const restoredSavedDrink = readLoadedSavedDrink();
+        loadedSavedDrink = restoredSavedDrink;
         void loadCloudBackedIngredientLists();
         loadMixState();
         loadNutrientGoals();
-        void loadCloudBackedMixPreferences();
+        if (!restoredSavedDrink) void loadCloudBackedMixPreferences();
         window.addEventListener("storage", loadIngredientLists);
         window.addEventListener(
             SMOOTHIE_LISTS_CHANGED_EVENT,
@@ -507,14 +595,30 @@
 <div class="mix-page">
     <header class="mix-header">
         <div>
-            <h2>Mix</h2>
-            <p>Build your smoothie here.</p>
+            {#if loadedSavedDrink}
+                <p class="mix-header__eyebrow">Loaded saved mix</p>
+                <div class="mix-header__title-row">
+                    <h2>{loadedSavedDrink.name}</h2>
+                    {#if loadedSavedDrink.isDirty}
+                        <span>Unsaved changes</span>
+                    {/if}
+                </div>
+                <p>
+                    {loadedSavedDrink.isDirty
+                        ? "Your saved mix has not changed. Save when this draft is ready."
+                        : "Adjust this draft, then overwrite it or save a new copy."}
+                </p>
+            {:else}
+                <h2>Mix</h2>
+                <p>Build your smoothie here.</p>
+            {/if}
         </div>
         <div class="reset-actions" aria-label="Mix reset actions">
             <button
                 type="button"
                 onclick={() => (saveDialogOpen = true)}
-                disabled={selectedFoods.length === 0}>Save</button
+                disabled={!canSaveCurrentMix}
+            >{loadedSavedDrink ? "Save Changes" : "Save"}</button
             >
             <button type="button" onclick={resetGoals}>Reset Goals</button>
             <button type="button" onclick={clearIngredients}
@@ -530,9 +634,12 @@
         description="Before saving, confirm these totals are close enough to your goals."
         label="Drink name"
         placeholder="Post-workout, Low sugar, High fiber…"
-        confirmLabel="Save Anyway"
+        initialValue={loadedSavedDrink?.name ?? ""}
+        confirmLabel={loadedSavedDrink ? "Overwrite Existing" : "Save Drink"}
+        secondaryConfirmLabel={loadedSavedDrink ? "Save as New" : ""}
         cancelLabel="Cancel"
-        onConfirm={saveCurrentDrink}
+        onConfirm={loadedSavedDrink ? overwriteLoadedDrink : saveCurrentDrinkAsNew}
+        onSecondaryConfirm={loadedSavedDrink ? saveCurrentDrinkAsNew : undefined}
         onCancel={() => (saveDialogOpen = false)}
     >
         <SaveGoalReview diffs={saveGoalDiffs} />
@@ -641,6 +748,39 @@
         p {
             color: $app-muted;
             font-size: $app-font-size-md;
+        }
+    }
+
+    .mix-header .mix-header__eyebrow {
+        margin-bottom: 0.12rem;
+        color: $app-warning-strong;
+        font-size: $app-font-size-xs;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .mix-header__title-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        align-items: center;
+        margin-bottom: 0.18rem;
+
+        h2 {
+            min-width: 0;
+            margin-bottom: 0;
+            overflow-wrap: anywhere;
+        }
+
+        span {
+            padding: 0.14rem 0.42rem;
+            color: $app-warning-strong;
+            background: $app-warning-bg;
+            border-radius: $app-radius-pill;
+            font-size: $app-font-size-xs;
+            font-weight: 900;
+            white-space: nowrap;
         }
     }
 

@@ -48,6 +48,19 @@ export const cacheSmoothieListLocally = (key: SmoothieListKey, list: FdcFood[]) 
 	}
 };
 
+export const preserveSelectedListItems = (
+	syncedList: FdcFood[],
+	cachedList: FdcFood[],
+	selectedFoodIds: number[],
+) => {
+	const selectedFoodIdSet = new Set(selectedFoodIds);
+	const selectedCachedFoods = cachedList.filter((food) =>
+		selectedFoodIdSet.has(food.fdcId),
+	);
+
+	return uniqueFoodsById([...syncedList, ...selectedCachedFoods]);
+};
+
 export const writeSmoothieList = (key: SmoothieListKey, list: FdcFood[]) => {
 	const compactList = uniqueFoodsById(list).map(compactFood);
 

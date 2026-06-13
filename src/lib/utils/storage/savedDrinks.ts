@@ -20,6 +20,7 @@ import { getScopedStorageKey } from "$lib/utils/storage/storageScope";
 
 export const SAVED_DRINKS_STORAGE_KEY = "smoothie-saved-drinks";
 export const SAVED_DRINKS_CHANGED_EVENT = "smoothie-saved-drinks-changed";
+export const LOADED_SAVED_DRINK_STORAGE_KEY = "smoothie-loaded-saved-drink";
 
 export type SavedDrinkNutrientOption = {
 	id: string | number;
@@ -40,6 +41,12 @@ export type SavedDrink = {
 };
 
 export type SavedDrinkInput = Omit<SavedDrink, "id" | "createdAt">;
+
+export type LoadedSavedDrink = {
+	id: string;
+	name: string;
+	isDirty: boolean;
+};
 
 const dispatchSavedDrinksChanged = () => {
 	window.dispatchEvent(new CustomEvent(SAVED_DRINKS_CHANGED_EVENT));
@@ -106,6 +113,39 @@ export const cacheSavedDrinksLocally = (drinks: SavedDrink[]) => {
 	persistSavedDrinksLocally(drinks);
 };
 
+export const readLoadedSavedDrink = (): LoadedSavedDrink | null => {
+	try {
+		const raw = localStorage.getItem(
+			getScopedStorageKey(LOADED_SAVED_DRINK_STORAGE_KEY),
+		);
+		if (!raw) return null;
+
+		const value = JSON.parse(raw) as Partial<LoadedSavedDrink>;
+		if (typeof value.id !== "string" || typeof value.name !== "string") {
+			return null;
+		}
+
+		return {
+			id: value.id,
+			name: value.name,
+			isDirty: value.isDirty === true,
+		};
+	} catch {
+		return null;
+	}
+};
+
+export const writeLoadedSavedDrink = (drink: LoadedSavedDrink) => {
+	localStorage.setItem(
+		getScopedStorageKey(LOADED_SAVED_DRINK_STORAGE_KEY),
+		JSON.stringify(drink),
+	);
+};
+
+export const clearLoadedSavedDrink = () => {
+	localStorage.removeItem(getScopedStorageKey(LOADED_SAVED_DRINK_STORAGE_KEY));
+};
+
 export const writeSavedDrinks = (
 	drinks: SavedDrink[],
 	{ syncCloud = true } = {},
@@ -131,10 +171,32 @@ export const addSavedDrink = (input: SavedDrinkInput) => {
 	return drink;
 };
 
+export const updateSavedDrink = (id: string, input: SavedDrinkInput) => {
+	const drinks = readSavedDrinks();
+	const existingDrink = drinks.find((drink) => drink.id === id);
+	if (!existingDrink) return null;
+
+	const updatedDrink: SavedDrink = normalizeDrink({
+		...input,
+		id,
+		name: input.name.trim() || existingDrink.name,
+		createdAt: existingDrink.createdAt,
+		foods: input.foods.map(compactFood),
+	});
+	const updatedDrinks = drinks.map((drink) =>
+		drink.id === id ? updatedDrink : drink,
+	);
+
+	writeSavedDrinks(updatedDrinks, { syncCloud: false });
+	void saveCloudSavedDrink(updatedDrink);
+	return updatedDrink;
+};
+
 export const deleteSavedDrink = (id: string) => {
 	writeSavedDrinks(readSavedDrinks().filter((drink) => drink.id !== id), {
 		syncCloud: false,
 	});
+	if (readLoadedSavedDrink()?.id === id) clearLoadedSavedDrink();
 	void deleteCloudSavedDrink(id);
 };
 
@@ -176,6 +238,11 @@ export const restoreSavedDrinkToMix = (drink: SavedDrink) => {
 		getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
 		JSON.stringify(mixState),
 	);
+	writeLoadedSavedDrink({
+		id: drink.id,
+		name: drink.name,
+		isDirty: false,
+	});
 	void saveCloudMixPreferences({
 		nutrientGoals: drink.nutrientGoals,
 		mixState,

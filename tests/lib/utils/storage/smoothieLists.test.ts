@@ -10,6 +10,7 @@ vi.mock("$lib/utils/storage/supabaseData", () => cloudData);
 
 import {
 	addFoodToSmoothieList,
+	preserveSelectedListItems,
 	readSmoothieList,
 	removeFoodFromSmoothieList,
 	writeSmoothieList,
@@ -86,5 +87,22 @@ describe("smoothie lists", () => {
 			food.fdcId,
 		);
 		expect(cloudData.writeCloudSmoothieList).not.toHaveBeenCalled();
+	});
+
+	it("preserves selected cached foods when the cloud list is temporarily stale", () => {
+		const syncedFood = { ...food, fdcId: 2, description: "Kale" };
+
+		expect(preserveSelectedListItems([syncedFood], [food], [food.fdcId])).toEqual([
+			syncedFood,
+			food,
+		]);
+	});
+
+	it("does not restore unselected cached foods after cloud synchronization", () => {
+		const syncedFood = { ...food, fdcId: 2, description: "Kale" };
+
+		expect(preserveSelectedListItems([syncedFood], [food], [])).toEqual([
+			syncedFood,
+		]);
 	});
 });

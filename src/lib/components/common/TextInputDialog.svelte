@@ -8,10 +8,12 @@
 		label,
 		placeholder = "",
 		confirmLabel = "Save",
+		secondaryConfirmLabel = "",
 		cancelLabel = "Cancel",
 		initialValue = "",
 		children,
 		onConfirm,
+		onSecondaryConfirm,
 		onCancel,
 	}: {
 		open?: boolean;
@@ -20,10 +22,12 @@
 		label: string;
 		placeholder?: string;
 		confirmLabel?: string;
+		secondaryConfirmLabel?: string;
 		cancelLabel?: string;
 		initialValue?: string;
 		children?: Snippet;
 		onConfirm: (value: string) => void;
+		onSecondaryConfirm?: (value: string) => void;
 		onCancel: () => void;
 	} = $props();
 
@@ -39,6 +43,10 @@
 
 	const confirm = () => {
 		onConfirm(value);
+	};
+
+	const secondaryConfirm = () => {
+		onSecondaryConfirm?.(value);
 	};
 </script>
 
@@ -82,6 +90,15 @@
 				<button class="dialog-cancel" type="button" onclick={onCancel}>
 					{cancelLabel}
 				</button>
+				{#if secondaryConfirmLabel && onSecondaryConfirm}
+					<button
+						class="dialog-secondary-confirm"
+						type="button"
+						onclick={secondaryConfirm}
+					>
+						{secondaryConfirmLabel}
+					</button>
+				{/if}
 				<button class="dialog-confirm" type="button" onclick={confirm}>
 					{confirmLabel}
 				</button>
@@ -172,12 +189,24 @@
 		background: $app-accent;
 	}
 
+	.dialog-secondary-confirm {
+		color: $app-primary;
+		background: $app-success-bg;
+	}
+
 	.dialog-confirm {
 		color: $app-btn-text;
 		background: $app-btn-bg;
 
 		&:hover {
 			background: $app-btn-bg-hover;
+		}
+	}
+
+	@media (max-width: $app-breakpoint-xs) {
+		.dialog-actions {
+			display: grid;
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

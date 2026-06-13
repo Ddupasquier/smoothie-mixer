@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { MIX_STORAGE_KEYS } from "../../../../src/defaults/mixDefaults";
 import {
 	addSavedDrink,
+	clearLoadedSavedDrink,
+	readLoadedSavedDrink,
 	readSavedDrinks,
 	restoreSavedDrinkToMix,
+	updateSavedDrink,
 } from "$lib/utils/storage/savedDrinks";
 import type { FdcFood } from "$lib/utils/food/types";
 
@@ -55,5 +58,60 @@ describe("saved drinks", () => {
 				selectedFoodIds: [1],
 				selected: [1008],
 			});
+		expect(readLoadedSavedDrink()).toEqual({
+			id: drink.id,
+			name: "High fiber",
+			isDirty: false,
+		});
+	});
+
+	it("overwrites an existing saved drink without creating a duplicate", () => {
+		const drink = addSavedDrink({
+			name: "Original",
+			foods: [food],
+			selected: [1008],
+			options: [{ id: 1008, label: "Calories" }],
+			nutrientGoals: { 1008: 350 },
+			servingGrams: { 1: 100 },
+			servingQuantities: { 1: 100 },
+			servingUnits: { 1: "g" },
+		});
+
+		const updated = updateSavedDrink(drink.id, {
+			name: "Updated",
+			foods: [food],
+			selected: [1008],
+			options: [{ id: 1008, label: "Calories" }],
+			nutrientGoals: { 1008: 450 },
+			servingGrams: { 1: 125 },
+			servingQuantities: { 1: 125 },
+			servingUnits: { 1: "g" },
+		});
+
+		expect(updated).toMatchObject({
+			id: drink.id,
+			name: "Updated",
+			createdAt: drink.createdAt,
+			nutrientGoals: { 1008: 450 },
+		});
+		expect(readSavedDrinks()).toHaveLength(1);
+	});
+
+	it("clears the loaded saved drink context", () => {
+		const drink = addSavedDrink({
+			name: "Draft",
+			foods: [food],
+			selected: [1008],
+			options: [{ id: 1008, label: "Calories" }],
+			nutrientGoals: { 1008: 350 },
+			servingGrams: { 1: 100 },
+			servingQuantities: { 1: 100 },
+			servingUnits: { 1: "g" },
+		});
+
+		restoreSavedDrinkToMix(drink);
+		clearLoadedSavedDrink();
+
+		expect(readLoadedSavedDrink()).toBeNull();
 	});
 });
