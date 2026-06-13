@@ -60,6 +60,15 @@ $color-acai-mauve: #c894a7;
 // buttons so interactive states are visibly related but clearly distinct.
 $color-acai-mauve-dark: #ae7288;
 
+// Bright mango accent. Use very sparingly for the single most important action
+// in a view, small active-navigation markers, and compact attention indicators.
+// It should guide the eye rather than become a general-purpose button color.
+$color-mango-gold: #f4b942;
+
+// Darker mango accent. Use only for hover and active states of mango-highlighted
+// controls so the emphasis remains consistent without introducing another hue.
+$color-mango-gold-dark: #d99a24;
+
 // User-created ingredient fill. Use only for custom foods entered manually by
 // the user so they are visually distinct from API-sourced ingredients.
 $color-lavender-smoothie: #cbb8e8;
@@ -171,6 +180,16 @@ $app-primary: $color-dark-taupe;
 // Default cool accent. Applied to neutral pills, secondary buttons, info badges,
 // remove buttons, and graph/info affordances.
 $app-accent: $color-blueberry-milk;
+
+// High-priority visual accent. Reserved for rare, important actions and small
+// navigation/notification details that should be noticed before surrounding UI.
+$app-highlight: $color-mango-gold;
+
+// Interactive state for high-priority highlighted controls.
+$app-highlight-hover: $color-mango-gold-dark;
+
+// Readable foreground for content placed on the mango highlight.
+$app-highlight-text: $color-dark-taupe;
 
 // Custom ingredient background. Applied to manually added/user-created foods in
 // pills, result badges, ingredient cards, and saved drink ingredient chips.

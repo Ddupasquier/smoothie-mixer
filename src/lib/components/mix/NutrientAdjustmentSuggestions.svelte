@@ -247,8 +247,8 @@
 		place-items: center;
 		width: 1.25rem;
 		height: 1.25rem;
-		color: $app-btn-text;
-		background: $app-warning-strong;
+		color: $app-highlight-text;
+		background: $app-highlight;
 		border-radius: $app-radius-pill;
 		font-size: 0.8rem;
 		font-weight: 900;

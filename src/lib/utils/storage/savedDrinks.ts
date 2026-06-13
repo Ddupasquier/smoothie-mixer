@@ -11,6 +11,7 @@ import { compactFood } from "$lib/utils/food/foodRecords";
 import {
 	deleteCloudSavedDrink,
 	saveCloudSavedDrink,
+	saveCloudSavedDrinkWithResult,
 	saveCloudMixPreferences,
 	writeCloudSavedDrinks,
 } from "$lib/utils/storage/supabaseData";
@@ -47,6 +48,10 @@ export type SavedDrink = {
 };
 
 export type SavedDrinkInput = Omit<SavedDrink, "id" | "createdAt">;
+
+export type SavedDrinkMutationResult =
+	| { ok: true; drink: SavedDrink }
+	| { ok: false; reason: "duplicate" | "missing" | "unavailable" };
 
 export type LoadedSavedDrink = {
 	id: string;
@@ -86,6 +91,21 @@ const normalizeDrink = (value: SavedDrink): SavedDrink => {
 		servingQuantities: value.servingQuantities ?? {},
 		servingUnits: value.servingUnits ?? {},
 	};
+};
+
+export const normalizeSavedDrinkName = (name: string) => {
+	return name.trim().toLowerCase();
+};
+
+export const hasSavedDrinkName = (name: string, excludeId?: string) => {
+	const normalizedName = normalizeSavedDrinkName(name);
+	if (!normalizedName) return false;
+
+	return readSavedDrinks().some(
+		(drink) =>
+			drink.id !== excludeId &&
+			normalizeSavedDrinkName(drink.name) === normalizedName,
+	);
 };
 
 export const readSavedDrinks = () => {
@@ -172,14 +192,31 @@ export const writeSavedDrinks = (
 	return persistedLocally;
 };
 
-export const addSavedDrink = (input: SavedDrinkInput) => {
-	const drink: SavedDrink = {
+const createSavedDrink = (input: SavedDrinkInput): SavedDrink => {
+	return {
 		...input,
 		id: crypto.randomUUID(),
 		name: input.name.trim() || "Untitled smoothie",
 		createdAt: Date.now(),
 		foods: input.foods.map(compactFood),
 	};
+};
+
+const createUpdatedSavedDrink = (
+	existingDrink: SavedDrink,
+	input: SavedDrinkInput,
+): SavedDrink => {
+	return normalizeDrink({
+		...input,
+		id: existingDrink.id,
+		name: input.name.trim() || existingDrink.name,
+		createdAt: existingDrink.createdAt,
+		foods: input.foods.map(compactFood),
+	});
+};
+
+export const addSavedDrink = (input: SavedDrinkInput) => {
+	const drink = createSavedDrink(input);
 	const drinks = readSavedDrinks();
 	writeSavedDrinks([drink, ...drinks], { syncCloud: false });
 	void saveCloudSavedDrink(drink);
@@ -191,13 +228,7 @@ export const updateSavedDrink = (id: string, input: SavedDrinkInput) => {
 	const existingDrink = drinks.find((drink) => drink.id === id);
 	if (!existingDrink) return null;
 
-	const updatedDrink: SavedDrink = normalizeDrink({
-		...input,
-		id,
-		name: input.name.trim() || existingDrink.name,
-		createdAt: existingDrink.createdAt,
-		foods: input.foods.map(compactFood),
-	});
+	const updatedDrink = createUpdatedSavedDrink(existingDrink, input);
 	const updatedDrinks = drinks.map((drink) =>
 		drink.id === id ? updatedDrink : drink,
 	);
@@ -205,6 +236,45 @@ export const updateSavedDrink = (id: string, input: SavedDrinkInput) => {
 	writeSavedDrinks(updatedDrinks, { syncCloud: false });
 	void saveCloudSavedDrink(updatedDrink);
 	return updatedDrink;
+};
+
+export const saveNewSavedDrink = async (
+	input: SavedDrinkInput,
+): Promise<SavedDrinkMutationResult> => {
+	if (hasSavedDrinkName(input.name)) {
+		return { ok: false, reason: "duplicate" };
+	}
+
+	const drink = createSavedDrink(input);
+	const cloudResult = await saveCloudSavedDrinkWithResult(drink);
+	if (cloudResult === "duplicate") return { ok: false, reason: "duplicate" };
+	if (cloudResult !== "saved") return { ok: false, reason: "unavailable" };
+
+	writeSavedDrinks([drink, ...readSavedDrinks()], { syncCloud: false });
+	return { ok: true, drink };
+};
+
+export const saveExistingSavedDrink = async (
+	id: string,
+	input: SavedDrinkInput,
+): Promise<SavedDrinkMutationResult> => {
+	const drinks = readSavedDrinks();
+	const existingDrink = drinks.find((drink) => drink.id === id);
+	if (!existingDrink) return { ok: false, reason: "missing" };
+	if (hasSavedDrinkName(input.name, id)) {
+		return { ok: false, reason: "duplicate" };
+	}
+
+	const updatedDrink = createUpdatedSavedDrink(existingDrink, input);
+	const cloudResult = await saveCloudSavedDrinkWithResult(updatedDrink);
+	if (cloudResult === "duplicate") return { ok: false, reason: "duplicate" };
+	if (cloudResult !== "saved") return { ok: false, reason: "unavailable" };
+
+	writeSavedDrinks(
+		drinks.map((drink) => (drink.id === id ? updatedDrink : drink)),
+		{ syncCloud: false },
+	);
+	return { ok: true, drink: updatedDrink };
 };
 
 export const deleteSavedDrink = (id: string) => {

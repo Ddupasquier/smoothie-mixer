@@ -3,6 +3,7 @@ import { MIX_STORAGE_KEYS } from "../../../../src/defaults/mixDefaults";
 import {
 	addSavedDrink,
 	clearLoadedSavedDrink,
+	hasSavedDrinkName,
 	readLoadedSavedDrink,
 	readSavedDrinks,
 	restoreSavedDrinkToMix,
@@ -97,6 +98,23 @@ describe("saved drinks", () => {
 			nutrientGoals: { 1008: 450 },
 		});
 		expect(readSavedDrinks()).toHaveLength(1);
+	});
+
+	it("detects saved drink names case-insensitively for the current user cache", () => {
+		const drink = addSavedDrink({
+			name: "Post-workout",
+			foods: [food],
+			selected: [1008],
+			options: [{ id: 1008, label: "Calories" }],
+			nutrientGoals: { 1008: 350 },
+			servingGrams: { 1: 100 },
+			servingQuantities: { 1: 100 },
+			servingUnits: { 1: "g" },
+		});
+
+		expect(hasSavedDrinkName("  POST-WORKOUT ")).toBe(true);
+		expect(hasSavedDrinkName("Post-workout", drink.id)).toBe(false);
+		expect(hasSavedDrinkName("Low sugar")).toBe(false);
 	});
 
 	it("clears the loaded saved drink context", () => {

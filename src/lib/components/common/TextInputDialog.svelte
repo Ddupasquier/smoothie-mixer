@@ -11,9 +11,12 @@
 		secondaryConfirmLabel = "",
 		cancelLabel = "Cancel",
 		initialValue = "",
+		error = "",
+		busy = false,
 		children,
 		onConfirm,
 		onSecondaryConfirm,
+		onValueChange,
 		onCancel,
 	}: {
 		open?: boolean;
@@ -25,9 +28,12 @@
 		secondaryConfirmLabel?: string;
 		cancelLabel?: string;
 		initialValue?: string;
+		error?: string;
+		busy?: boolean;
 		children?: Snippet;
-		onConfirm: (value: string) => void;
-		onSecondaryConfirm?: (value: string) => void;
+		onConfirm: (value: string) => void | Promise<void>;
+		onSecondaryConfirm?: (value: string) => void | Promise<void>;
+		onValueChange?: (value: string) => void;
 		onCancel: () => void;
 	} = $props();
 
@@ -42,10 +48,12 @@
 	});
 
 	const confirm = () => {
+		if (busy) return;
 		onConfirm(value);
 	};
 
 	const secondaryConfirm = () => {
+		if (busy) return;
 		onSecondaryConfirm?.(value);
 	};
 </script>
@@ -79,15 +87,24 @@
 					type="text"
 					bind:value
 					{placeholder}
+					disabled={busy}
+					aria-invalid={error ? "true" : undefined}
+					aria-describedby={error ? "text-input-dialog-error" : undefined}
+					oninput={() => onValueChange?.(value)}
 					onkeydown={(event) => {
 						if (event.key === "Enter") confirm();
 						if (event.key === "Escape") onCancel();
 					}}
 				/>
+				{#if error}
+					<span id="text-input-dialog-error" class="dialog-error" role="alert">
+						{error}
+					</span>
+				{/if}
 			</label>
 
 			<div class="dialog-actions">
-				<button class="dialog-cancel" type="button" onclick={onCancel}>
+				<button class="dialog-cancel" type="button" onclick={onCancel} disabled={busy}>
 					{cancelLabel}
 				</button>
 				{#if secondaryConfirmLabel && onSecondaryConfirm}
@@ -95,11 +112,12 @@
 						class="dialog-secondary-confirm"
 						type="button"
 						onclick={secondaryConfirm}
+						disabled={busy}
 					>
 						{secondaryConfirmLabel}
 					</button>
 				{/if}
-				<button class="dialog-confirm" type="button" onclick={confirm}>
+				<button class="dialog-confirm" type="button" onclick={confirm} disabled={busy}>
 					{confirmLabel}
 				</button>
 			</div>
@@ -169,6 +187,12 @@
 		border-radius: $app-radius;
 		font-size: $app-font-size-lg;
 		box-sizing: border-box;
+	}
+
+	.dialog-error {
+		color: $app-warning-strong;
+		font-size: $app-font-size-sm;
+		font-weight: 800;
 	}
 
 	.dialog-actions {

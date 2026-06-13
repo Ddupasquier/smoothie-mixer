@@ -2,6 +2,8 @@ import { getSupabaseBrowserClient } from "$lib/supabase/client";
 import type { SavedDrink } from "$lib/utils/storage/savedDrinks";
 import { getCurrentUserId, toJson } from "./shared";
 
+export type CloudSavedDrinkWriteResult = "saved" | "duplicate" | "error";
+
 export const readCloudSavedDrinks = async () => {
 	const userId = await getCurrentUserId();
 	if (!userId) return null;
@@ -52,11 +54,13 @@ export const writeCloudSavedDrinks = async (drinks: SavedDrink[]) => {
 	return !error;
 };
 
-export const saveCloudSavedDrink = async (drink: SavedDrink) => {
+export const saveCloudSavedDrinkWithResult = async (
+	drink: SavedDrink,
+): Promise<CloudSavedDrinkWriteResult> => {
 	const userId = await getCurrentUserId();
-	if (!userId) return false;
+	if (!userId) return "error";
 	const supabase = getSupabaseBrowserClient();
-	if (!supabase) return false;
+	if (!supabase) return "error";
 
 	const { error } = await supabase.from("saved_drinks").upsert({
 		id: drink.id,
@@ -66,7 +70,13 @@ export const saveCloudSavedDrink = async (drink: SavedDrink) => {
 		created_at: new Date(drink.createdAt).toISOString(),
 	});
 
-	return !error;
+	if (!error) return "saved";
+	if (error.code === "23505") return "duplicate";
+	return "error";
+};
+
+export const saveCloudSavedDrink = async (drink: SavedDrink) => {
+	return (await saveCloudSavedDrinkWithResult(drink)) === "saved";
 };
 
 export const deleteCloudSavedDrink = async (drinkId: string) => {

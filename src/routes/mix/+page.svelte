@@ -26,10 +26,10 @@
     } from "$lib/utils/storage/supabaseData";
     import IngredientContributionBreakdown from "$lib/components/mix/IngredientContributionBreakdown.svelte";
     import {
-        addSavedDrink,
         clearLoadedSavedDrink,
         readLoadedSavedDrink,
-        updateSavedDrink,
+        saveExistingSavedDrink,
+        saveNewSavedDrink,
         writeLoadedSavedDrink,
         type LoadedSavedDrink,
         type SavedDrinkInput,
@@ -101,6 +101,8 @@
     let saveDialogOpen = $state(false);
     let selectedGoalTemplateId = $state("");
     let loadedSavedDrink = $state<LoadedSavedDrink | null>(null);
+    let saveDialogError = $state("");
+    let saveDialogBusy = $state(false);
 
 	const assignMixState = (state: MixStateSnapshot) => {
 		selected = state.selected;
@@ -436,8 +438,35 @@
         };
     };
 
-    const saveCurrentDrinkAsNew = (name: string) => {
-        const drink = addSavedDrink(getCurrentSavedDrinkInput(name));
+    const getSaveErrorMessage = (reason: "duplicate" | "missing" | "unavailable") => {
+        if (reason === "duplicate") {
+            return "You already have a saved drink with this name. Choose a different name.";
+        }
+        if (reason === "missing") {
+            return "This saved drink no longer exists. Save it as a new drink instead.";
+        }
+        return "The drink could not be saved right now. Check your connection and try again.";
+    };
+
+    const validateSaveName = (name: string) => {
+        if (name.trim()) return true;
+        saveDialogError = "Enter a name for this drink.";
+        return false;
+    };
+
+    const saveCurrentDrinkAsNew = async (name: string) => {
+        if (!validateSaveName(name)) return;
+
+        saveDialogBusy = true;
+        saveDialogError = "";
+        const result = await saveNewSavedDrink(getCurrentSavedDrinkInput(name));
+        saveDialogBusy = false;
+        if (!result.ok) {
+            saveDialogError = getSaveErrorMessage(result.reason);
+            return;
+        }
+
+        const { drink } = result;
         setLoadedSavedDrink({
             id: drink.id,
             name: drink.name,
@@ -446,18 +475,23 @@
         saveDialogOpen = false;
     };
 
-    const overwriteLoadedDrink = (name: string) => {
+    const overwriteLoadedDrink = async (name: string) => {
         if (!loadedSavedDrink) return;
+        if (!validateSaveName(name)) return;
 
-        const drink = updateSavedDrink(
+        saveDialogBusy = true;
+        saveDialogError = "";
+        const result = await saveExistingSavedDrink(
             loadedSavedDrink.id,
             getCurrentSavedDrinkInput(name),
         );
-        if (!drink) {
-            saveCurrentDrinkAsNew(name);
+        saveDialogBusy = false;
+        if (!result.ok) {
+            saveDialogError = getSaveErrorMessage(result.reason);
             return;
         }
 
+        const { drink } = result;
         setLoadedSavedDrink({
             id: drink.id,
             name: drink.name,
@@ -616,8 +650,12 @@
         </div>
         <div class="reset-actions" aria-label="Mix reset actions">
             <button
+                class="primary-save-action"
                 type="button"
-                onclick={() => (saveDialogOpen = true)}
+                onclick={() => {
+                    saveDialogError = "";
+                    saveDialogOpen = true;
+                }}
                 disabled={!canSaveCurrentMix}
             >{loadedSavedDrink ? "Save Changes" : "Save"}</button
             >
@@ -636,12 +674,18 @@
         label="Drink name"
         placeholder="Post-workout, Low sugar, High fiber…"
         initialValue={loadedSavedDrink?.name ?? ""}
+        error={saveDialogError}
+        busy={saveDialogBusy}
         confirmLabel={loadedSavedDrink ? "Overwrite Existing" : "Save Drink"}
         secondaryConfirmLabel={loadedSavedDrink ? "Save as New" : ""}
         cancelLabel="Cancel"
         onConfirm={loadedSavedDrink ? overwriteLoadedDrink : saveCurrentDrinkAsNew}
         onSecondaryConfirm={loadedSavedDrink ? saveCurrentDrinkAsNew : undefined}
-        onCancel={() => (saveDialogOpen = false)}
+        onValueChange={() => (saveDialogError = "")}
+        onCancel={() => {
+            saveDialogError = "";
+            saveDialogOpen = false;
+        }}
     >
         <SaveGoalReview diffs={saveGoalDiffs} />
     </TextInputDialog>
@@ -807,6 +851,15 @@
             &:disabled {
                 cursor: not-allowed;
                 background: $app-btn-disabled;
+            }
+        }
+
+        .primary-save-action:not(:disabled) {
+            color: $app-highlight-text;
+            background: $app-highlight;
+
+            &:hover {
+                background: $app-highlight-hover;
             }
         }
     }
