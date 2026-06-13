@@ -106,6 +106,10 @@ $app-gap-md: 1.1rem;
 // Small spacing token for dense controls, pills, compact rows, and helper text.
 $app-gap-sm: 0.5rem;
 
+// Extra-small spacing token for tightly related icons, labels, and compact list
+// items where the standard small gap creates unnecessary visual separation.
+$app-gap-xs: 0.3rem;
+
 // Standard page/card padding for primary app sections.
 $app-padding: 1.5rem;
 
@@ -214,6 +218,10 @@ $app-header-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 // Card radius for larger surfaces like saved drinks, mix panels, graph panels,
 // and ingredient cards.
 $app-card-radius: 12px;
+
+// Standard floating-surface shadow. Use for temporary overlays such as popovers,
+// menus, and dialogs that need to appear above the surrounding page content.
+$app-shadow: 0 0.4rem 1.2rem rgb(79 72 66 / 16%);
 
 // Card shadow for compact repeated cards and smaller surfaces.
 $app-card-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);

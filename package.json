@@ -12,6 +12,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"audit:fdc-vitals": "node scripts/audit_fdc_vitals.mjs",
 		"compare:fdc": "node scripts/compare_fdc_products.mjs",
+		"discover:fdc-nutrients": "node scripts/discover_fdc_nutrients.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"kill:vite": "pkill -f \"node .*node_modules/.bin/vite dev\" 2>/dev/null || true",

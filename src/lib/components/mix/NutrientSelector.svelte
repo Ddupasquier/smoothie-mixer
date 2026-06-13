@@ -1,7 +1,7 @@
 <script lang="ts">
 	import CheckboxGroup from "$lib/components/common/CheckboxGroup.svelte";
+	import NutrientPicker from "$lib/components/mix/NutrientPicker.svelte";
 	import type { NutrientOption } from "$lib/utils/mix/mixUi";
-	import { ALL_NUTRIENTS } from "../../../variables/allNutrients";
 
 	let {
 		options,
@@ -17,13 +17,6 @@
 		onAddNutrient: (id: string | number) => void;
 	} = $props();
 
-	let addNutrientId = $state<string | number>("");
-
-	const addNutrient = () => {
-		if (!addNutrientId) return;
-		onAddNutrient(addNutrientId);
-		addNutrientId = "";
-	};
 </script>
 
 <section class="setup-card setup-card--nutrients">
@@ -32,18 +25,7 @@
 			<h3 id="nutrient-controls-title">Nutrients</h3>
 			<p>{selectedCount} selected for the graph</p>
 		</div>
-		<div class="add-nutrient-controls">
-			<label for="add-nutrient">Add nutrient</label>
-			<select id="add-nutrient" name="add-nutrient" bind:value={addNutrientId}>
-				<option value="">Select nutrient</option>
-				{#each ALL_NUTRIENTS.filter((nutrient) => !options.some((option) => option.id == nutrient.id)) as nutrient}
-					<option value={nutrient.id}>{nutrient.label}</option>
-				{/each}
-			</select>
-			<button type="button" onclick={addNutrient} disabled={!addNutrientId}>
-				Add
-			</button>
-		</div>
+		<NutrientPicker excludedIds={options.map((option) => option.id)} onSelect={onAddNutrient} />
 	</div>
 
 	<div class="mix-nutrients" aria-label="Selected nutrients">
@@ -82,51 +64,6 @@
 		}
 	}
 
-	.add-nutrient-controls {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 4.5rem;
-		gap: 0.4rem;
-
-		label {
-			grid-column: 1 / -1;
-			color: $app-muted;
-			font-size: $app-font-size-xs;
-			font-weight: 700;
-			line-height: 1;
-		}
-
-		select {
-			width: 100%;
-			min-width: 0;
-			height: $app-control-height;
-			padding: 0 0.55rem;
-			color: $app-primary;
-			background: $app-bg;
-			border: $app-border;
-			border-radius: $app-radius-sm;
-			font-size: $app-font-size-md;
-		}
-
-		button {
-			height: $app-control-height-sm;
-			padding: 0 0.6rem;
-			color: $app-primary;
-			background: $app-btn-bg;
-			border-radius: $app-radius-sm;
-			font-size: $app-font-size-sm;
-			font-weight: 800;
-
-			&:hover:not(:disabled) {
-				background: $app-btn-bg-hover;
-			}
-
-			&:disabled {
-				cursor: not-allowed;
-				background: $app-btn-disabled;
-			}
-		}
-	}
-
 	.mix-nutrients {
 		display: flex;
 		align-content: flex-start;
@@ -150,10 +87,6 @@
 	@media (max-width: $app-breakpoint-md) {
 		.panel-header {
 			grid-template-columns: 1fr;
-		}
-
-		.add-nutrient-controls {
-			grid-template-columns: minmax(0, 1fr) 4.5rem;
 		}
 	}
 </style>

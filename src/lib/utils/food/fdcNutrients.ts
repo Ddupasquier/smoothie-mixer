@@ -10,6 +10,8 @@ export type ResolvedFdcNutrient = {
 
 const FALLBACK_NUTRIENT_IDS: Record<number, number[]> = {
 	[NUTRIENT_IDS.FAT]: [1085],
+	[NUTRIENT_IDS.SUGAR]: [1063],
+	[NUTRIENT_IDS.CALORIES]: [2047, 2048],
 };
 
 const FALLBACK_NUTRIENT_NUMBERS: Record<number, string[]> = {

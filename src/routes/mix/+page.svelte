@@ -476,6 +476,7 @@
         const nutrient = ALL_NUTRIENTS.find((n) => n.id == nutrientId);
         if (nutrient && !options.some((opt) => opt.id == nutrient.id)) {
             options = [...options, { id: nutrient.id, label: nutrient.label }];
+			selected = [...selected, nutrient.id];
             markLoadedSavedDrinkDirty();
             saveMixState();
         }

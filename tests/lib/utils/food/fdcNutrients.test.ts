@@ -33,4 +33,42 @@ describe("FDC nutrient resolver", () => {
 			getFdcNutrientValue(sunflowerOilSearchResult, NUTRIENT_IDS.CALORIES),
 		).toBeCloseTo(838.8);
 	});
+
+	it("uses Foundation total sugars as a fallback for Total Sugars", () => {
+		const foundationFood = {
+			fdcId: 2,
+			description: "Foundation food",
+			foodNutrients: [
+				{
+					nutrientId: 1063,
+					nutrientName: "Sugars, Total",
+					nutrientNumber: "269.3",
+					unitName: "G",
+					value: 12.5,
+				},
+			],
+		} satisfies FdcFood;
+
+		expect(getFdcNutrientValue(foundationFood, NUTRIENT_IDS.SUGAR)).toBe(12.5);
+	});
+
+	it("uses Atwater energy when standard calories are omitted", () => {
+		const foundationFood = {
+			fdcId: 3,
+			description: "Foundation food",
+			foodNutrients: [
+				{
+					nutrientId: 2047,
+					nutrientName: "Energy (Atwater General Factors)",
+					nutrientNumber: "957",
+					unitName: "KCAL",
+					value: 123,
+				},
+			],
+		} satisfies FdcFood;
+
+		expect(getFdcNutrientValue(foundationFood, NUTRIENT_IDS.CALORIES)).toBe(
+			123,
+		);
+	});
 });

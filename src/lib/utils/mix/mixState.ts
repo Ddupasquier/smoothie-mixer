@@ -23,6 +23,12 @@ import {
 	type NutrientOption,
 	type SavedMixState,
 } from "./mixUi";
+import {
+	hasLegacySodiumOption,
+	migrateLegacyNutrientGoals,
+	migrateLegacyNutrientIds,
+	migrateLegacyNutrientOptions,
+} from "./nutrientMappings";
 
 export type MixStateSnapshot = {
 	selected: (string | number)[];
@@ -84,10 +90,23 @@ export const readStoredNutrientGoals = () => {
 		const rawGoals = localStorage.getItem(
 			getScopedStorageKey(MIX_STORAGE_KEYS.nutrientGoals),
 		);
+		const rawMixState = localStorage.getItem(
+			getScopedStorageKey(MIX_STORAGE_KEYS.mixState),
+		);
+		const storedOptions = rawMixState
+			? normalizeNutrientOptions(
+					(JSON.parse(rawMixState) as SavedMixState).options,
+				)
+			: [];
+		const shouldMigrateLegacySodium = hasLegacySodiumOption(storedOptions);
+
 		return rawGoals
 			? {
 					...DEFAULT_NUTRIENT_GOALS,
-					...(JSON.parse(rawGoals) as Record<number, number>),
+					...migrateLegacyNutrientGoals(
+						JSON.parse(rawGoals) as Record<number, number>,
+						shouldMigrateLegacySodium,
+					),
 				}
 			: { ...DEFAULT_NUTRIENT_GOALS };
 	} catch {
@@ -115,10 +134,17 @@ export const readStoredMixState = (
 		if (!rawState) return fallbackState;
 
 		const savedState = JSON.parse(rawState) as SavedMixState;
+		const normalizedSavedOptions = normalizeNutrientOptions(savedState.options);
+		const shouldMigrateLegacySodium = hasLegacySodiumOption(
+			normalizedSavedOptions,
+		);
 		const selected = Array.isArray(savedState.selected)
-			? savedState.selected
+			? migrateLegacyNutrientIds(
+					savedState.selected,
+					shouldMigrateLegacySodium,
+				)
 			: fallbackState.selected;
-		const savedOptions = normalizeNutrientOptions(savedState.options);
+		const savedOptions = migrateLegacyNutrientOptions(normalizedSavedOptions);
 		const options = mergeNutrientOptions(
 			getDefaultNutrientOptions(),
 			savedOptions,

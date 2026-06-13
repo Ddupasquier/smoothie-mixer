@@ -6,9 +6,11 @@ import {
 	readLoadedSavedDrink,
 	readSavedDrinks,
 	restoreSavedDrinkToMix,
+	SAVED_DRINKS_STORAGE_KEY,
 	updateSavedDrink,
 } from "$lib/utils/storage/savedDrinks";
-import type { FdcFood } from "$lib/utils/food/types";
+import { NUTRIENT_IDS, type FdcFood } from "$lib/utils/food/types";
+import { LEGACY_SODIUM_NUTRIENT_ID } from "$lib/utils/mix/nutrientMappings";
 
 const food = {
 	fdcId: 1,
@@ -113,5 +115,64 @@ describe("saved drinks", () => {
 		clearLoadedSavedDrink();
 
 		expect(readLoadedSavedDrink()).toBeNull();
+	});
+
+	it("migrates legacy saved Sodium data away from saturated fat", () => {
+		localStorage.setItem(
+			SAVED_DRINKS_STORAGE_KEY,
+			JSON.stringify([
+				{
+					id: "legacy-drink",
+					name: "Legacy",
+					createdAt: 1,
+					foods: [food],
+					selected: [LEGACY_SODIUM_NUTRIENT_ID],
+					options: [
+						{ id: LEGACY_SODIUM_NUTRIENT_ID, label: "Sodium" },
+					],
+					nutrientGoals: { [LEGACY_SODIUM_NUTRIENT_ID]: 500 },
+					servingGrams: { 1: 100 },
+					servingQuantities: { 1: 100 },
+					servingUnits: { 1: "g" },
+				},
+			]),
+		);
+
+		expect(readSavedDrinks()[0]).toMatchObject({
+			selected: [NUTRIENT_IDS.SODIUM],
+			options: [{ id: NUTRIENT_IDS.SODIUM, label: "Sodium" }],
+			nutrientGoals: { [NUTRIENT_IDS.SODIUM]: 500 },
+		});
+	});
+
+	it("restores the nutrient selection belonging to each saved mix", () => {
+		const sodiumMix = addSavedDrink({
+			name: "Low sodium",
+			foods: [food],
+			selected: [NUTRIENT_IDS.SODIUM],
+			options: [{ id: NUTRIENT_IDS.SODIUM, label: "Sodium" }],
+			nutrientGoals: { [NUTRIENT_IDS.SODIUM]: 500 },
+			servingGrams: { 1: 100 },
+			servingQuantities: { 1: 100 },
+			servingUnits: { 1: "g" },
+		});
+		const potassiumMix = addSavedDrink({
+			name: "Potassium",
+			foods: [food],
+			selected: [NUTRIENT_IDS.POTASSIUM],
+			options: [{ id: NUTRIENT_IDS.POTASSIUM, label: "Potassium" }],
+			nutrientGoals: { [NUTRIENT_IDS.POTASSIUM]: 900 },
+			servingGrams: { 1: 100 },
+			servingQuantities: { 1: 100 },
+			servingUnits: { 1: "g" },
+		});
+
+		restoreSavedDrinkToMix(sodiumMix);
+		expect(JSON.parse(localStorage.getItem(MIX_STORAGE_KEYS.mixState) ?? "{}"))
+			.toMatchObject({ selected: [NUTRIENT_IDS.SODIUM] });
+
+		restoreSavedDrinkToMix(potassiumMix);
+		expect(JSON.parse(localStorage.getItem(MIX_STORAGE_KEYS.mixState) ?? "{}"))
+			.toMatchObject({ selected: [NUTRIENT_IDS.POTASSIUM] });
 	});
 });

@@ -46,7 +46,12 @@ export const NUTRIENT_IDS = {
     VITAMIN_C: 1162,
     POTASSIUM: 1092,
     CALCIUM: 1087,
-    IRON: 1089
+    IRON: 1089,
+    SODIUM: 1093,
+    VITAMIN_A_RAE: 1106,
+    VITAMIN_D_IU: 1110,
+    VITAMIN_K1: 1185,
+    CHOLESTEROL: 1253,
 } as const;
 
 /** A smoothie ingredient derived from an FDC food item */

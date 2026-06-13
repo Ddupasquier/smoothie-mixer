@@ -1,3 +1,5 @@
+import { NUTRIENT_IDS } from "$lib/utils/food/types";
+
 export const MIX_STORAGE_KEYS = {
 	fridge: "smoothie-fridge",
 	shoppingList: "smoothie-shopping-list",
@@ -16,11 +18,11 @@ export const DEFAULT_NUTRIENT_GOALS: Record<number, number> = {
 	1087: 300,
 	1089: 5,
 	1092: 900,
-	1106: 300,
-	1110: 400,
-	1185: 45,
-	1253: 50,
-	1258: 500,
+	[NUTRIENT_IDS.VITAMIN_A_RAE]: 300,
+	[NUTRIENT_IDS.VITAMIN_D_IU]: 400,
+	[NUTRIENT_IDS.VITAMIN_K1]: 45,
+	[NUTRIENT_IDS.CHOLESTEROL]: 50,
+	[NUTRIENT_IDS.SODIUM]: 500,
 };
 
 export const GOAL_TEMPLATES = [
