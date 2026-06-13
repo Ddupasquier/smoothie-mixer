@@ -51,7 +51,7 @@
         border-radius: $app-radius-pill;
         padding: 0.22rem 0.62rem;
         font-size: $app-font-size-md;
-        font-weight: 700;
+        font-weight: 550;
         border: 1px solid $app-accent;
         box-shadow: $app-pill-shadow;
         margin-bottom: 0.1rem;

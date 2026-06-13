@@ -108,11 +108,13 @@
 		}
 
 		button {
-			height: $app-control-height;
-			padding: 0 0.65rem;
+			height: $app-control-height-sm;
+			padding: 0 0.6rem;
+			color: $app-primary;
 			background: $app-btn-bg;
-			color: $app-btn-text;
+			border-radius: $app-radius-sm;
 			font-size: $app-font-size-sm;
+			font-weight: 800;
 
 			&:hover:not(:disabled) {
 				background: $app-btn-bg-hover;

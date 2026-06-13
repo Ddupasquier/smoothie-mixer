@@ -135,7 +135,7 @@
 		button {
 			height: $app-control-height-sm;
 			padding: 0 0.6rem;
-			color: $app-btn-text;
+			color: $app-primary;
 			background: $app-btn-bg;
 			border-radius: $app-radius-sm;
 			font-size: $app-font-size-sm;

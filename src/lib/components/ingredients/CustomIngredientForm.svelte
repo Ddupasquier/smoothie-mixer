@@ -288,7 +288,6 @@
 	@use "../../../styles/variables" as *;
 
 	.custom-ingredient {
-		margin-top: $app-gap-md;
 		padding: $app-gap-sm;
 		background: $app-bg;
 		border: $app-border;
