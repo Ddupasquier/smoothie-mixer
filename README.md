@@ -31,6 +31,16 @@ cp .env.example .env
 
 > Your `.env` is listed in `.gitignore` — it will never be committed.
 
+For production authentication, set `PUBLIC_SITE_URL` in the hosting environment
+to the deployed origin, for example `https://smoothie-mixer.vercel.app`. In
+Supabase **Authentication → URL Configuration**, set the Site URL to that same
+production origin and add both callback URLs to the redirect allow list:
+
+```text
+https://smoothie-mixer.vercel.app/auth/callback
+http://localhost:5173/auth/callback
+```
+
 ### 3. Run the dev server
 
 ```bash

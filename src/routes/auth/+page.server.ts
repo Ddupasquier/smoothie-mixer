@@ -1,5 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
+import { getAuthCallbackUrl } from "$lib/utils/auth/authUrls";
 
 const getSafeNextPath = (value: FormDataEntryValue | string | null) => {
 	if (typeof value !== "string" || !value.startsWith("/")) return "/";
@@ -81,7 +82,7 @@ export const actions: Actions = {
 			email,
 			password,
 			options: {
-				emailRedirectTo: `${url.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+				emailRedirectTo: getAuthCallbackUrl(request, url, next),
 			},
 		});
 
@@ -107,7 +108,7 @@ export const actions: Actions = {
 	google: async ({ locals, request, url }) => {
 		const formData = await request.formData();
 		const next = getSafeNextPath(formData.get("next"));
-		const redirectTo = `${url.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+		const redirectTo = getAuthCallbackUrl(request, url, next);
 
 		const { data, error } = await locals.supabase.auth.signInWithOAuth({
 			provider: "google",

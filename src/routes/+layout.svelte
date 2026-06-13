@@ -7,6 +7,9 @@
 		setActiveStorageUserId,
 	} from "$lib/utils/storage/storageScope";
 	import type { LayoutData } from "./$types";
+	import { injectSpeedInsights } from "@vercel/speed-insights/sveltekit";
+
+	injectSpeedInsights();
 
 	let {
 		children,
@@ -41,19 +44,31 @@
 		property="og:description"
 		content="Build, compare, and save smoothie recipes with nutrition goals, ingredient amounts, custom foods, and visual nutrient tracking."
 	/>
-	<meta property="og:image" content="https://smoothie-mixer.vercel.app/og-image.png" />
+	<meta
+		property="og:image"
+		content="https://smoothie-mixer.vercel.app/og-image.png"
+	/>
 	<meta property="og:image:type" content="image/png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
-	<meta property="og:image:alt" content="Smoothie Mixer nutrition graph preview" />
+	<meta
+		property="og:image:alt"
+		content="Smoothie Mixer nutrition graph preview"
+	/>
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Smoothie Mixer" />
 	<meta
 		name="twitter:description"
 		content="Build, compare, and save smoothie recipes with nutrition goals, ingredient amounts, custom foods, and visual nutrient tracking."
 	/>
-	<meta name="twitter:image" content="https://smoothie-mixer.vercel.app/og-image.png" />
-	<meta name="twitter:image:alt" content="Smoothie Mixer nutrition graph preview" />
+	<meta
+		name="twitter:image"
+		content="https://smoothie-mixer.vercel.app/og-image.png"
+	/>
+	<meta
+		name="twitter:image:alt"
+		content="Smoothie Mixer nutrition graph preview"
+	/>
 </svelte:head>
 
 <header class="app-header">

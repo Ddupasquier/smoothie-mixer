@@ -9,6 +9,7 @@ const getSafeNextPath = (value: string | null) => {
 export const GET: RequestHandler = async ({ locals, url }) => {
 	const code = url.searchParams.get("code");
 	const next = getSafeNextPath(url.searchParams.get("next"));
+	const providerError = url.searchParams.get("error_description");
 
 	if (code) {
 		const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
@@ -16,7 +17,16 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		if (!error) {
 			throw redirect(303, next);
 		}
+
+		throw redirect(
+			303,
+			`/auth?error=callback_exchange&next=${encodeURIComponent(next)}`,
+		);
 	}
 
-	throw redirect(303, `/auth?error=callback&next=${encodeURIComponent(next)}`);
+	const errorCode = providerError ? "provider" : "missing_code";
+	throw redirect(
+		303,
+		`/auth?error=${errorCode}&next=${encodeURIComponent(next)}`,
+	);
 };

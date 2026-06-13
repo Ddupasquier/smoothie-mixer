@@ -13,6 +13,12 @@
 	let providerError = $state("");
 	let email = $state("");
 
+	const authErrorMessages: Record<string, string> = {
+		callback_exchange: "The returned sign-in code could not be verified.",
+		missing_code: "The sign-in provider did not return a login code.",
+		provider: "Google rejected or cancelled the sign-in request.",
+	};
+
 	$effect(() => {
 		if (form?.email !== undefined) {
 			email = form.email;
@@ -41,7 +47,7 @@
 				{#if providerError}
 					<span>{providerError}</span>
 				{:else}
-					<span>Try again.</span>
+					<span>{authErrorMessages[data.authError] ?? "Try again."}</span>
 				{/if}
 			</p>
 		{/if}
